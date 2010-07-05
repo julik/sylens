@@ -5,8 +5,9 @@
 *	It is largely based on tx_nukeLensDistortion by Matti Gruener of Trixter Film and Rising Sun fame. However,
 * 
 *	
-*	written by Julik Tarkhanov in Amsterdam in 2010. me@julik.nl
+*	Written by Julik Tarkhanov in Amsterdam in 2010. me(at)julik.nl
 *	with kind support by HecticElectric.
+*	The beautiful landscape shot provided by Tim Parshikov, 2010.
 *	
 *	For filtering we also use the standard filtering methods provided by Nuke.
 *
@@ -57,9 +58,13 @@ static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 "to the lens distortion model used by Syntheyes";
 
+static const char* const mode_names[] = { "undistort", "redistort", 0 };
+
 class SyLens : public Iop
 {
 	Filter filter;
+	
+	enum { UNDIST, REDIST };
 	
 	// Input with and height for input0
 	unsigned int _inputWidth;
@@ -79,12 +84,14 @@ class SyLens : public Iop
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
 	
+	// Stuff drive bu knobbz
 	double kCoeff;
 	double kCubeCoeff;
 	double kUnCrop;
+	bool kDbg;
+	int kMode;
 	
 	int _lastScanlineSize;
-	bool _dbg;
 	
 	// Used to store the output format. This needs to be kept between
 	// calls to _request and cannot reside on the stack, so... 
@@ -93,6 +100,7 @@ class SyLens : public Iop
 public:
 	SyLens( Node *node ) : Iop ( node )
 	{
+		kMode = UNDIST;
 		kCoeff = -0.01826;
 		kCubeCoeff = 0.0f;
 		kUnCrop = 0.038f;
@@ -102,7 +110,7 @@ public:
 		_lastScanlineSize = 0;
 		_paddingW = 0;
 		_paddingH = 0;
-		_dbg = false;
+		kDbg = false;
 	}
 	
 	~SyLens () { }
@@ -123,15 +131,13 @@ public:
 		_paddingW = ceil(_inputWidth * kUnCrop);
 		_paddingH = ceil(_inputHeight * kUnCrop);
 
-		if(_dbg) printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
+		if(kDbg) printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
 
 		// Compute the sampled width and height
 		_extWidth = uncrop(_inputWidth);
 		_extHeight = uncrop(_inputHeight);
 
-		if(_dbg) printf("SyLens: true lens window will be %dx%d\n", _extWidth, _extHeight);
-
-
+		if(kDbg) printf("SyLens: true lens window will be %dx%d\n", _extWidth, _extHeight);
 	}
 	
 	// Here we need to expand the image
@@ -140,24 +146,27 @@ public:
 		filter.initialize();
 		input0().validate(for_real);
 		copy_info();
-		set_out_channels( Mask_All );
+		set_out_channels(Mask_All);
+		
 		info_.black_outside(true);
 		
 		_computeAspects();    
-		if(_dbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
 		
-		// Define the output box
-		Box obox = Box(0,0, _extWidth, _extHeight);
-		info_.merge(obox);
-
-		// Define the format in the info_ - this is what Nuke uses
-		// to know how big OUR output will be
-		_outFormat = info_.format();
-		_outFormat.width(_extWidth);
+		if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
+		
+		// Crucial. Define the format in the info_ - this is what Nuke uses
+		// to know how big OUR output will be. Note that it's notoriously convoluted
+		// to MAKE a Format yourself, better copy one from the input instead.
+		//_outFormat = info_.format();
+		
+		_outFormat = Format(_extWidth, _extHeight, 1);
 		_outFormat.height(_extHeight);
 		info_.format(_outFormat);
 		
-		if(_dbg) printf("SyLens: ext output will be %dx%d\n", _outFormat.width(), _outFormat.height());
+		Box obox = Box(0,0, _extWidth, _extHeight);
+		info_.merge(obox);
+		
+		if(kDbg) printf("SyLens: ext output will be %dx%d\n", _outFormat.width(), _outFormat.height());
 	}
 	
 	// Uncrop an integer dimension with a Syntheyes crop factor
@@ -165,10 +174,10 @@ public:
 		return ceil(dimension + (dimension * kUnCrop * 2));
 	}
 	
-	// request the entire image to have access to every pixel
+	// request the entire image to have access to every pixel. We pad in the output during engine() call
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
 	{
-		if(_dbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
+		if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 		ChannelSet c1(channels); in_channels(0,c1);
 		input0().request( channels, count);
 	}
@@ -185,6 +194,11 @@ public:
 	static const Iop::Description description; 
 	
 	void knobs( Knob_Callback f) {
+/* I don't feel like it _just_ yet
+		Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
+		_modeSel->label("mode");
+		_modeSel->tooltip("Pick your poison");
+*/		
 		Knob* _kKnob = Float_knob( f, &kCoeff, "k_knob" );
 		_kKnob->label("K coeff");
 		_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
@@ -197,24 +211,42 @@ public:
 		_kUncropKnob->label("Uncrop expansion");
 		_kUncropKnob->tooltip("Set this to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
 		
+		Knob* kDbgKnob = Bool_knob( f, &kDbg, "Debug_knob");
+		kDbgKnob->label("Output debug info");
+		kDbgKnob->tooltip("When checked, SyLens will output various debug info to STDOUT");
+		
 		// Add the filter selection menu that comes from the filter obj itself
 		filter.knobs( f );
    	}
 	
+	// called whenever a knob is changed
+	int knob_changed(Knob* k) {
+		// Dont dereference unless...
+		if (k == NULL) return 1;
+		
+		// Touching the crop knob changes our output bounds
+		if ((*k).startsWith("Crop_knob")) {
+			_validate(false);
+		}
+	}
+	
+	
+private:
 	// custom functions
 	double toUv(double, int);
 	double fromUv(double, int);
 	void vecToUV(Vector2&, Vector2&, int, int);
 	void vecFromUV(Vector2&, Vector2&, int, int);
 	void distortVector(Vector2& uvVec, double k, double kcube);
+	
 };
 
 static Iop* SyLensCreate( Node *node ) {
-	return ( 
-		new DD::Image::NukeWrapper(
-		 	new SyLens(node)
-	   )
-	)->noMix()->noMask();
+	SyLens* s = new SyLens(node);
+	DD::Image::NukeWrapper* w = new DD::Image::NukeWrapper(s);
+	w->noMix();
+	w->noMask();
+	return w;
 }
 
 const Iop::Description SyLens::description ( CLASS, 0, SyLensCreate );
@@ -269,13 +301,14 @@ void SyLens::distortVector(Vector2& uvVec, double k, double kcube) {
 void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
 	if(r != _lastScanlineSize) {
-		if(_dbg) printf("SyLens: Rendering scanline %d pix\n", r);
+		if(kDbg) printf("SyLens: Rendering scanline %d pix\n", r);
 		_lastScanlineSize = r;
 	}
 	
 	foreach(z, channels) out.writable(z);
 	
 	Pixel pixel(channels);
+	const float sampleOff = 0.5f;
 	
 	for (; x < r; x++) {
 		
@@ -290,17 +323,14 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		distortVector(uvXY, kCoeff, kCubeCoeff);
 		vecFromUV(distXY, uvXY, _extWidth, _extHeight);
 		
-		distXY.x += _paddingW;
-		distXY.y += _paddingH;
-		
-		
 		// Sample from the input node at the coordinates
 		// half a pixel has to be added here because sample() takes the first two
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
-		// We also sample with a slight offset to compensate for the fact that our pic is left-bottom registered
+		// We also sample with an offset to compensate for the fact that our pic is left-bottom registered and we DO NOT
+		// have pading in the requested input
 		input0().sample(
-			distXY.x + 0.5 -(_paddingW * 2), distXY.y + 0.5 - (_paddingH * 2), 
+			distXY.x + sampleOff - _paddingW, distXY.y + sampleOff - _paddingH, 
 			1.0f, 
 			1.0f,
 			&filter,
