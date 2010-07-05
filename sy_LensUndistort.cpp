@@ -58,6 +58,8 @@ class sy_LensUndistort : public Iop
 	// values to the pixel offset
 	unsigned int _shiftX;
 	unsigned int _shiftY;
+	unsigned int _paddingW;
+	unsigned int _paddingH;
 	
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
@@ -66,8 +68,11 @@ class sy_LensUndistort : public Iop
 	double kCubeCoeff;
 	double kUnCrop;
 	
-	// used to store input-format
-	Format _format;
+	int _lastScanlineSize;
+	
+	// Used to store the output format. This needs to be kept between
+	// calls to _request and cannot reside on the stack, so... 
+	Format _outFormat;
 	
 public:
 	sy_LensUndistort( Node *node ) : Iop ( node )
@@ -78,6 +83,9 @@ public:
 		_aspect = 1.33f;
 		_shiftX = 0;
 		_shiftY = 0;
+		_lastScanlineSize = 0;
+		_paddingW = 0;
+		_paddingH = 0;
 	}
 	
 	~sy_LensUndistort () { }
@@ -95,10 +103,10 @@ public:
 		_inputHeight = f.height();
 		_aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
 		
-		int _paddingW = ceil(_inputWidth * kUnCrop);
-		int _paddingH = ceil(_inputHeight * kUnCrop);
+		_paddingW = ceil(_inputWidth * kUnCrop);
+		_paddingH = ceil(_inputHeight * kUnCrop);
 		
-		printf("SyLens: will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
+		printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
 		// Compute the sampled width and height
 		_extWidth = uncrop(_inputWidth);
 		_extHeight = uncrop(_inputHeight);
@@ -106,38 +114,47 @@ public:
 		printf("SyLens: true lens window will be %dx%d\n", _extWidth, _extHeight);
 	}
 	
-	void _validate(bool forReal)
+	// Here we need to expand the image
+	void _validate(bool for_real)
 	  {
-		_computeAspects();    
 		filter.initialize();
+		input0().validate(for_real);
 		copy_info();
 		set_out_channels( Mask_All );
+		info_.black_outside(true);
 		
-		Box abox = input0().info();
-		abox.set(0,0, _extWidth, _extHeight);
-		printf("SyLens: validating info box to  %dx%d\n", _extWidth, _extHeight);
-		info_.merge(abox);
-	  }
+		
+		_computeAspects();    
+		printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
+		
+		Box obox = Box(0,0, _extWidth, _extHeight);
+		info_.merge(obox);
+		
+		_outFormat = info_.format();
+		_outFormat.width(_extWidth);
+		_outFormat.height(_extHeight);
+		info_.format(_outFormat);
+		printf("Extended image to %dx%d\n", _outFormat.width(), _outFormat.height());
+	}
 	
 	// Uncrop an integer dimension with a Syntheyes crop factor
 	int uncrop(int dimension) {
 		return ceil(dimension + (dimension * kUnCrop * 2));
 	}
 	
-	// request the entire image to have access to every pixel, plus padding
+	// request the entire image to have access to every pixel PLUS padding
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
 	{
 		printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
-		ChannelSet c1(channels);
-		in_channels(0, c1);
+		ChannelSet c1(channels); in_channels(0,c1);
 		input0().request(
-			input0().info().x(),
-			input0().info().y(),
-			input0().info().x() + _extWidth,
-			input0().info().y() + _extHeight,
-			c1, count);
-		input0().request(c1,count);
-   }
+			x - _paddingW,
+			y - _paddingH,
+			r + _paddingW,
+			t + _paddingH,
+			channels, count
+		);
+	}
 
 	void uncropCoordinate(Vector2& croppedSource, Vector2& uncroppedDest) {
 		uncroppedDest.x = croppedSource.x - float(_shiftX);
@@ -234,8 +251,11 @@ void sy_LensUndistort::distortVector(Vector2& uvVec, double k, double kcube) {
 // r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
 void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
-	//assert(r == _extWidth);
-//	printf("Line %d\n", r);
+	if(r != _lastScanlineSize) {
+		printf("SyLens: Rendering scanline %d pix\n", r);
+		_lastScanlineSize = r;
+	}
+	
 	foreach(z, channels) out.writable(z);
 	
 	Pixel pixel(channels);
@@ -247,10 +267,11 @@ void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& 
 		Vector2 distXY(0, 0);
 		
 		// Compute the DISTORTED vector for this image and sample it from the input
-		vecToUV(absXY, uvXY, _extWidth, _extHeight);
+		vecToUV(absXY, uvXY, _inputWidth, _inputWidth);
 		distortVector(uvXY, kCoeff, kCubeCoeff);
 		vecFromUV(distXY, uvXY, _extWidth, _extHeight);
 		
+		// Sample from the input node at the coordinates
 		// half a pixel has to be added here because sample() takes the first two
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
