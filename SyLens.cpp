@@ -37,12 +37,12 @@ using namespace DD::Image;
 #define FLOAT_TOL 5.0e-7
 #define STR_EQUAL 0
 
-static const char* const CLASS = "sy_LensUndistort";
+static const char* const CLASS = "SyLens";
 static const char* const HELP =
 "This plugin distorts and undistorts footage according"
 "to the lens distortion model used by Syntheyes";
 
-class sy_LensUndistort : public Iop
+class SyLens : public Iop
 {
 	Filter filter;
 	
@@ -75,7 +75,7 @@ class sy_LensUndistort : public Iop
 	Format _outFormat;
 	
 public:
-	sy_LensUndistort( Node *node ) : Iop ( node )
+	SyLens( Node *node ) : Iop ( node )
 	{
 		kCoeff = -0.01826;
 		kCubeCoeff = 0.0f;
@@ -88,7 +88,7 @@ public:
 		_paddingH = 0;
 	}
 	
-	~sy_LensUndistort () { }
+	~SyLens () { }
 	
 	//void append(Hash& hash)
     //{
@@ -189,38 +189,38 @@ public:
 	void distortVector(Vector2& uvVec, double k, double kcube);
 };
 
-static Iop* sy_LensUndistortCreate( Node *node ) {
+static Iop* SyLensCreate( Node *node ) {
 	return ( 
 		new DD::Image::NukeWrapper(
-		 	new sy_LensUndistort(node)
+		 	new SyLens(node)
 	   )
 	)->noMix()->noMask();
 }
 
-const Iop::Description sy_LensUndistort::description ( CLASS, 0, sy_LensUndistortCreate );
+const Iop::Description SyLens::description ( CLASS, 0, SyLensCreate );
 
 // Syntheyes uses UV coordinates that start at the optical center of the image
-double sy_LensUndistort::toUv(double absValue, int absSide)
+double SyLens::toUv(double absValue, int absSide)
 {
 	double x = (absValue / (double)absSide) - 0.5;
     // .2 to -.3, y is reversed and coords are double
 	return x * 2;
 }
 
-double sy_LensUndistort::fromUv(double uvValue, int absSide) {
+double SyLens::fromUv(double uvValue, int absSide) {
     // First, start from zero (-.1 becomes .4)
 	double value_off_corner = (uvValue / 2) + 0.5f;
 	return absSide * value_off_corner;
 }
 
-void sy_LensUndistort::vecToUV(Vector2& absVec, Vector2& uvVec, int w, int h)
+void SyLens::vecToUV(Vector2& absVec, Vector2& uvVec, int w, int h)
 {
 	// Nuke coords are 0,0 on lower left
 	uvVec.x = toUv(absVec.x, w);
 	uvVec.y = toUv(absVec.y, h);
 }
 
-void sy_LensUndistort::vecFromUV(Vector2& absVec, Vector2& uvVec, int w, int h)
+void SyLens::vecFromUV(Vector2& absVec, Vector2& uvVec, int w, int h)
 {
 	// Nuke coords are 0,0 on lower left
 	absVec.x = fromUv(uvVec.x, w);
@@ -228,7 +228,7 @@ void sy_LensUndistort::vecFromUV(Vector2& absVec, Vector2& uvVec, int w, int h)
 }
 
 // Place the UV coordinates of the distorted image in the undistorted image plane into uvVec
-void sy_LensUndistort::distortVector(Vector2& uvVec, double k, double kcube) {
+void SyLens::distortVector(Vector2& uvVec, double k, double kcube) {
 	
 	float r2 = _aspect * _aspect * uvVec.x * uvVec.x + uvVec.y * uvVec.y;
 	float f;
@@ -246,7 +246,7 @@ void sy_LensUndistort::distortVector(Vector2& uvVec, double k, double kcube) {
 
 // The image processor that works by scanline. Y is the scanline offset, x is the pix,
 // r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
-void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& out )
+void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
 	if(r != _lastScanlineSize) {
 		printf("SyLens: Rendering scanline %d pix\n", r);
