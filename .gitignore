@@ -4,3 +4,4 @@
 *.dll
 .DS_Store
 *.nk~
+*.nk.autosave
