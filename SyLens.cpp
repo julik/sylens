@@ -319,9 +319,8 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		Vector2 uvXY(0, 0);
 		Vector2 distXY(0, 0);
 		
-		// So. The UV vector that we get here is the UV value on the EXTENDED back.
-		// We distort that When we sample Compute the DISTORTED vector for this image and sample it from the input.
-		// The only thing is that we need to sample from the center
+		// The gritty bits - get coordinates of the distorted pixel in the coordinates of the
+		// EXTENDED film back
 		vecToUV(absXY, uvXY, _extWidth, _extHeight);
 		distortVector(uvXY, kCoeff, kCubeCoeff);
 		vecFromUV(distXY, uvXY, _extWidth, _extHeight);
@@ -330,7 +329,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		// half a pixel has to be added here because sample() takes the first two
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
-		// We also sample with an offset to compensate for the fact that our pic is left-bottom registered and we DO NOT
+		// We also sample with a padding offset to compensate for the fact that our pic is left-bottom registered and we DO NOT
 		// have pading in the requested input
 		input0().sample(
 			distXY.x + sampleOff - _paddingW, distXY.y + sampleOff - _paddingH, 
