@@ -57,7 +57,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 "to the lens distortion model used by Syntheyes";
-
+static const char* const VERSION = "0.0.1";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -163,6 +163,7 @@ public:
 		_outFormat.height(_extHeight);
 		info_.format(_outFormat);
 		
+		// And also enforce the bounding box AS WELL
 		Box obox = Box(0,0, _extWidth, _extHeight);
 		info_.merge(obox);
 		
@@ -217,6 +218,8 @@ public:
 		
 		// Add the filter selection menu that comes from the filter obj itself
 		filter.knobs( f );
+		Divider(f, 0);
+		Text_knob(f, (std::string("SyLens v.") + std::string(VERSION)).c_str());
    	}
 	
 	// called whenever a knob is changed
