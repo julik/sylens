@@ -123,7 +123,6 @@ public:
 		set_out_channels( Mask_All );
 		info_.black_outside(true);
 		
-		
 		_computeAspects();    
 		printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
 		
@@ -138,7 +137,7 @@ public:
 		_outFormat.height(_extHeight);
 		info_.format(_outFormat);
 		
-		printf("Extended image to %dx%d\n", _outFormat.width(), _outFormat.height());
+		printf("SyLens: ext output will be %dx%d\n", _outFormat.width(), _outFormat.height());
 	}
 	
 	// Uncrop an integer dimension with a Syntheyes crop factor
@@ -279,7 +278,14 @@ void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& 
 		// half a pixel has to be added here because sample() takes the first two
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
-		input0().sample(distXY.x+0.5, distXY.y+0.5, 1.0f, 1.0f, &filter, pixel );
+		// We also sample with a slight offset to compensate for the fact that our pic is left-bottom registered
+		input0().sample(
+			distXY.x + 0.5 -(_paddingW * 2), distXY.y + 0.5 - (_paddingH * 2), 
+			1.0f, 
+			1.0f,
+			&filter,
+			pixel
+		);
 		
 		// write the resulting pixel into the image
 		foreach (z, channels)
