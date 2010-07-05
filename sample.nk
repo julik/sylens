@@ -35,7 +35,6 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /Code/SyLens/sample.nk
- frame 5
  last_frame 213
  lock_range true
  format "2048 1234 0 0 2048 1234 1 "
@@ -47,28 +46,28 @@ Read {
  file SampleImg/Source.jpg
  format "2048 1234 0 0 2048 1234 1 "
  name Read1
- xpos -277
- ypos -713
+ xpos -267
+ ypos -711
 }
-set N1fa2cbb0 [stack 0]
-push $N1fa2cbb0
 SyLens {
- k_knob {{curve x1 -0.01826 x101 -0.0456}}
+ k_knob {{curve x1 -0.01826}}
  name SyLens1
  tile_color 0xc10000ff
- xpos -277
- ypos -598
+ xpos -267
+ ypos -595
 }
 Read {
  inputs 0
  file SampleImg/Sample.jpg
  format "2204 1328 0 0 2204 1328 1 "
  name Read2
- xpos -407
- ypos -711
+ xpos -404
+ ypos -705
 }
 Viewer {
- inputs 3
+ inputs 2
+ frame 1
+ input_number 1
  zoom_lock true
  input_process false
  name Viewer1
