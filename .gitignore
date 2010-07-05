@@ -3,3 +3,4 @@
 *.so
 *.dll
 .DS_Store
+*.nk~
