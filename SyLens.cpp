@@ -1,3 +1,19 @@
+/*
+*	This plugin uses the lens distortion model provided by Russ Anderson of the SynthEyes camera tracker
+*	fame. It is made so that it's output is _identical_ to the Image Preparation tool of the SY camera tracker.
+*	so you can usehe developers of 3D Equalizer
+*	It is largely based on tx_nukeLensDistortion by Matti Gruener of Trixter Film and Rising Sun fame. However,
+* 
+*	
+*	written by Julik Tarkhanov in Amsterdam in 2010. me@julik.nl
+*	with kind support by HecticElectric.
+*	
+*	For filtering we also use the standard filtering methods provided by Nuke.
+*
+*	The code has some more comments than it's 3DE counterpart since we have to do some things that the other plugin
+*	did not (like expanding the image output)
+*/
+
 extern "C" {
 
 #include <unistd.h>
@@ -38,8 +54,7 @@ using namespace DD::Image;
 #define STR_EQUAL 0
 
 static const char* const CLASS = "SyLens";
-static const char* const HELP =
-"This plugin distorts and undistorts footage according"
+static const char* const HELP =  "This plugin undistorts footage according"
 "to the lens distortion model used by Syntheyes";
 
 class SyLens : public Iop
@@ -69,6 +84,7 @@ class SyLens : public Iop
 	double kUnCrop;
 	
 	int _lastScanlineSize;
+	bool _dbg;
 	
 	// Used to store the output format. This needs to be kept between
 	// calls to _request and cannot reside on the stack, so... 
@@ -86,6 +102,7 @@ public:
 		_lastScanlineSize = 0;
 		_paddingW = 0;
 		_paddingH = 0;
+		_dbg = false;
 	}
 	
 	~SyLens () { }
@@ -105,13 +122,16 @@ public:
 		
 		_paddingW = ceil(_inputWidth * kUnCrop);
 		_paddingH = ceil(_inputHeight * kUnCrop);
-		
-		printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
+
+		if(_dbg) printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
+
 		// Compute the sampled width and height
 		_extWidth = uncrop(_inputWidth);
 		_extHeight = uncrop(_inputHeight);
-		
-		printf("SyLens: true lens window will be %dx%d\n", _extWidth, _extHeight);
+
+		if(_dbg) printf("SyLens: true lens window will be %dx%d\n", _extWidth, _extHeight);
+
+
 	}
 	
 	// Here we need to expand the image
@@ -124,7 +144,7 @@ public:
 		info_.black_outside(true);
 		
 		_computeAspects();    
-		printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
+		if(_dbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
 		
 		// Define the output box
 		Box obox = Box(0,0, _extWidth, _extHeight);
@@ -137,7 +157,7 @@ public:
 		_outFormat.height(_extHeight);
 		info_.format(_outFormat);
 		
-		printf("SyLens: ext output will be %dx%d\n", _outFormat.width(), _outFormat.height());
+		if(_dbg) printf("SyLens: ext output will be %dx%d\n", _outFormat.width(), _outFormat.height());
 	}
 	
 	// Uncrop an integer dimension with a Syntheyes crop factor
@@ -148,7 +168,7 @@ public:
 	// request the entire image to have access to every pixel
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
 	{
-		printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
+		if(_dbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 		ChannelSet c1(channels); in_channels(0,c1);
 		input0().request( channels, count);
 	}
@@ -249,7 +269,7 @@ void SyLens::distortVector(Vector2& uvVec, double k, double kcube) {
 void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
 	if(r != _lastScanlineSize) {
-		printf("SyLens: Rendering scanline %d pix\n", r);
+		if(_dbg) printf("SyLens: Rendering scanline %d pix\n", r);
 		_lastScanlineSize = r;
 	}
 	
