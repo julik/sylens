@@ -50,6 +50,10 @@ class sy_LensUndistort : public Iop
 	unsigned int _inputWidth;
 	unsigned int _inputHeight;
 
+	// The size of the filmback we are actually sampling from
+	unsigned int _extWidth;
+	unsigned int _extHeight;
+	
 	// When we extend the image and get undistorted coordinates, we need to add these
 	// values to the pixel offset
 	double _shiftX;
@@ -83,10 +87,20 @@ public:
 		copy_info();
 		set_out_channels( Mask_All );
 		
+		// Compute the aspect from the input format
 		Format f = input0().format();
 		_inputWidth = f.width();
 		_inputHeight = f.height();
 		_aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
+		
+		// Compute the sampled width and height
+		_extWidth = uncrop(_inputWidth);
+		_extHeight = uncrop(_inputHeight);
+		printf("Extended back %dx%d\n", _extWidth, _extHeight);
+	}
+	
+	int uncrop(int dimension) {
+		return ceil(dimension + (dimension * kUnCrop * 2));
 	}
 	
 	// request the entire image to have access to every pixel

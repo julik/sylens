@@ -2,7 +2,7 @@
 version 6.0 v3
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="295" y="22" w="1680" h="1024" screen="0">
+    <window x="115" y="22" w="1680" h="1024" screen="0">
         <splitter orientation="1">
             <split size="1062"></split>
             <splitter orientation="1">
@@ -35,7 +35,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /Code/nksydist/sample.nk
- frame 87
+ frame 86
  last_frame 213
  lock_range true
  format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
@@ -66,25 +66,23 @@ CheckerBoard2 {
  ypos -413
 }
 sy_LensUndistort {
- Crop_knob 0.035
- filter Impulse
+ filter Keys
  name sy_LensUndistort1
- xpos -163
- ypos -312
+ xpos -176
+ ypos -304
  postage_stamp true
 }
-set N1fa9ce60 [stack 0]
+set N1fa9d1c0 [stack 0]
 Difference {
  inputs 2
  name Difference1
  xpos -305
  ypos -223
 }
-push $N1fa9ce60
-push $N1fa9ce60
+push $N1fa9d1c0
+push $N1fa9d1c0
 Viewer {
  inputs 2
- frame 87
  input_process false
  name Viewer1
  xpos -305
