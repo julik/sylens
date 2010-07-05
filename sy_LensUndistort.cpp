@@ -46,7 +46,7 @@ class sy_LensUndistort : public Iop
 {
 	Filter filter;
 	
-	// Input with and height for input(0)
+	// Input with and height for input0
 	unsigned int _inputWidth;
 	unsigned int _inputHeight;
 
@@ -58,8 +58,6 @@ class sy_LensUndistort : public Iop
 	// values to the pixel offset
 	unsigned int _shiftX;
 	unsigned int _shiftY;
-	
-	unsigned int _padding;
 	
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
@@ -84,28 +82,42 @@ public:
 	
 	~sy_LensUndistort () { }
 	
-	void _validate( bool ) {
-		filter.initialize();
-		copy_info();
-		set_out_channels( Mask_All );
-		
+	//void append(Hash& hash)
+    //{
+    //        hash.append(hash_counter);
+    //}
+
+	void _computeAspects() {
 		// Compute the aspect from the input format
 		Format f = input0().format();
+		
 		_inputWidth = f.width();
 		_inputHeight = f.height();
 		_aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
 		
-		_padding = ceil(_inputWidth * kUnCrop);
+		int _paddingW = ceil(_inputWidth * kUnCrop);
+		int _paddingH = ceil(_inputHeight * kUnCrop);
 		
+		printf("SyLens: will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
 		// Compute the sampled width and height
 		_extWidth = uncrop(_inputWidth);
 		_extHeight = uncrop(_inputHeight);
-		_shiftX = _extWidth - _inputWidth;
-		_shiftY = _extHeight - _inputHeight;
 		
-		Box extended = Box(_padding * -1, _padding * -1, _extWidth, _extHeight);
-		info_.merge(extended);
+		printf("SyLens: true lens window will be %dx%d\n", _extWidth, _extHeight);
 	}
+	
+	void _validate(bool forReal)
+	  {
+		_computeAspects();    
+		filter.initialize();
+		copy_info();
+		set_out_channels( Mask_All );
+		
+		Box abox = input0().info();
+		abox.set(0,0, _extWidth, _extHeight);
+		printf("SyLens: validating info box to  %dx%d\n", _extWidth, _extHeight);
+		info_.merge(abox);
+	  }
 	
 	// Uncrop an integer dimension with a Syntheyes crop factor
 	int uncrop(int dimension) {
@@ -115,39 +127,45 @@ public:
 	// request the entire image to have access to every pixel, plus padding
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
 	{
-		ChannelSet c1(channels); in_channels(0,c1);
-		input0().request(x - _padding, y - _padding, r + _padding, t + _padding, channels, count);
+		printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
+		ChannelSet c1(channels);
+		in_channels(0, c1);
+		input0().request(
+			input0().info().x(),
+			input0().info().y(),
+			input0().info().x() + _extWidth,
+			input0().info().y() + _extHeight,
+			c1, count);
+		input0().request(c1,count);
+   }
+
+	void uncropCoordinate(Vector2& croppedSource, Vector2& uncroppedDest) {
+		uncroppedDest.x = croppedSource.x - float(_shiftX);
+		uncroppedDest.y = croppedSource.y - float(_shiftX);
 	}
 
-	// create UI
-	void knobs( Knob_Callback f )
-	{
-		Knob* _kCoeffKnob = Float_knob( f, &kCoeff, "kCoeff_knob" );
-		_kCoeffKnob->label("K coeff");
-		_kCoeffKnob->tooltip("Set to the same K coefficient as applied by Syntheyes");
+	// nuke
+	void engine( int y, int x, int r, ChannelMask channels, Row& out );
+	const char* Class() const { return CLASS; }
+	const char* node_help() const { return HELP; }
+	static const Iop::Description description; 
+	
+	void knobs( Knob_Callback f) {
+		Knob* _kKnob = Float_knob( f, &kCoeff, "k_knob" );
+		_kKnob->label("K coeff");
+		_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
 
 		Knob* _kCubeKnob = Float_knob( f, &kCubeCoeff, "kCube_knob" );
 		_kCubeKnob->label("Cubic coeff");
 		_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
-
+		
 		Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "Crop_knob" );
 		_kUncropKnob->label("Uncrop expansion");
 		_kUncropKnob->tooltip("Set this to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
 		
 		// Add the filter selection menu that comes from the filter obj itself
 		filter.knobs( f );
-	}
-	
-	void uncropCoordinate(Vector2& croppedSource, Vector2& uncroppedDest) {
-		uncroppedDest.x = croppedSource.x - float(_shiftX);
-		uncroppedDest.y = croppedSource.y - float(_shiftX);
-	}
-
-	// nuke-functions
-	void engine( int y, int x, int r, ChannelMask channels, Row& out );
-	const char* Class() const { return CLASS; }
-	const char* node_help() const { return HELP; }
-	static const Iop::Description description; 
+   	}
 	
 	// custom functions
 	double toUv(double, int);
@@ -216,7 +234,8 @@ void sy_LensUndistort::distortVector(Vector2& uvVec, double k, double kcube) {
 // r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
 void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
-	
+	//assert(r == _extWidth);
+//	printf("Line %d\n", r);
 	foreach(z, channels) out.writable(z);
 	
 	Pixel pixel(channels);
@@ -228,9 +247,9 @@ void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& 
 		Vector2 distXY(0, 0);
 		
 		// Compute the DISTORTED vector for this image and sample it from the input
-		vecToUV(absXY, uvXY, _inputWidth, _inputHeight);
+		vecToUV(absXY, uvXY, _extWidth, _extHeight);
 		distortVector(uvXY, kCoeff, kCubeCoeff);
-		vecFromUV(distXY, uvXY, _inputWidth, _inputHeight);
+		vecFromUV(distXY, uvXY, _extWidth, _extHeight);
 		
 		// half a pixel has to be added here because sample() takes the first two
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
