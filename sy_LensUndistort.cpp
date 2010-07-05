@@ -59,6 +59,8 @@ class sy_LensUndistort : public Iop
 	unsigned int _shiftX;
 	unsigned int _shiftY;
 	
+	unsigned int _padding;
+	
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
 	
@@ -93,11 +95,16 @@ public:
 		_inputHeight = f.height();
 		_aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
 		
+		_padding = ceil(_inputWidth * kUnCrop);
+		
 		// Compute the sampled width and height
 		_extWidth = uncrop(_inputWidth);
 		_extHeight = uncrop(_inputHeight);
 		_shiftX = _extWidth - _inputWidth;
 		_shiftY = _extHeight - _inputHeight;
+		
+		Box extended = Box(_padding * -1, _padding * -1, _extWidth, _extHeight);
+		info_.merge(extended);
 	}
 	
 	// Uncrop an integer dimension with a Syntheyes crop factor
@@ -105,11 +112,11 @@ public:
 		return ceil(dimension + (dimension * kUnCrop * 2));
 	}
 	
-	// request the entire image to have access to every pixel
+	// request the entire image to have access to every pixel, plus padding
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
 	{
 		ChannelSet c1(channels); in_channels(0,c1);
-		input0().request(channels, count);
+		input0().request(x - _padding, y - _padding, r + _padding, t + _padding, channels, count);
 	}
 
 	// create UI
