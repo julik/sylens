@@ -35,12 +35,41 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /Code/nksydist/sample.nk
- frame 86
+ frame 101
  last_frame 213
  lock_range true
  format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+}
+CheckerBoard2 {
+ inputs 0
+ format "2048 1234 0 0 2048 1234 1 "
+ name CheckerBoard1
+ xpos -109
+ ypos -413
+}
+Read {
+ inputs 0
+ file /Code/nksydist/SampleImg/Sample.jpg
+ format "2204 1328 0 0 2204 1328 1 "
+ name Read2
+ xpos -361
+ ypos -435
+}
+Transform {
+ inputs 0
+ translate {80 50}
+ center {1024 778}
+ name Transform1
+ xpos -296
+ ypos -214
+}
+Difference {
+ inputs 2
+ name Difference1
+ xpos -392
+ ypos -189
 }
 Read {
  inputs 0
@@ -50,41 +79,17 @@ Read {
  xpos -202
  ypos -436
 }
-Read {
- inputs 0
- file /Code/nksydist/SampleImg/Sample.jpg
- format "2204 1328 0 0 2204 1328 1 "
- name Read2
- xpos -358
- ypos -434
-}
-CheckerBoard2 {
- inputs 0
- format "2048 1234 0 0 2048 1234 1 "
- name CheckerBoard1
- xpos -109
- ypos -413
-}
 sy_LensUndistort {
  filter Keys
  name sy_LensUndistort1
- xpos -176
- ypos -304
+ selected true
+ xpos -184
+ ypos -299
  postage_stamp true
 }
-set N1fa9d1c0 [stack 0]
-Difference {
- inputs 2
- name Difference1
- xpos -305
- ypos -223
-}
-push $N1fa9d1c0
-push $N1fa9d1c0
 Viewer {
- inputs 2
  input_process false
  name Viewer1
- xpos -305
- ypos -142
+ xpos -184
+ ypos -213
 }

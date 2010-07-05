@@ -56,8 +56,8 @@ class sy_LensUndistort : public Iop
 	
 	// When we extend the image and get undistorted coordinates, we need to add these
 	// values to the pixel offset
-	double _shiftX;
-	double _shiftY;
+	unsigned int _shiftX;
+	unsigned int _shiftY;
 	
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
@@ -96,9 +96,11 @@ public:
 		// Compute the sampled width and height
 		_extWidth = uncrop(_inputWidth);
 		_extHeight = uncrop(_inputHeight);
-		printf("Extended back %dx%d\n", _extWidth, _extHeight);
+		_shiftX = _extWidth - _inputWidth;
+		_shiftY = _extHeight - _inputHeight;
 	}
 	
+	// Uncrop an integer dimension with a Syntheyes crop factor
 	int uncrop(int dimension) {
 		return ceil(dimension + (dimension * kUnCrop * 2));
 	}
@@ -128,6 +130,11 @@ public:
 		// Add the filter selection menu that comes from the filter obj itself
 		filter.knobs( f );
 	}
+	
+	void uncropCoordinate(Vector2& croppedSource, Vector2& uncroppedDest) {
+		uncroppedDest.x = croppedSource.x - float(_shiftX);
+		uncroppedDest.y = croppedSource.y - float(_shiftX);
+	}
 
 	// nuke-functions
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
@@ -140,7 +147,7 @@ public:
 	double fromUv(double, int);
 	void vecToUV(Vector2&, Vector2&, int, int);
 	void vecFromUV(Vector2&, Vector2&, int, int);
-	void distortVector(Vector2& uvVec, double k, double kcube, double aspect);
+	void distortVector(Vector2& uvVec, double k, double kcube);
 };
 
 static Iop* sy_LensUndistortCreate( Node *node ) {
@@ -182,9 +189,9 @@ void sy_LensUndistort::vecFromUV(Vector2& absVec, Vector2& uvVec, int w, int h)
 }
 
 // Place the UV coordinates of the distorted image in the undistorted image plane into uvVec
-void sy_LensUndistort::distortVector(Vector2& uvVec, double k, double kcube, double aspect) {
+void sy_LensUndistort::distortVector(Vector2& uvVec, double k, double kcube) {
 	
-	float r2 = aspect * aspect * uvVec.x * uvVec.x + uvVec.y * uvVec.y;
+	float r2 = _aspect * _aspect * uvVec.x * uvVec.x + uvVec.y * uvVec.y;
 	float f;
 	
 	// Skipping the square root munges up precision some
@@ -199,7 +206,7 @@ void sy_LensUndistort::distortVector(Vector2& uvVec, double k, double kcube, dou
 }
 
 // The image processor that works by scanline. Y is the scanline offset, x is the pix,
-// r is the length of the row.
+// r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
 void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
 	
@@ -215,13 +222,12 @@ void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& 
 		
 		// Compute the DISTORTED vector for this image and sample it from the input
 		vecToUV(absXY, uvXY, _inputWidth, _inputHeight);
-		distortVector(uvXY, kCoeff, kCubeCoeff, _aspect);
+		distortVector(uvXY, kCoeff, kCubeCoeff);
 		vecFromUV(distXY, uvXY, _inputWidth, _inputHeight);
 		
 		// half a pixel has to be added here because sample() takes the first two
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
-		// THIS IS NUKE-SPECIFIC AND HAS NOT NECESSARILY TO BE DONE IN OTHER IMPLEMENTATIONS!
 		input0().sample(distXY.x+0.5, distXY.y+0.5, 1.0f, 1.0f, &filter, pixel );
 		
 		// write the resulting pixel into the image
