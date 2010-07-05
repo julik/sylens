@@ -127,13 +127,17 @@ public:
 		_computeAspects();    
 		printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
 		
+		// Define the output box
 		Box obox = Box(0,0, _extWidth, _extHeight);
 		info_.merge(obox);
-		
+
+		// Define the format in the info_ - this is what Nuke uses
+		// to know how big OUR output will be
 		_outFormat = info_.format();
 		_outFormat.width(_extWidth);
 		_outFormat.height(_extHeight);
 		info_.format(_outFormat);
+		
 		printf("Extended image to %dx%d\n", _outFormat.width(), _outFormat.height());
 	}
 	
@@ -142,18 +146,12 @@ public:
 		return ceil(dimension + (dimension * kUnCrop * 2));
 	}
 	
-	// request the entire image to have access to every pixel PLUS padding
+	// request the entire image to have access to every pixel
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
 	{
 		printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 		ChannelSet c1(channels); in_channels(0,c1);
-		input0().request(
-			x - _paddingW,
-			y - _paddingH,
-			r + _paddingW,
-			t + _paddingH,
-			channels, count
-		);
+		input0().request( channels, count);
 	}
 
 	void uncropCoordinate(Vector2& croppedSource, Vector2& uncroppedDest) {
@@ -266,10 +264,16 @@ void sy_LensUndistort::engine ( int y, int x, int r, ChannelMask channels, Row& 
 		Vector2 uvXY(0, 0);
 		Vector2 distXY(0, 0);
 		
-		// Compute the DISTORTED vector for this image and sample it from the input
-		vecToUV(absXY, uvXY, _inputWidth, _inputWidth);
+		// So. The UV vector that we get here is the UV value on the EXTENDED back.
+		// We distort that When we sample Compute the DISTORTED vector for this image and sample it from the input.
+		// The only thing is that we need to sample from the center
+		vecToUV(absXY, uvXY, _extWidth, _extHeight);
 		distortVector(uvXY, kCoeff, kCubeCoeff);
 		vecFromUV(distXY, uvXY, _extWidth, _extHeight);
+		
+		distXY.x += _paddingW;
+		distXY.y += _paddingH;
+		
 		
 		// Sample from the input node at the coordinates
 		// half a pixel has to be added here because sample() takes the first two
