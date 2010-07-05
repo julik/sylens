@@ -1,6 +1,6 @@
 NDKDIR=/Applications/Nuke6.0v3-32/Nuke6.0v3.app/Contents/MacOS
 
-TARGET=sy_LensUndistort.dylib
+TARGET=SyLens.dylib
 HEADERS=$(wildcard *.h)
 SOURCES=$(wildcard *.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)

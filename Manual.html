@@ -1,0 +1,43 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+	<title>SyLens for Nuke</title> 
+	<style type='text/css'> 
+body {
+  font-family: "Helvetica Neue", Helvetica, "Lucida Sans Unicode", Arial, sans-serif;
+  padding: 2em;
+  background: rgb(255,255,255);
+  color: rgb(10,10,10);
+}
+
+h1,h2,h3,h4 {
+  font-family: "Lucida Grande", sans-serif;
+}
+
+	</style> 
+</head> 
+<body> 
+
+  <h1>SyLens for Nuke</h1>
+  
+  <p>This plugin helps to prep images that have been undistorted using the Syntheyes matchmoving software. It implements the same undistortion algorithm
+    as the one embedded in Syntheyes and explained <a href="http://www.ssontech.com/content/lensalg.htm">here.</a>
+  
+  <p>To use the plugin, you will need to use the Lens Workflow script included with Syntheyes. When you have solved the shot, lens distortion will likely be
+    computed. After that, hit "Lens Workflow".</p>
+  <img src="doc/lensw.png" width="600" height="430" alt="Lensw">
+  <p>You will be presented with a choice dialog, and the option you need is the one called "Redistorted"</p>
+  <img src="doc/lenswm2.png" width="750" height="174" alt="Lenswm2">
+  <p>What it does is it undistorts your footage, and simultaneously makes your camera FOV a little wider and
+    your composition size (the film back) a little bigger, to accomodate for image parts that would disappear
+    if you would be undistorting the image by other means.</p>
+  <p>Now open the <b>Shot->Image Preparation</b> menu. Go to the Lens tab and note the values for Distortion and Cubic Distort.
+    Then note down the crop values on the Cropping tab.<p>
+  <p>Load your source footage into Nuke and punch in the values, here's how they are related:</p>
+  <img src="doc/alltogether.png" width="861" height="386" alt="Alltogether">
+  <p>and you should get exactly the same undistortion as the one you would have gotten from Syntheyes using the Save Sequence button.</p>
+  
+  <p>Currently there is no equivalent redistortion - just use a sane coefficient with a negative sign compared to the undistorted version.</p>
+  <p>For questions and comments shoot a mail to me _at_ julik.nl</p>
+  </body> 
+</html>

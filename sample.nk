@@ -2,7 +2,7 @@
 version 6.0 v3
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="115" y="22" w="1680" h="1024" screen="0">
+    <window x="0" y="22" w="1680" h="1024" screen="0">
         <splitter orientation="1">
             <split size="1062"></split>
             <splitter orientation="1">
@@ -12,11 +12,11 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                 </dock>
                 <split size="1018"></split>
                 <splitter orientation="2">
-                    <split size="500"></split>
+                    <split size="556"></split>
                     <dock id="" activePageId="Viewer.1">
                         <page id="Viewer.1"></page>
                     </dock>
-                    <split size="498"></split>
+                    <split size="442"></split>
                     <dock id="" activePageId="DAG.1">
                         <page id="DAG.1"></page>
                         <page id="Curve Editor.1"></page>
@@ -34,67 +34,44 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 }
 Root {
  inputs 0
- name /Code/nksydist/sample.nk
- frame 77
+ name /Code/SyLens/sample.nk
+ frame 5
  last_frame 213
  lock_range true
- format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ format "2048 1234 0 0 2048 1234 1 "
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
 }
-CheckerBoard2 {
- inputs 0
- format "2048 1234 0 0 2048 1234 1 "
- name CheckerBoard1
- xpos -109
- ypos -413
-}
 Read {
  inputs 0
- file /Code/nksydist/SampleImg/Sample.jpg
- format "2204 1328 0 0 2204 1328 1 "
- name Read2
- xpos -363
- ypos -435
-}
-set N1fa52f00 [stack 0]
-Transform {
- inputs 0
- translate {80 50}
- center {1024 778}
- name Transform1
- xpos -296
- ypos -214
-}
-Difference {
- inputs 2
- name Difference1
- xpos -392
- ypos -189
-}
-Read {
- inputs 0
- file /Code/nksydist/SampleImg/Source.jpg
+ file SampleImg/Source.jpg
  format "2048 1234 0 0 2048 1234 1 "
  name Read1
- xpos -201
- ypos -435
+ xpos -277
+ ypos -713
 }
-sy_LensUndistort {
- filter Keys
- name sy_LensUndistort1
- xpos -184
- ypos -299
- postage_stamp true
+set N1fa2cbb0 [stack 0]
+push $N1fa2cbb0
+SyLens {
+ k_knob {{curve x1 -0.01826 x101 -0.0456}}
+ name SyLens1
+ tile_color 0xc10000ff
+ xpos -277
+ ypos -598
 }
-push $N1fa52f00
+Read {
+ inputs 0
+ file SampleImg/Sample.jpg
+ format "2204 1328 0 0 2204 1328 1 "
+ name Read2
+ xpos -407
+ ypos -711
+}
 Viewer {
- inputs 2
- frame 77
- input_number 1
+ inputs 3
+ zoom_lock true
  input_process false
  name Viewer1
- selected true
- xpos -184
- ypos -213
+ xpos -364
+ ypos -522
 }
