@@ -6,9 +6,11 @@ SOURCES=$(wildcard *.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
 
 SDKROOT=/Developer/SDKs/MacOSX10.4u.sdk
+LIBS ?= -lDDImage -lGLEW
 
-CXXFLAGS+= -c -fPIC -DUSE_GLEW -I$(NDKDIR)/include
-LNFLAGS+=-undefined warning -flat_namespace  -dynamiclib -shared -rdynamic -nodefaultlibs -m32 -ggdb
+CXXFLAGS+= -c -fPIC -DUSE_GLEW -I$(NDKDIR)/include  -msse -O3 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386
+LNFLAGS+=-bundle -undefined warning -flat_namespace -shared -rdynamic -nodefaultlibs -m32 -ggdb -lDDImage -lGLEW
+LNFLAGS+=-L$(NDKDIR) -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386
 
 all: $(TARGET)
 
@@ -16,7 +18,7 @@ all: $(TARGET)
 	$(CXX) $(CXXFLAGS) -c $<
 	
 $(TARGET): $(OBJECTS)
-	$(CXX) -o $(TARGET) $(LNFLAGS) $(OBJECTS)
+	$(CXX) -o $(TARGET) $(LNFLAGS) $(LIBS) $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
