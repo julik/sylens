@@ -7,7 +7,7 @@
 *	
 *	Written by Julik Tarkhanov in Amsterdam in 2010. me(at)julik.nl
 *	with kind support by HecticElectric.
-*	The beautiful landscape shot provided by Tim Parshikov, 2010.
+*	The beautiful Crimean landscape shot provided by Tim Parshikov, 2010.
 *	
 *	The code has some more comments than it's 3DE counterpart since we have to do some things that the other plugin
 *	did not (like expanding the image output)
@@ -51,7 +51,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 "to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.0.1";
+static const char* const VERSION = "0.0.2";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -65,8 +65,8 @@ class SyLens : public Iop
 	unsigned int _inputHeight;
 
 	// The size of the filmback we are actually sampling from
-	unsigned int _extWidth;
-	unsigned int _extHeight;
+	unsigned int _outWidth;
+	unsigned int _outHeight;
 	
 	// When we extend the image and get undistorted coordinates, we need to add these
 	// values to the pixel offset
@@ -105,11 +105,6 @@ public:
 	
 	~SyLens () { }
 	
-	//void append(Hash& hash)
-    //{
-    //        hash.append(hash_counter);
-    //}
-
 	void _computeAspects() {
 		// Compute the aspect from the input format
 		Format f = input0().format();
@@ -124,8 +119,8 @@ public:
 			if(kDbg) printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
 			
 			// Compute the sampled width and height
-			_extWidth = uncrop(_inputWidth);
-			_extHeight = uncrop(_inputHeight);
+			_outWidth = uncrop(_inputWidth);
+			_outHeight = uncrop(_inputHeight);
 		} else {
 			// We need to figure out which plate has been used as source in terms of size, before undistortion.
 			// To do this, we need to solve y = x + (x * 2z) with a known y and z
@@ -133,16 +128,16 @@ public:
 			
 			if(kDbg) printf("SyLens: _validate input is upscaled by %2.2f\n", upscaledBy);
 			
-			_extWidth = floor(float(_inputWidth) / upscaledBy);
-			_extHeight = ceil(float(_inputHeight) / upscaledBy);
+			_outWidth = floor(float(_inputWidth) / upscaledBy);
+			_outHeight = ceil(float(_inputHeight) / upscaledBy);
 			
-			_paddingW = floor(float(_extWidth) * kUnCrop);
-			_paddingH = floor(float(_extHeight) * kUnCrop);
+			_paddingW = floor(float(_outWidth) * kUnCrop);
+			_paddingH = floor(float(_outHeight) * kUnCrop);
 
 			if(kDbg) printf("SyLens: _validate will need to UNpad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
 		}
 
-		if(kDbg) printf("SyLens: true lens window will be %dx%d\n", _extWidth, _extHeight);
+		if(kDbg) printf("SyLens: true lens window will be %dx%d\n", _outWidth, _outHeight);
 	}
 	
 	// Here we need to expand the image
@@ -157,27 +152,19 @@ public:
 		
 		_computeAspects();    
 		
-		if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
+		if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _outWidth, _outHeight);
 		
 		// Crucial. Define the format in the info_ - this is what Nuke uses
-		// to know how big OUR output will be. Note that it's notoriously convoluted
-		// to MAKE a Format yourself, better copy one from the input instead.
-		//_outFormat = info_.format();
-		
-		_outFormat = Format(_extWidth, _extHeight, 1);
-		_outFormat.height(_extHeight);
+		// to know how big OUR output will be. We also pretty much NEED to store it
+		// in an instance var because we cannot keep it on the stack (segfault!)
+		_outFormat = Format(_outWidth, _outHeight, 1);
 		info_.format(_outFormat);
 
 		// And also enforce the bounding box AS WELL
-		Box obox = Box(0,0, _extWidth, _extHeight);
+		Box obox = Box(0,0, _outWidth, _outHeight);
 		info_.merge(obox);
 		
 		if(kDbg) printf("SyLens: ext output will be %dx%d\n", _outFormat.width(), _outFormat.height());
-	}
-	
-	// Uncrop an integer dimension with a Syntheyes crop factor
-	int uncrop(int dimension) {
-		return ceil(dimension + (dimension * kUnCrop * 2));
 	}
 	
 	// request the entire image to have access to every pixel. We pad in the output during engine() call
@@ -192,7 +179,7 @@ public:
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	const char* Class() const { return CLASS; }
 	const char* node_help() const { return HELP; }
-	static const Iop::Description description; 
+	static const Iop::Description description;
 	
 	void knobs( Knob_Callback f) {
 		
@@ -218,6 +205,7 @@ public:
 		
 		// Add the filter selection menu that comes from the filter obj itself
 		filter.knobs( f );
+		
 		Divider(f, 0);
 		Text_knob(f, (std::string("SyLens v.") + std::string(VERSION)).c_str());
    	}
@@ -240,7 +228,7 @@ public:
 	
 	
 private:
-	// custom functions
+	
 	double toUv(double, int);
 	double fromUv(double, int);
 	void vecToUV(Vector2&, Vector2&, int, int);
@@ -248,13 +236,14 @@ private:
 	void distortVector(Vector2& uvVec, double k, double kcube);
 	void distortVectorIntoSource(Vector2& vec);
 	void undistortVectorIntoDest(Vector2& vec);
+	int uncrop(int dimension);
 };
 
 static Iop* SyLensCreate( Node *node ) {
 	SyLens* s = new SyLens(node);
 	DD::Image::NukeWrapper* w = new DD::Image::NukeWrapper(s);
+	w->noMask(); // This fails on Nuke 6.0v3
 	w->noMix();
-	w->noMask();
 	return w;
 }
 
@@ -311,9 +300,9 @@ void SyLens::distortVectorIntoSource(Vector2& absXY) {
 	Vector2 uvXY(0, 0);
 	// The gritty bits - get coordinates of the distorted pixel in the coordinates of the
 	// EXTENDED film back
-	vecToUV(absXY, uvXY, _extWidth, _extHeight);
+	vecToUV(absXY, uvXY, _outWidth, _outHeight);
 	distortVector(uvXY, kCoeff, kCubeCoeff);
-	vecFromUV(absXY, uvXY, _extWidth, _extHeight);
+	vecFromUV(absXY, uvXY, _outWidth, _outHeight);
 	absXY.x += - (double)_paddingW;
 	absXY.y += - (double)_paddingH;
 }
@@ -321,11 +310,16 @@ void SyLens::distortVectorIntoSource(Vector2& absXY) {
 // This is WRONG!
 void SyLens::undistortVectorIntoDest(Vector2& absXY) {
 	Vector2 uvXY(0, 0);
-	vecToUV(absXY, uvXY, _inputWidth, _inputWidth);
-	distortVector(uvXY, kCoeff * -1, kCubeCoeff);
-	vecFromUV(absXY, uvXY, _inputWidth, _extWidth);
-	absXY.x -= - (double)_paddingW;
-	absXY.y -= - (double)_paddingH;
+	vecToUV(absXY, uvXY, _outWidth, _outHeight);
+	distortVector(uvXY, kCoeff * -1, kCubeCoeff * -1);
+	vecFromUV(absXY, uvXY, _outWidth, _outHeight);
+	absXY.x = absXY.x + (double)_paddingW; // + 2.0f;
+	absXY.y = absXY.y + (double)_paddingH; // + 2.0f;
+}
+
+// Uncrop an integer dimension with a Syntheyes crop factor
+int SyLens::uncrop(int dimension) {
+	return ceil(dimension + (dimension * kUnCrop * 2));
 }
 
 // The image processor that works by scanline. Y is the scanline offset, x is the pix,
@@ -349,6 +343,8 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		if( kMode == UNDIST) {
 			distortVectorIntoSource(absXY);
 		} else {
+			// There is an offset by one scanline that appears here, we neutralise that
+			absXY = Vector2(x, y + 1);
 			undistortVectorIntoDest(absXY);
 		}
 		
