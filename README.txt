@@ -5,7 +5,9 @@ fame. It is made so that it's output is _identical_ to the Image Preparation too
 It is largely based on tx_nukeLensDistortion by Matti Gruener.
 
 ## USAGE
-See Manual.html for instructions.
+See Manual.html for instructions. To install, drop that into your .nuke
+directory in the home dir and do "All plugins->Update". Afterwards
+type SyLens in the tab menu and you will get'em.
 
 ## TESTING
 Use the included sample.nk script. The following values should produce identical distortion and bounds for Source.jpg
