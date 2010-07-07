@@ -1,16 +1,14 @@
 /*
 *	This plugin uses the lens distortion model provided by Russ Anderson of the SynthEyes camera tracker
 *	fame. It is made so that it's output is _identical_ to the Image Preparation tool of the SY camera tracker.
-*	so you can usehe developers of 3D Equalizer
+*	so you can use it INSTEAD of the footage Syntheyes prerenders.
 *	It is largely based on tx_nukeLensDistortion by Matti Gruener of Trixter Film and Rising Sun fame. However,
-* 
+*	For filtering we also use the standard filtering methods provided by Nuke.
 *	
 *	Written by Julik Tarkhanov in Amsterdam in 2010. me(at)julik.nl
 *	with kind support by HecticElectric.
 *	The beautiful landscape shot provided by Tim Parshikov, 2010.
 *	
-*	For filtering we also use the standard filtering methods provided by Nuke.
-*
 *	The code has some more comments than it's 3DE counterpart since we have to do some things that the other plugin
 *	did not (like expanding the image output)
 */
@@ -50,10 +48,6 @@ extern "C" {
 
 using namespace DD::Image;
 
-#define MAX_ITERATIONS 400
-#define FLOAT_TOL 5.0e-7
-#define STR_EQUAL 0
-
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 "to the lens distortion model used by Syntheyes";
@@ -76,8 +70,6 @@ class SyLens : public Iop
 	
 	// When we extend the image and get undistorted coordinates, we need to add these
 	// values to the pixel offset
-	unsigned int _shiftX;
-	unsigned int _shiftY;
 	unsigned int _paddingW;
 	unsigned int _paddingH;
 	
@@ -105,8 +97,6 @@ public:
 		kCubeCoeff = 0.0f;
 		kUnCrop = 0.038f;
 		_aspect = 1.33f;
-		_shiftX = 0;
-		_shiftY = 0;
 		_lastScanlineSize = 0;
 		_paddingW = 0;
 		_paddingH = 0;
@@ -128,14 +118,29 @@ public:
 		_inputHeight = f.height();
 		_aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
 		
-		_paddingW = ceil(_inputWidth * kUnCrop);
-		_paddingH = ceil(_inputHeight * kUnCrop);
+		if (kMode == UNDIST) {
+			_paddingW = ceil(_inputWidth * kUnCrop);
+			_paddingH = ceil(_inputHeight * kUnCrop);
+			if(kDbg) printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
+			
+			// Compute the sampled width and height
+			_extWidth = uncrop(_inputWidth);
+			_extHeight = uncrop(_inputHeight);
+		} else {
+			// We need to figure out which plate has been used as source in terms of size, before undistortion.
+			// To do this, we need to solve y = x + (x * 2z) with a known y and z
+			float upscaledBy = 1.0 + (kUnCrop * 2.0f);
+			
+			if(kDbg) printf("SyLens: _validate input is upscaled by %2.2f\n", upscaledBy);
+			
+			_extWidth = floor(float(_inputWidth) / upscaledBy);
+			_extHeight = ceil(float(_inputHeight) / upscaledBy);
+			
+			_paddingW = floor(float(_extWidth) * kUnCrop);
+			_paddingH = floor(float(_extHeight) * kUnCrop);
 
-		if(kDbg) printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
-
-		// Compute the sampled width and height
-		_extWidth = uncrop(_inputWidth);
-		_extHeight = uncrop(_inputHeight);
+			if(kDbg) printf("SyLens: _validate will need to UNpad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
+		}
 
 		if(kDbg) printf("SyLens: true lens window will be %dx%d\n", _extWidth, _extHeight);
 	}
@@ -162,7 +167,7 @@ public:
 		_outFormat = Format(_extWidth, _extHeight, 1);
 		_outFormat.height(_extHeight);
 		info_.format(_outFormat);
-		
+
 		// And also enforce the bounding box AS WELL
 		Box obox = Box(0,0, _extWidth, _extHeight);
 		info_.merge(obox);
@@ -183,11 +188,6 @@ public:
 		input0().request( channels, count);
 	}
 
-	void uncropCoordinate(Vector2& croppedSource, Vector2& uncroppedDest) {
-		uncroppedDest.x = croppedSource.x - float(_shiftX);
-		uncroppedDest.y = croppedSource.y - float(_shiftX);
-	}
-
 	// nuke
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	const char* Class() const { return CLASS; }
@@ -195,24 +195,24 @@ public:
 	static const Iop::Description description; 
 	
 	void knobs( Knob_Callback f) {
-/* I don't feel like it _just_ yet
+		
 		Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
 		_modeSel->label("mode");
 		_modeSel->tooltip("Pick your poison");
-*/		
-		Knob* _kKnob = Float_knob( f, &kCoeff, "k_knob" );
+		
+		Knob* _kKnob = Float_knob( f, &kCoeff, "k" );
 		_kKnob->label("K coeff");
 		_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
 
-		Knob* _kCubeKnob = Float_knob( f, &kCubeCoeff, "kCube_knob" );
+		Knob* _kCubeKnob = Float_knob( f, &kCubeCoeff, "kcube" );
 		_kCubeKnob->label("Cubic coeff");
 		_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
 		
-		Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "Crop_knob" );
+		Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "uncrop" );
 		_kUncropKnob->label("Uncrop expansion");
 		_kUncropKnob->tooltip("Set this to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
 		
-		Knob* kDbgKnob = Bool_knob( f, &kDbg, "Debug_knob");
+		Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
 		kDbgKnob->label("Output debug info");
 		kDbgKnob->tooltip("When checked, SyLens will output various debug info to STDOUT");
 		
@@ -228,7 +228,12 @@ public:
 		if (k == NULL) return 1;
 		
 		// Touching the crop knob changes our output bounds
-		if ((*k).startsWith("Crop_knob")) {
+		if ((*k).startsWith("uncrop")) {
+			_validate(false);
+		}
+		
+		// Touching the mode changes everything
+		if ((*k).startsWith("mode")) {
 			_validate(false);
 		}
 	}
@@ -241,7 +246,8 @@ private:
 	void vecToUV(Vector2&, Vector2&, int, int);
 	void vecFromUV(Vector2&, Vector2&, int, int);
 	void distortVector(Vector2& uvVec, double k, double kcube);
-	
+	void distortVectorIntoSource(Vector2& vec);
+	void undistortVectorIntoDest(Vector2& vec);
 };
 
 static Iop* SyLensCreate( Node *node ) {
@@ -299,6 +305,29 @@ void SyLens::distortVector(Vector2& uvVec, double k, double kcube) {
 	uvVec.y = uvVec.y * f;
 }
 
+// Get a coordinate that we need to sample from the SOURCE distorted image to get at the absXY
+// values in the RESULT
+void SyLens::distortVectorIntoSource(Vector2& absXY) {
+	Vector2 uvXY(0, 0);
+	// The gritty bits - get coordinates of the distorted pixel in the coordinates of the
+	// EXTENDED film back
+	vecToUV(absXY, uvXY, _extWidth, _extHeight);
+	distortVector(uvXY, kCoeff, kCubeCoeff);
+	vecFromUV(absXY, uvXY, _extWidth, _extHeight);
+	absXY.x += - (double)_paddingW;
+	absXY.y += - (double)_paddingH;
+}
+
+// This is WRONG!
+void SyLens::undistortVectorIntoDest(Vector2& absXY) {
+	Vector2 uvXY(0, 0);
+	vecToUV(absXY, uvXY, _inputWidth, _inputWidth);
+	distortVector(uvXY, kCoeff * -1, kCubeCoeff);
+	vecFromUV(absXY, uvXY, _inputWidth, _extWidth);
+	absXY.x -= - (double)_paddingW;
+	absXY.y -= - (double)_paddingH;
+}
+
 // The image processor that works by scanline. Y is the scanline offset, x is the pix,
 // r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
 void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
@@ -316,14 +345,12 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	for (; x < r; x++) {
 		
 		Vector2 absXY(x, y);
-		Vector2 uvXY(0, 0);
-		Vector2 distXY(0, 0);
-		
-		// The gritty bits - get coordinates of the distorted pixel in the coordinates of the
-		// EXTENDED film back
-		vecToUV(absXY, uvXY, _extWidth, _extHeight);
-		distortVector(uvXY, kCoeff, kCubeCoeff);
-		vecFromUV(distXY, uvXY, _extWidth, _extHeight);
+		// If chromatics are enabled, we apply per channel adjustment to the fringe values
+		if( kMode == UNDIST) {
+			distortVectorIntoSource(absXY);
+		} else {
+			undistortVectorIntoDest(absXY);
+		}
 		
 		// Sample from the input node at the coordinates
 		// half a pixel has to be added here because sample() takes the first two
@@ -332,7 +359,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		// We also sample with a padding offset to compensate for the fact that our pic is left-bottom registered and we DO NOT
 		// have pading in the requested input
 		input0().sample(
-			distXY.x + sampleOff - _paddingW, distXY.y + sampleOff - _paddingH, 
+			absXY.x + sampleOff , absXY.y + sampleOff, 
 			1.0f, 
 			1.0f,
 			&filter,
