@@ -247,7 +247,8 @@ static Iop* SyLensCreate( Node *node ) {
 	return w;
 }
 
-const Iop::Description SyLens::description ( CLASS, 0, SyLensCreate );
+//const Iop::Description SyLens::description ( CLASS, "Transform/SyLens", SyLensCreate );
+const Iop::Description SyLens::description(CLASS, 0, SyLensCreate);
 
 // Syntheyes uses UV coordinates that start at the optical center of the image
 double SyLens::toUv(double absValue, int absSide)

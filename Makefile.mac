@@ -22,3 +22,15 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
+	rm -rf dist
+	
+dist:
+	mkdir dist
+	cp README.txt dist/
+	cp Manual.html dist/
+	cp -r doc dist/
+	cp sample.nk dist/
+	cp -r SampleImg dist/
+	cp *.so dist/
+	cp *.dll dist/
+	cp *.dylib dist/

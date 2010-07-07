@@ -24,10 +24,17 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                 </splitter>
             </splitter>
             <split size="457"></split>
-            <dock id="" activePageId="Properties.1">
-                <page id="Properties.1"></page>
-                <page id="Script Editor.1"></page>
-            </dock>
+            <splitter orientation="2">
+                <split size="868"></split>
+                <dock id="" activePageId="Properties.1">
+                    <page id="Properties.1"></page>
+                    <page id="Script Editor.1"></page>
+                </dock>
+                <split size="130"></split>
+                <dock id="" activePageId="Progress.1">
+                    <page id="Progress.1"></page>
+                </dock>
+            </splitter>
         </splitter>
     </window>
 </layout>
@@ -50,7 +57,7 @@ Read {
  xpos -172
  ypos -734
 }
-set N1f78bc10 [stack 0]
+set N1fba0850 [stack 0]
 SyLens {
  k {{curve x114 -0.01826}}
  uncrop -0.038
@@ -59,7 +66,7 @@ SyLens {
  xpos 79
  ypos -618
 }
-push $N1f78bc10
+push $N1fba0850
 SyLens {
  k {{curve x114 -0.01826}}
  uncrop {{curve x102 0.038}}
@@ -69,7 +76,7 @@ SyLens {
  xpos -172
  ypos -616
 }
-set N166a4f10 [stack 0]
+set N1fb8dca0 [stack 0]
 SyLens {
  mode redistort
  k {{curve x114 -0.01826}}
@@ -80,7 +87,7 @@ SyLens {
  xpos -172
  ypos -563
 }
-push $N1f78bc10
+push $N1fba0850
 Dot {
  name Dot1
  xpos -11
@@ -100,7 +107,7 @@ Read {
  xpos -442
  ypos -734
 }
-push $N166a4f10
+push $N1fb8dca0
 Difference {
  inputs 2
  name Difference1
@@ -109,7 +116,6 @@ Difference {
 }
 Viewer {
  inputs 2
- input_number 1
  zoom_lock true
  input_process false
  name Viewer1
