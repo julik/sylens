@@ -2,9 +2,10 @@
 
 This plugin uses the lens distortion model provided by Russ Anderson of the SynthEyes camera tracker
 fame. It is made so that it's output is _identical_ to the Image Preparation tool of the SY camera tracker.
-so you can usehe developers of 3D Equalizer
-It is largely based on tx_nukeLensDistortion by Matti Gruener of Trixter Film and Rising Sun fame. However,
+It is largely based on tx_nukeLensDistortion by Matti Gruener.
 
+## USAGE
+See Manual.html for instructions.
 
 ## TESTING
 Use the included sample.nk script. The following values should produce identical distortion and bounds for Source.jpg
