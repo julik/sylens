@@ -157,7 +157,7 @@ public:
 		// Crucial. Define the format in the info_ - this is what Nuke uses
 		// to know how big OUR output will be. We also pretty much NEED to store it
 		// in an instance var because we cannot keep it on the stack (segfault!)
-		_outFormat = Format(_outWidth, _outHeight, 1);
+		_outFormat = Format(_outWidth, _outHeight, input0().format().pixel_aspect());
 		info_.format(_outFormat);
 
 		// And also enforce the bounding box AS WELL
