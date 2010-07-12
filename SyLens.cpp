@@ -149,6 +149,7 @@ public:
 		
 		if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
 		
+		// Time to define how big our output will be
 		int ow, oh;
 		
 		if(kMode == UNDIST) {
@@ -174,8 +175,22 @@ public:
 		_outFormat = Format(ow, oh, input0().format().pixel_aspect());
 		info_.format( _outFormat );
 		
-		// And also enforce the bounding box AS WELL
-		Box obox = Box(0,0, ow, oh);
+		// For the case when we are working with a 8k by 4k plate with a SMALL CG pink elephant rrright in the left
+		// corner we want to actually translate the bbox of the elephant to our distorted pipe downstream. So we need to
+		// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
+		// Grab the bbox from the input first
+		Info i = input0().info();
+		Vector2 xy(i.x(), i.y());
+		Vector2 tr(i.r(), i.t());
+		
+		if(kMode == UNDIST) {
+			undistortVectorIntoDest(xy);
+			undistortVectorIntoDest(tr);
+		} else {
+			distortVectorIntoSource(xy);
+			distortVectorIntoSource(tr);
+		}
+		Box obox = Box(xy.x, xy.y, tr.x, tr.y);
 		
 		// When we expand we need to do a merge which overrides the output bbox and tells Nuke
 		// to expand the render area 

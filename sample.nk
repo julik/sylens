@@ -42,7 +42,8 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /Code/SyLens/sample.nk
- last_frame 1
+ frame 14
+ last_frame 50
  lock_range true
  format "2048 1234 0 0 2048 1234 1 "
  proxy_type scale
@@ -55,6 +56,73 @@ StickyNote {
  xpos -310
  ypos -563
 }
+Read {
+ inputs 0
+ file SampleImg/Sample.jpg
+ format "2204 1328 0 0 2204 1328 1 "
+ name Read2
+ xpos -442
+ ypos -739
+}
+Read {
+ inputs 0
+ file SampleImg/Source.jpg
+ format "2048 1234 0 0 2048 1234 1 "
+ name Read1
+ xpos -172
+ ypos -768
+}
+set N17aa6b80 [stack 0]
+SyLens {
+ k {{curve x114 -0.01826}}
+ uncrop {{curve x102 0.038}}
+ debug true
+ filter Parzen
+ name SyLens_UN
+ tile_color 0xc10000ff
+ xpos -172
+ ypos -619
+}
+set N17aa7070 [stack 0]
+Difference {
+ inputs 2
+ name Difference1
+ xpos -442
+ ypos -616
+}
+push $N17aa6b80
+Dot {
+ name Dot1
+ xpos -11
+ ypos -700
+}
+set N18a9e7c0 [stack 0]
+SyLens {
+ k {{curve x114 -0.01826}}
+ uncrop -0.038
+ name SyLens_Un_NEG
+ tile_color 0xc10000ff
+ xpos 99
+ ypos -710
+}
+push $N17aa7070
+SyLens {
+ mode redistort
+ k {{curve i x1 -0.01826 x114 -0.01826}}
+ uncrop {{curve i x114 0.038}}
+ filter Mitchell
+ name SyLens_Re
+ tile_color 0xc10000ff
+ xpos -172
+ ypos -581
+}
+push $N18a9e7c0
+Difference {
+ inputs 2
+ name Difference2
+ xpos -45
+ ypos -520
+}
 CheckerBoard2 {
  inputs 0
  boxsize {256 154}
@@ -62,7 +130,38 @@ CheckerBoard2 {
  xpos 318
  ypos -782
 }
-set N18a50870 [stack 0]
+set N17aaaaf0 [stack 0]
+Dot {
+ name Dot2
+ xpos 495
+ ypos -755
+}
+set N1eb7160 [stack 0]
+push $N1eb7160
+SyLens {
+ k -0.03
+ uncrop 0.063
+ filter Keys
+ name SyLens3
+ xpos 512
+ ypos -711
+}
+SyLens {
+ mode redistort
+ k -0.03
+ uncrop 0.063
+ filter Simon
+ name SyLens4
+ xpos 512
+ ypos -672
+}
+Difference {
+ inputs 2
+ name Difference4
+ xpos 461
+ ypos -597
+}
+push $N17aaaaf0
 SyLens {
  k 0.1
  uncrop 0
@@ -79,27 +178,35 @@ SyLens {
  xpos 318
  ypos -672
 }
-push $N18a50870
-Dot {
- name Dot2
- xpos 495
- ypos -755
-}
-set N18a4ffe0 [stack 0]
+push $N1eb7160
 Difference {
  inputs 2
  name Difference3
  xpos 318
- ypos -597
+ ypos -598
 }
-push $N18a4ffe0
+StickyNote {
+ inputs 0
+ name StickyNote2
+ label "Roundtrip wo crop"
+ xpos 284
+ ypos -554
+}
+StickyNote {
+ inputs 0
+ name StickyNote3
+ label "Roundtrip with crop"
+ xpos 450
+ ypos -552
+}
+push $N1eb7160
 Dot {
  name Dot3
  xpos 811
  ypos -755
 }
-set N18aa03c0 [stack 0]
-push $N18aa03c0
+set N18ad1310 [stack 0]
+push $N18ad1310
 SyLens {
  k -0.03
  kcube 0.002
@@ -123,83 +230,23 @@ Difference {
  inputs 2
  name Difference5
  xpos 777
- ypos -596
+ ypos -595
 }
-Read {
+StickyNote {
  inputs 0
- file SampleImg/Sample.jpg
- format "2204 1328 0 0 2204 1328 1 "
- name Read2
- xpos -442
- ypos -739
+ name StickyNote4
+ label "Roundtrip with crop and cubic"
+ xpos 737
+ ypos -554
 }
-Read {
- inputs 0
- file SampleImg/Source.jpg
- format "2048 1234 0 0 2048 1234 1 "
- name Read1
- xpos -172
- ypos -768
-}
-set N17aac370 [stack 0]
-SyLens {
- k {{curve x114 -0.01826}}
- uncrop {{curve x102 0.038}}
- debug true
- filter Parzen
- name SyLens_UN
- tile_color 0xc10000ff
- xpos -172
- ypos -618
-}
-set N18abf130 [stack 0]
-Difference {
- inputs 2
- name Difference1
- xpos -442
- ypos -616
-}
-push $N17aac370
-Dot {
- name Dot1
- xpos -11
- ypos -700
-}
-set N18ac6050 [stack 0]
-SyLens {
- k {{curve x114 -0.01826}}
- uncrop -0.038
- name SyLens_Un_NEG
- tile_color 0xc10000ff
- xpos 99
- ypos -710
-}
-push $N18abf130
-SyLens {
- mode redistort
- k {{curve i x1 -0.01826 x114 -0.01826}}
- uncrop {{curve i x114 0.038}}
- filter Mitchell
- name SyLens_Re
- tile_color 0xc10000ff
- xpos -172
- ypos -578
-}
-push $N18ac6050
-Difference {
- inputs 2
- name Difference2
- xpos -45
- ypos -523
-}
-push $N18aa03c0
+push $N18ad1310
 Dot {
  name Dot4
  xpos 1055
  ypos -755
 }
-set N18acfdd0 [stack 0]
-push $N18acfdd0
+set N18adc4c0 [stack 0]
+push $N18adc4c0
 SyLens {
  k -0.04
  kcube 0.002
@@ -208,7 +255,7 @@ SyLens {
  filter Keys
  name SyLens7
  xpos 1071
- ypos -711
+ ypos -712
 }
 SyLens {
  mode redistort
@@ -218,23 +265,49 @@ SyLens {
  filter Parzen
  name SyLens8
  xpos 1071
- ypos -673
+ ypos -675
 }
-set N18ad4690 [stack 0]
 Difference {
  inputs 2
  name Difference6
  xpos 1021
- ypos -596
+ ypos -597
 }
-push $N18a4ffe0
-push $N18a4ffe0
+StickyNote {
+ inputs 0
+ name StickyNote5
+ label "Roundtrip with crop and bbox"
+ xpos 1001
+ ypos -557
+}
+StickyNote {
+ inputs 0
+ name StickyNote6
+ label "Roundtrip with neg crop"
+ xpos 1244
+ ypos -558
+}
+push $N18adc4c0
+Dot {
+ name Dot5
+ xpos 1243
+ ypos -755
+}
+set N18ae8de0 [stack 0]
+push $N18ae8de0
+Crop {
+ box {{curve x1 0 x5 268 x11 564 808 x21 904 x27 1024 x44 740} {curve x1 0 x5 112 x11 188 400 x21 544 x27 610 x44 370} {curve x1 1026 x5 1294 x11 1590 1834 x21 1930 x27 2050 x44 1982} {curve x1 622 x5 734 x11 810 1022 x21 1166 x27 1232 x44 1164}}
+ name Crop1
+ selected true
+ xpos 1260
+ ypos -737
+}
 SyLens {
  k -0.03
  uncrop 0.063
  filter Keys
- name SyLens3
- xpos 512
+ name SyLens9
+ xpos 1260
  ypos -711
 }
 SyLens {
@@ -242,24 +315,29 @@ SyLens {
  k -0.03
  uncrop 0.063
  filter Simon
- name SyLens4
- xpos 512
- ypos -673
+ name SyLens10
+ xpos 1260
+ ypos -675
 }
+set N18af0410 [stack 0]
 Difference {
  inputs 2
- name Difference4
- xpos 461
+ name Difference7
+ xpos 1209
  ypos -597
 }
-push $N18ad4690
-push $N18abf130
+push $N18af0410
+Grade {
+ name Grade1
+ xpos 1338
+ ypos -625
+}
+push $N18af0410
+push $N18af0410
 Viewer {
  inputs 2
- frame 1
  input_process false
  name Viewer1
- selected true
  xpos 664
  ypos -586
 }
