@@ -50,23 +50,29 @@ using namespace DD::Image;
 
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
-"to the lens distortion model used by Syntheyes";
+" to the lens distortion model used by Syntheyes";
 static const char* const VERSION = "0.0.2";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
 {
+	//Nuke statics
+	
+	const char* Class() const { return CLASS; }
+	const char* node_help() const { return HELP; }
+	static const Iop::Description description;
+	
 	Filter filter;
 	
 	enum { UNDIST, REDIST };
 	
 	// Input with and height for input0
-	unsigned int _inputWidth;
-	unsigned int _inputHeight;
+	unsigned int _plateWidth;
+	unsigned int _plateHeight;
 
 	// The size of the filmback we are actually sampling from
-	unsigned int _outWidth;
-	unsigned int _outHeight;
+	unsigned int _extWidth;
+	unsigned int _extHeight;
 	
 	// When we extend the image and get undistorted coordinates, we need to add these
 	// values to the pixel offset
@@ -109,35 +115,25 @@ public:
 		// Compute the aspect from the input format
 		Format f = input0().format();
 		
-		_inputWidth = f.width();
-		_inputHeight = f.height();
-		_aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
+		double sc = 1.0f + (2.0f * kUnCrop);
 		
-		if (kMode == UNDIST) {
-			_paddingW = ceil(_inputWidth * kUnCrop);
-			_paddingH = ceil(_inputHeight * kUnCrop);
-			if(kDbg) printf("SyLens: _validate will need to pad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
-			
-			// Compute the sampled width and height
-			_outWidth = uncrop(_inputWidth);
-			_outHeight = uncrop(_inputHeight);
+		if(kMode == UNDIST) {
+			_plateWidth = f.width();
+			_plateHeight = f.height();
+			_extWidth = ceil(float(_plateWidth) * sc);
+			_extHeight = ceil(float(_plateHeight) * sc);
 		} else {
-			// We need to figure out which plate has been used as source in terms of size, before undistortion.
-			// To do this, we need to solve y = x + (x * 2z) with a known y and z
-			float upscaledBy = 1.0 + (kUnCrop * 2.0f);
-			
-			if(kDbg) printf("SyLens: _validate input is upscaled by %2.2f\n", upscaledBy);
-			
-			_outWidth = floor(float(_inputWidth) / upscaledBy);
-			_outHeight = ceil(float(_inputHeight) / upscaledBy);
-			
-			_paddingW = floor(float(_outWidth) * kUnCrop);
-			_paddingH = floor(float(_outHeight) * kUnCrop);
-
-			if(kDbg) printf("SyLens: _validate will need to UNpad the input with  %dpx x %dpx\n", _paddingW, _paddingH);
+			_plateWidth = floor( float(f.width()) / sc);
+			_plateHeight = floor( float(f.height()) / sc);
+			_extWidth = f.width();
+			_extHeight = f.height();
 		}
-
-		if(kDbg) printf("SyLens: true lens window will be %dx%d\n", _outWidth, _outHeight);
+		
+		_paddingW = (_extWidth - _plateWidth) / 2;
+		_paddingH = (_extHeight - _plateHeight) / 2;
+		_aspect = float(_plateWidth) / float(_plateHeight) *  f.pixel_aspect();
+		
+		if(kDbg) printf("SyLens: true plate window with uncrop will be %dx%d\n", _extWidth, _extHeight);
 	}
 	
 	// Here we need to expand the image
@@ -152,36 +148,46 @@ public:
 		
 		_computeAspects();    
 		
-		if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _outWidth, _outHeight);
+		if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
+		
+		int ow, oh;
+		
+		if(kMode == UNDIST) {
+			ow = _extWidth;
+			oh = _extHeight;
+		} else {
+			ow = _plateWidth;
+			oh = _plateHeight;
+		}
 		
 		// Crucial. Define the format in the info_ - this is what Nuke uses
 		// to know how big OUR output will be. We also pretty much NEED to store it
 		// in an instance var because we cannot keep it on the stack (segfault!)
-		_outFormat = Format(_outWidth, _outHeight, input0().format().pixel_aspect());
-		info_.format(_outFormat);
-
+		_outFormat = Format(ow, oh, input0().format().pixel_aspect());
+		info_.format( _outFormat );
+		
 		// And also enforce the bounding box AS WELL
-		Box obox = Box(0,0, _outWidth, _outHeight);
-		info_.merge(obox);
+		Box obox = Box(0,0, ow, oh);
+		if(kMode == UNDIST) {
+			info_.merge(obox);
+		} else {
+			info_.intersect(obox);
+		}
 		
 		if(kDbg) printf("SyLens: ext output will be %dx%d\n", _outFormat.width(), _outFormat.height());
 	}
 	
-	// request the entire image to have access to every pixel. We pad in the output during engine() call
+	// Request the same source area upstream. We pad in the output during engine() call
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
 	{
 		if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 		ChannelSet c1(channels); in_channels(0,c1);
 		// Request the same part of the input plus padding
-		input0().request(x - _paddingW, y - _paddingW, r + _paddingW, t + _paddingH, channels, count);
+		input0().request(x - (_paddingW * 2), y - (_paddingW * 2), r + (_paddingW * 2), t + (_paddingH * 2), channels, count);
 	}
 
 	// nuke
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
-	const char* Class() const { return CLASS; }
-	const char* node_help() const { return HELP; }
-	static const Iop::Description description;
-	
 	void knobs( Knob_Callback f) {
 		
 		Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
@@ -238,13 +244,11 @@ private:
 	void distortVectorIntoSource(Vector2& vec);
 	void undistortVectorIntoDest(Vector2& vec);
 	int uncrop(int dimension);
+	void Remove(Vector2& vec);
 };
 
-static Iop* SyLensCreate( Node *node ) {
-	SyLens* s = new SyLens(node);
-	DD::Image::NukeWrapper* w = new DD::Image::NukeWrapper(s);
-	w->noMask()->noMix(); // This fails on Nuke 6.0v3
-	return w;
+static Iop* SyLensCreate( Node* node ) {
+	return ( new NukeWrapper ( new SyLens( node )))->noMix()->noMask();
 }
 
 //const Iop::Description SyLens::description ( CLASS, "Transform/SyLens", SyLensCreate );
@@ -301,22 +305,53 @@ void SyLens::distortVectorIntoSource(Vector2& absXY) {
 	Vector2 uvXY(0, 0);
 	// The gritty bits - get coordinates of the distorted pixel in the coordinates of the
 	// EXTENDED film back
-	vecToUV(absXY, uvXY, _outWidth, _outHeight);
+	vecToUV(absXY, uvXY, _extWidth, _extHeight);
 	distortVector(uvXY, kCoeff, kCubeCoeff);
-	vecFromUV(absXY, uvXY, _outWidth, _outHeight);
-	absXY.x += - (double)_paddingW;
-	absXY.y += - (double)_paddingH;
+	vecFromUV(absXY, uvXY, _extWidth, _extHeight);
+	absXY.x -= (double)_paddingW;
+	absXY.y -=  (double)_paddingH;
 }
 
-// This is WRONG!
+// This is still a little wrongish (we use the same approximation as the one
+// in distort.szl and we do all ops in reverse
 void SyLens::undistortVectorIntoDest(Vector2& absXY) {
+	absXY.x += (double)_paddingW;
+	absXY.y += (double)_paddingH;
 	Vector2 uvXY(0, 0);
-	vecToUV(absXY, uvXY, _outWidth, _outHeight);
-	distortVector(uvXY, kCoeff * -1, kCubeCoeff * -1);
-	vecFromUV(absXY, uvXY, _outWidth, _outHeight);
-	absXY.x = absXY.x + (double)_paddingW; // + 2.0f;
-	absXY.y = absXY.y + (double)_paddingH; // + 2.0f;
+	vecToUV(absXY, uvXY, _extWidth, _extHeight);
+	Remove(uvXY);
+	vecFromUV(absXY, uvXY, _extWidth, _extHeight);
 }
+
+// Ported over from distort.szl
+void SyLens::Remove(Vector2& pt) {
+	double r, rp, f, rlim, rplim, raw, err, slope;
+	
+	rp = sqrt(_aspect * _aspect * pt.x * pt.x + pt.y * pt.y);
+	if (kCoeff < 0.0f) {
+		rlim = sqrt((-1.0/3.0) / kCoeff);
+		rplim = rlim * (1 + kCoeff*rlim*rlim);
+		if (rp >= 0.99 * rplim) {
+			f = rlim / rp;
+			pt.x = pt.x * f;
+			pt.y = pt.y * f;
+			return;
+		}
+    }
+	r = rp;
+    for (int i = 0; i < 20; i++) {
+		raw = kCoeff * r * r;
+		slope = 1 + 3*raw;
+		err = rp - r * (1 + raw);
+		if (fabs(err) < 1.0e-10) break;
+		r += err / slope;
+	}
+	f = r / rp;
+	
+	pt.x = pt.x * f;
+	pt.y = pt.y * f;
+}
+
 
 // Uncrop an integer dimension with a Syntheyes crop factor
 int SyLens::uncrop(int dimension) {
@@ -346,7 +381,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 			distortVectorIntoSource(sampleFromXY);
 		} else {
 			// There is an offset by one scanline that appears here, we neutralise that
-			sampleFromXY = Vector2(x, y + 1);
+			sampleFromXY = Vector2(x, y);
 			undistortVectorIntoDest(sampleFromXY);
 		}
 		
