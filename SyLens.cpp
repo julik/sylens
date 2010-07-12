@@ -206,7 +206,7 @@ public:
 		}
 		
 		if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
-		if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x, obox.y, obox.r, obox.t);
+		if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
 	}
 	
 	// Request the same source area upstream. We pad in the output during engine() call
@@ -214,7 +214,8 @@ public:
 	{
 		if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 		ChannelSet c1(channels); in_channels(0,c1);
-		// Request the same part of the input plus padding
+		// Request the same part of the input plus padding times two. This is an opportunistic
+		// cargo cult approximation but it usually allows us to grab just enough pixels to survive
 		input0().request(x - (_paddingW * 2), y - (_paddingW * 2), r + (_paddingW * 2), t + (_paddingH * 2), channels, count);
 	}
 
