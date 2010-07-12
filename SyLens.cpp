@@ -36,7 +36,6 @@ extern "C" {
 
 // Nuke-Data
 #include "DDImage/Iop.h"
-#include "DDImage/NukeWrapper.h"
 #include "DDImage/Row.h"
 #include "DDImage/Tile.h"
 #include "DDImage/Pixel.h"
@@ -45,6 +44,7 @@ extern "C" {
 #include "DDImage/Knob.h"
 #include "DDImage/Vector2.h"
 #include "DDImage/DDMath.h"
+#include "DDImage/Hash.h"
 
 using namespace DD::Image;
 
@@ -60,32 +60,29 @@ class SyLens : public Iop
 	
 	const char* Class() const { return CLASS; }
 	const char* node_help() const { return HELP; }
+	
+	
 	static const Iop::Description description;
 	
 	Filter filter;
 	
 	enum { UNDIST, REDIST };
 	
-	// Input with and height for input0
-	unsigned int _plateWidth;
-	unsigned int _plateHeight;
+	// The original size of the plate that we distort
+	unsigned int _plateWidth, _plateHeight;
 
 	// The size of the filmback we are actually sampling from
-	unsigned int _extWidth;
-	unsigned int _extHeight;
+	unsigned int _extWidth, _extHeight;
 	
 	// When we extend the image and get undistorted coordinates, we need to add these
 	// values to the pixel offset
-	unsigned int _paddingW;
-	unsigned int _paddingH;
+	int _paddingW, _paddingH;
 	
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
 	
-	// Stuff drive bu knobbz
-	double kCoeff;
-	double kCubeCoeff;
-	double kUnCrop;
+	// Stuff driven by knobbz
+	double kCoeff, kCubeCoeff, kUnCrop;
 	bool kDbg;
 	int kMode;
 	
@@ -102,11 +99,12 @@ public:
 		kCoeff = -0.01826;
 		kCubeCoeff = 0.0f;
 		kUnCrop = 0.038f;
+		kDbg = false;
+		
 		_aspect = 1.33f;
 		_lastScanlineSize = 0;
 		_paddingW = 0;
 		_paddingH = 0;
-		kDbg = false;
 	}
 	
 	~SyLens () { }
@@ -136,6 +134,7 @@ public:
 		if(kDbg) printf("SyLens: true plate window with uncrop will be %dx%d\n", _extWidth, _extHeight);
 	}
 	
+	
 	// Here we need to expand the image
 	void _validate(bool for_real)
 	  {
@@ -160,6 +159,15 @@ public:
 			oh = _plateHeight;
 		}
 		
+		// Nudge outputs to power of 2, up for undistort and down for redistort
+		if (kMode == UNDIST) {
+			if(ow % 2 != 0) ow +=1;
+			if(oh % 2 != 0) oh +=1;
+		} else {
+			if(ow % 2 != 0) ow -=1;
+			if(oh % 2 != 0) oh -=1;
+		}
+		
 		// Crucial. Define the format in the info_ - this is what Nuke uses
 		// to know how big OUR output will be. We also pretty much NEED to store it
 		// in an instance var because we cannot keep it on the stack (segfault!)
@@ -168,9 +176,12 @@ public:
 		
 		// And also enforce the bounding box AS WELL
 		Box obox = Box(0,0, ow, oh);
+		
+		// When we expand we need to do a merge which overrides the output bbox and tells Nuke
+		// to expand the render area 
 		if(kMode == UNDIST) {
 			info_.merge(obox);
-		} else {
+		} else { // but when we collapse the render area an dour output format already is small doing an intersect works
 			info_.intersect(obox);
 		}
 		
@@ -233,6 +244,14 @@ public:
 		}
 	}
 	
+	// Hashing for caches. We append our version to the cache hash, so that when you update
+	// the plugin all the caches will(should?) be flushed automatically
+	void append(Hash& hash) {
+		int intv;
+		memcpy(&intv, VERSION, strlen(VERSION));
+		hash.append(intv);
+	}
+	
 	
 private:
 	
@@ -248,11 +267,12 @@ private:
 };
 
 static Iop* SyLensCreate( Node* node ) {
-	return ( new NukeWrapper ( new SyLens( node )))->noMix()->noMask();
+	return new SyLens(node);
 }
 
-//const Iop::Description SyLens::description ( CLASS, "Transform/SyLens", SyLensCreate );
-const Iop::Description SyLens::description(CLASS, 0, SyLensCreate);
+// The second item is ignored because all a compsitor dreams of is writing fucking init.py
+// every time he installs a plugin
+const Iop::Description SyLens::description(CLASS, "Transform/SyLens", SyLensCreate);
 
 // Syntheyes uses UV coordinates that start at the optical center of the image
 double SyLens::toUv(double absValue, int absSide)
@@ -309,11 +329,10 @@ void SyLens::distortVectorIntoSource(Vector2& absXY) {
 	distortVector(uvXY, kCoeff, kCubeCoeff);
 	vecFromUV(absXY, uvXY, _extWidth, _extHeight);
 	absXY.x -= (double)_paddingW;
-	absXY.y -=  (double)_paddingH;
+	absXY.y -= (double)_paddingH;
 }
 
-// This is still a little wrongish (we use the same approximation as the one
-// in distort.szl and we do all ops in reverse
+// This is still a little wrongish but less wrong than before
 void SyLens::undistortVectorIntoDest(Vector2& absXY) {
 	absXY.x += (double)_paddingW;
 	absXY.y += (double)_paddingH;
@@ -323,7 +342,7 @@ void SyLens::undistortVectorIntoDest(Vector2& absXY) {
 	vecFromUV(absXY, uvXY, _extWidth, _extHeight);
 }
 
-// Ported over from distort.szl
+// Ported over from distort.szl, does not honor cubic distortion
 void SyLens::Remove(Vector2& pt) {
 	double r, rp, f, rlim, rplim, raw, err, slope;
 	
@@ -337,14 +356,15 @@ void SyLens::Remove(Vector2& pt) {
 			pt.y = pt.y * f;
 			return;
 		}
-    }
+	}
+	
 	r = rp;
-    for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 20; i++) {
 		raw = kCoeff * r * r;
 		slope = 1 + 3*raw;
 		err = rp - r * (1 + raw);
 		if (fabs(err) < 1.0e-10) break;
-		r += err / slope;
+		r += (err / slope);
 	}
 	f = r / rp;
 	
