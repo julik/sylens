@@ -172,7 +172,8 @@ public:
 	{
 		if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 		ChannelSet c1(channels); in_channels(0,c1);
-		input0().request( channels, count);
+		// Request the same part of the input plus padding
+		input0().request(x - _paddingW, y - _paddingW, r + _paddingW, t + _paddingH, channels, count);
 	}
 
 	// nuke
@@ -242,8 +243,7 @@ private:
 static Iop* SyLensCreate( Node *node ) {
 	SyLens* s = new SyLens(node);
 	DD::Image::NukeWrapper* w = new DD::Image::NukeWrapper(s);
-	w->noMask(); // This fails on Nuke 6.0v3
-	w->noMix();
+	w->noMask()->noMix(); // This fails on Nuke 6.0v3
 	return w;
 }
 
@@ -337,26 +337,25 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	Pixel pixel(channels);
 	const float sampleOff = 0.5f;
 	
+	Vector2 sampleFromXY(0.0f, 0.0f);
 	for (; x < r; x++) {
 		
-		Vector2 absXY(x, y);
 		// If chromatics are enabled, we apply per channel adjustment to the fringe values
 		if( kMode == UNDIST) {
-			distortVectorIntoSource(absXY);
+			sampleFromXY = Vector2(x, y);
+			distortVectorIntoSource(sampleFromXY);
 		} else {
 			// There is an offset by one scanline that appears here, we neutralise that
-			absXY = Vector2(x, y + 1);
-			undistortVectorIntoDest(absXY);
+			sampleFromXY = Vector2(x, y + 1);
+			undistortVectorIntoDest(sampleFromXY);
 		}
 		
 		// Sample from the input node at the coordinates
 		// half a pixel has to be added here because sample() takes the first two
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
-		// We also sample with a padding offset to compensate for the fact that our pic is left-bottom registered and we DO NOT
-		// have pading in the requested input
 		input0().sample(
-			absXY.x + sampleOff , absXY.y + sampleOff, 
+			sampleFromXY.x + sampleOff , sampleFromXY.y + sampleOff, 
 			1.0f, 
 			1.0f,
 			&filter,
