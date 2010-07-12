@@ -364,7 +364,7 @@ void SyLens::undistortVectorIntoDest(Vector2& absXY) {
 	vecFromUV(absXY, uvXY, _extWidth, _extHeight);
 }
 
-// Ported over from distort.szl, does not honor cubic distortion
+// THIS IS SEMI-WRONG! Ported over from distort.szl, does not honor cubic distortion
 void SyLens::Remove(Vector2& pt) {
 	double r, rp, f, rlim, rplim, raw, err, slope;
 	
