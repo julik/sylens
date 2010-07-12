@@ -135,7 +135,8 @@ public:
 	}
 	
 	
-	// Here we need to expand the image
+	// Here we need to expand the image and the bounding box. This is the most important method in a plug like this so
+	// pay attention
 	void _validate(bool for_real)
 	  {
 		filter.initialize();
@@ -183,6 +184,10 @@ public:
 		Vector2 xy(i.x(), i.y());
 		Vector2 tr(i.r(), i.t());
 		
+		// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
+		// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
+		// since this is where our bbox corners are going to be in the coordinate plane of the output
+		// format
 		if(kMode == UNDIST) {
 			undistortVectorIntoDest(xy);
 			undistortVectorIntoDest(tr);
@@ -200,7 +205,8 @@ public:
 			info_.intersect(obox);
 		}
 		
-		if(kDbg) printf("SyLens: ext output will be %dx%d\n", _outFormat.width(), _outFormat.height());
+		if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
+		if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x, obox.y, obox.r, obox.t);
 	}
 	
 	// Request the same source area upstream. We pad in the output during engine() call
