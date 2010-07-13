@@ -51,7 +51,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 " to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.0.3";
+static const char* const VERSION = "0.0.4";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -181,6 +181,9 @@ public:
 		// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 		// Grab the bbox from the input first
 		Info i = input0().info();
+		
+		if(kDbg) printf("SyLens: input info was %dx %dy %dr %dt\n", i.x(), i.y(), i.r(), i.t());
+		
 		Vector2 xy(i.x(), i.y());
 		Vector2 tr(i.r(), i.t());
 		
@@ -195,18 +198,15 @@ public:
 			distortVectorIntoSource(xy);
 			distortVectorIntoSource(tr);
 		}
-		Box obox = Box(xy.x, xy.y, tr.x, tr.y);
+		int wPlus = 0; //(kMode == REDIST) ? _paddingW : -_paddingW;
+		int hPlus = 0; //(kMode == REDIST) ? _paddingH : -_paddingH;
 		
-		// When we expand we need to do a merge which overrides the output bbox and tells Nuke
-		// to expand the render area 
-		if(kMode == UNDIST) {
-			info_.merge(obox);
-		} else { // but when we collapse the render area an dour output format already is small doing an intersect works
-			info_.intersect(obox);
-		}
-		
+		Box obox = Box(xy.x + wPlus, xy.y + hPlus, tr.x, tr.y);
+
 		if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
 		if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
+		
+		info_.set(obox);
 	}
 	
 	// Request the same source area upstream. We pad in the output during engine() call
@@ -221,6 +221,11 @@ public:
 
 	// nuke
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
+	
+	// knobs. There is really only one thing to pay attention to - be consistent and call your knobs
+	// "in_snake_case_as_short_as_possible", labels are also lowercase normally
+	
+	
 	void knobs( Knob_Callback f) {
 		
 		Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
@@ -274,7 +279,6 @@ public:
 		hash.append(intv);
 	}
 	
-	
 private:
 	
 	double toUv(double, int);
@@ -284,7 +288,6 @@ private:
 	void distortVector(Vector2& uvVec, double k, double kcube);
 	void distortVectorIntoSource(Vector2& vec);
 	void undistortVectorIntoDest(Vector2& vec);
-	int uncrop(int dimension);
 	void Remove(Vector2& vec);
 };
 
@@ -395,11 +398,6 @@ void SyLens::Remove(Vector2& pt) {
 }
 
 
-// Uncrop an integer dimension with a Syntheyes crop factor
-int SyLens::uncrop(int dimension) {
-	return ceil(dimension + (dimension * kUnCrop * 2));
-}
-
 // The image processor that works by scanline. Y is the scanline offset, x is the pix,
 // r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
 void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
@@ -417,13 +415,10 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	Vector2 sampleFromXY(0.0f, 0.0f);
 	for (; x < r; x++) {
 		
-		// If chromatics are enabled, we apply per channel adjustment to the fringe values
+		sampleFromXY = Vector2(x, y);
 		if( kMode == UNDIST) {
-			sampleFromXY = Vector2(x, y);
 			distortVectorIntoSource(sampleFromXY);
 		} else {
-			// There is an offset by one scanline that appears here, we neutralise that
-			sampleFromXY = Vector2(x, y);
 			undistortVectorIntoDest(sampleFromXY);
 		}
 		
