@@ -51,7 +51,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 " to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.0.4";
+static const char* const VERSION = "0.0.5";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -83,7 +83,7 @@ class SyLens : public Iop
 	
 	// Stuff driven by knobbz
 	double kCoeff, kCubeCoeff, kUnCrop;
-	bool kDbg;
+	bool kDbg, kTrimToFormat;
 	int kMode;
 	
 	int _lastScanlineSize;
@@ -95,11 +95,18 @@ class SyLens : public Iop
 public:
 	SyLens( Node *node ) : Iop ( node )
 	{
+		// IMPORTANT! these are the knob defaults. If someone has a plugin in
+		// his script and did not change these values this is the values they will expect.
+		// Therefore THESE values have to be here for the life of the plugin, through versions to come.
+		// These are sane defaults - they showcase distortion and uncrop but do not use cubics.
+		// cast in stone BEGIN {{
 		kMode = UNDIST;
 		kCoeff = -0.01826;
 		kCubeCoeff = 0.0f;
 		kUnCrop = 0.038f;
 		kDbg = false;
+		kTrimToFormat = false;
+		// }} END
 		
 		_aspect = 1.33f;
 		_lastScanlineSize = 0;
@@ -198,11 +205,12 @@ public:
 			distortVectorIntoSource(xy);
 			distortVectorIntoSource(tr);
 		}
-		int wPlus = 0; //(kMode == REDIST) ? _paddingW : -_paddingW;
-		int hPlus = 0; //(kMode == REDIST) ? _paddingH : -_paddingH;
 		
-		Box obox = Box(xy.x + wPlus, xy.y + hPlus, tr.x, tr.y);
-
+		Box obox(xy.x, xy.y, tr.x, tr.y);
+		if(kTrimToFormat) {
+			obox.intersect(_outFormat);
+		}
+		
 		if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
 		if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
 		
@@ -224,35 +232,41 @@ public:
 	
 	// knobs. There is really only one thing to pay attention to - be consistent and call your knobs
 	// "in_snake_case_as_short_as_possible", labels are also lowercase normally
-	
-	
 	void knobs( Knob_Callback f) {
+		// For info on knob flags see Knob.h
+		const int KNOB_ON_SEPARATE_LINE = 0x1000;
 		
 		Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
 		_modeSel->label("mode");
 		_modeSel->tooltip("Pick your poison");
 		
 		Knob* _kKnob = Float_knob( f, &kCoeff, "k" );
-		_kKnob->label("K coeff");
+		_kKnob->label("k");
 		_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
 
 		Knob* _kCubeKnob = Float_knob( f, &kCubeCoeff, "kcube" );
-		_kCubeKnob->label("Cubic coeff");
+		_kCubeKnob->label("cubic k");
 		_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
 		
 		Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "uncrop" );
-		_kUncropKnob->label("Uncrop expansion");
+		_kUncropKnob->label("uncrop expansion");
 		_kUncropKnob->tooltip("Set this to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
-		
-		Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
-		kDbgKnob->label("Output debug info");
-		kDbgKnob->tooltip("When checked, SyLens will output various debug info to STDOUT");
 		
 		// Add the filter selection menu that comes from the filter obj itself
 		filter.knobs( f );
 		
+		Knob* kTrimKnob = Bool_knob( f, &kTrimToFormat, "trim");
+		kTrimKnob->label("trim bbox");
+		kTrimKnob->tooltip("When checked, SyLens will reduce the bouding box to be within the destination format");
+		kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+		
+		Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
+		kDbgKnob->label("debug info");
+		kDbgKnob->tooltip("When checked, SyLens will output various debug info to STDOUT");
+		
 		Divider(f, 0);
 		Text_knob(f, (std::string("SyLens v.") + std::string(VERSION)).c_str());
+		
    	}
 	
 	// called whenever a knob is changed
