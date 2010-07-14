@@ -243,14 +243,14 @@ public:
 		Knob* _kKnob = Float_knob( f, &kCoeff, "k" );
 		_kKnob->label("k");
 		_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
-
+		
 		Knob* _kCubeKnob = Float_knob( f, &kCubeCoeff, "kcube" );
 		_kCubeKnob->label("cubic k");
 		_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
 		
 		Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "uncrop" );
 		_kUncropKnob->label("uncrop expansion");
-		_kUncropKnob->tooltip("Set this to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
+		_kUncropKnob->tooltip("Set to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
 		
 		// Add the filter selection menu that comes from the filter obj itself
 		filter.knobs( f );
@@ -266,8 +266,7 @@ public:
 		
 		Divider(f, 0);
 		Text_knob(f, (std::string("SyLens v.") + std::string(VERSION)).c_str());
-		
-   	}
+	}
 	
 	// called whenever a knob is changed
 	int knob_changed(Knob* k) {
