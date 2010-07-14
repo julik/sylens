@@ -207,9 +207,7 @@ public:
 		}
 		
 		Box obox(xy.x, xy.y, tr.x, tr.y);
-		if(kTrimToFormat) {
-			obox.intersect(_outFormat);
-		}
+		if(kTrimToFormat) obox.intersect(_outFormat);
 		
 		if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
 		if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
@@ -304,6 +302,8 @@ private:
 	void Remove(Vector2& vec);
 };
 
+// Since we do not need channel selectors or masks, we can use our raw Iop
+// directly instead of putting it into a NukeWrapper
 static Iop* SyLensCreate( Node* node ) {
 	return new SyLens(node);
 }
@@ -312,7 +312,9 @@ static Iop* SyLensCreate( Node* node ) {
 // every time he installs a plugin
 const Iop::Description SyLens::description(CLASS, "Transform/SyLens", SyLensCreate);
 
-// Syntheyes uses UV coordinates that start at the optical center of the image
+// Syntheyes uses UV coordinates that start at the optical center of the image,
+// and go -1,1. Nuke offers a UV option on Format that goes from 0 to 1, but it's not
+// exactly what we want
 double SyLens::toUv(double absValue, int absSide)
 {
 	double x = (absValue / (double)absSide) - 0.5;
