@@ -33,6 +33,7 @@ extern "C" {
 #include <cstring>
 #include <iomanip>
 #include <cstdlib> 
+#include <algorithm>
 
 // Nuke-Data
 #include "DDImage/Iop.h"
@@ -193,20 +194,43 @@ public:
 		
 		Vector2 xy(i.x(), i.y());
 		Vector2 tr(i.r(), i.t());
+
+		// We also need the OTHER bounds of the bbox because we might be cutting into the image area if we
+		// only use the corners
+		double midX = (double)i.x() + ((i.r() - i.x()) / 2.0f);
+		double midY = (double)i.y() + ((i.t() - i.y()) / 2.0f);
+		
+		Vector2 top(midX, i.t());
+		Vector2 bot(midX, i.y());
+		Vector2 left(i.x(), midY);
+		Vector2 right(i.r(), midY);
 		
 		// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
 		// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
 		// since this is where our bbox corners are going to be in the coordinate plane of the output
-		// format
+		// format. We also need to be careful for the case when the bottom line of the bbox
+		// comes into the picture area, so we compute 8 points instead of the standard 4
+		// and take the min/max
+		Box obox;
 		if(kMode == UNDIST) {
 			undistortVectorIntoDest(xy);
 			undistortVectorIntoDest(tr);
+			undistortVectorIntoDest(left);
+			undistortVectorIntoDest(right);
+			undistortVectorIntoDest(top);
+			undistortVectorIntoDest(bot);
+			obox = Box(std::min(xy.x, left.x), std::min(xy.y, bot.y), std::max(tr.x, right.x), std::max(tr.y, top.y));
 		} else {
+			// When we redistort we take the maximum values to which we crop
 			distortVectorIntoSource(xy);
 			distortVectorIntoSource(tr);
+			distortVectorIntoSource(left);
+			distortVectorIntoSource(right);
+			distortVectorIntoSource(top);
+			distortVectorIntoSource(bot);
+			obox = Box(std::max(xy.x, left.x), std::max(xy.y, bot.y), std::min(tr.x, right.x), std::min(tr.y, top.y));
 		}
 		
-		Box obox(xy.x, xy.y, tr.x, tr.y);
 		if(kTrimToFormat) obox.intersect(_outFormat);
 		
 		if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
@@ -220,9 +244,10 @@ public:
 	{
 		if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 		ChannelSet c1(channels); in_channels(0,c1);
+		input0().request(channels, count);
 		// Request the same part of the input plus padding times two. This is an opportunistic
 		// cargo cult approximation but it usually allows us to grab just enough pixels to survive
-		input0().request(x - (_paddingW * 2), y - (_paddingW * 2), r + (_paddingW * 2), t + (_paddingH * 2), channels, count);
+//		input0().request(x - (_paddingW * 2), y - (_paddingW * 2), r + (_paddingW * 2), t + (_paddingH * 2), channels, count);
 	}
 
 	// nuke
