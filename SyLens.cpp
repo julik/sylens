@@ -27,18 +27,13 @@ extern "C" {
 
 #include <string>
 #include <vector>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <cstring>
-#include <iomanip>
 #include <cstdlib> 
 #include <algorithm>
 
 // Nuke-Data
 #include "DDImage/Iop.h"
 #include "DDImage/Row.h"
-#include "DDImage/Tile.h"
 #include "DDImage/Pixel.h"
 #include "DDImage/Filter.h"
 #include "DDImage/Knobs.h"
@@ -169,14 +164,9 @@ public:
 			oh = _plateHeight;
 		}
 		
-		// Nudge outputs to power of 2, up for undistort and down for redistort
-		if (kMode == UNDIST) {
-			if(ow % 2 != 0) ow +=1;
-			if(oh % 2 != 0) oh +=1;
-		} else {
-			if(ow % 2 != 0) ow -=1;
-			if(oh % 2 != 0) oh -=1;
-		}
+		// Nudge outputs to power of 2, upwards
+		if(ow % 2 != 0) ow +=1;
+		if(oh % 2 != 0) oh +=1;
 		
 		// Crucial. Define the format in the info_ - this is what Nuke uses
 		// to know how big OUR output will be. We also pretty much NEED to store it
@@ -188,48 +178,72 @@ public:
 		// corner we want to actually translate the bbox of the elephant to our distorted pipe downstream. So we need to
 		// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 		// Grab the bbox from the input first
-		Info i = input0().info();
+		Info inf = input0().info();
+		Format f = input0().format();
 		
-		if(kDbg) printf("SyLens: input info was %dx %dy %dr %dt\n", i.x(), i.y(), i.r(), i.t());
-		
-		Vector2 xy(i.x(), i.y());
-		Vector2 tr(i.r(), i.t());
+		// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
+		// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
+		// we just take the corners we might be chopping some image away. So to get a reliable bbox we need to check
+		// our padding at 6 points - the 4 extremes and where the bbox crosses the middle of the coordinates
+		int xMid = ow/2;
+		int yMid = oh/2;
 
-		// We also need the OTHER bounds of the bbox because we might be cutting into the image area if we
-		// only use the corners
-		double midX = (double)i.x() + ((i.r() - i.x()) / 2.0f);
-		double midY = (double)i.y() + ((i.t() - i.y()) / 2.0f);
+		std::vector<Vector2*> pointsOnBbox;
 		
-		Vector2 top(midX, i.t());
-		Vector2 bot(midX, i.y());
-		Vector2 left(i.x(), midY);
-		Vector2 right(i.r(), midY);
+		// Add the standard two points - LR and TR
+		pointsOnBbox.push_back(new Vector2(inf.x(), inf.y()));
+		pointsOnBbox.push_back(new Vector2(inf.r(), inf.t()));
+		
+		// Add the TL and LR as well
+		pointsOnBbox.push_back(new Vector2(inf.x(), inf.t()));
+		pointsOnBbox.push_back(new Vector2(inf.r(), inf.y()));
+		
+		// If our box intersects the midplane on X add the points where the bbox crosses centerline
+		if((inf.x() < xMid) && (inf.r() > xMid)) {
+			// Find the two intersections and add them
+			pointsOnBbox.push_back( new Vector2(xMid, inf.y()) );
+			pointsOnBbox.push_back( new Vector2(xMid, inf.t()) );
+		}
+		
+		// If our box intersects the midplane on Y add the points where the bbox crosses centerline
+		if((inf.y() < yMid) && (inf.t() > yMid)) {
+			pointsOnBbox.push_back( new Vector2(inf.x(), yMid) );
+			pointsOnBbox.push_back( new Vector2(inf.r(), yMid) );
+		}
 		
 		// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
 		// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
 		// since this is where our bbox corners are going to be in the coordinate plane of the output
-		// format. We also need to be careful for the case when the bottom line of the bbox
-		// comes into the picture area, so we compute 8 points instead of the standard 4
-		// and take the min/max
-		Box obox;
-		if(kMode == UNDIST) {
-			undistortVectorIntoDest(xy);
-			undistortVectorIntoDest(tr);
-			undistortVectorIntoDest(left);
-			undistortVectorIntoDest(right);
-			undistortVectorIntoDest(top);
-			undistortVectorIntoDest(bot);
-			obox = Box(std::min(xy.x, left.x), std::min(xy.y, bot.y), std::max(tr.x, right.x), std::max(tr.y, top.y));
-		} else {
-			// When we redistort we take the maximum values to which we crop
-			distortVectorIntoSource(xy);
-			distortVectorIntoSource(tr);
-			distortVectorIntoSource(left);
-			distortVectorIntoSource(right);
-			distortVectorIntoSource(top);
-			distortVectorIntoSource(bot);
-			obox = Box(std::max(xy.x, left.x), std::max(xy.y, bot.y), std::min(tr.x, right.x), std::min(tr.y, top.y));
+		// format.
+		std::vector<int> xValues;
+		std::vector<int> yValues;
+		std::vector<int>::iterator detector;
+		
+		for(int i = 0; i < pointsOnBbox.size(); i++) {
+			if(kMode == UNDIST) {
+				undistortVectorIntoDest(*pointsOnBbox[i]);
+			} else {
+				distortVectorIntoSource(*pointsOnBbox[i]);
+			}
+			xValues.push_back(pointsOnBbox[i]->x);
+			yValues.push_back(pointsOnBbox[i]->y);
 		}
+		
+		int min_x, min_y, max_x, max_y;
+		
+		detector = std::min_element(xValues.begin(), xValues.end());
+		min_x = *detector;
+		
+		detector = std::max_element(xValues.begin(), xValues.end());
+		max_x = *detector;
+		
+		detector = std::min_element(yValues.begin(), yValues.end());
+		min_y = *detector;
+		
+		detector = std::max_element(yValues.begin(), yValues.end());
+		max_y = *detector;
+		
+		Box obox(min_x, min_y, max_x, max_y);
 		
 		if(kTrimToFormat) obox.intersect(_outFormat);
 		
@@ -244,10 +258,9 @@ public:
 	{
 		if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 		ChannelSet c1(channels); in_channels(0,c1);
-		input0().request(channels, count);
 		// Request the same part of the input plus padding times two. This is an opportunistic
-		// cargo cult approximation but it usually allows us to grab just enough pixels to survive
-//		input0().request(x - (_paddingW * 2), y - (_paddingW * 2), r + (_paddingW * 2), t + (_paddingH * 2), channels, count);
+		// cargo cult approximation but it usually allows us to grab just enough pixels to survive.
+		input0().request(x - (_paddingW * 2), y - (_paddingW * 2), r + (_paddingW * 2), t + (_paddingH * 2), channels, count);
 	}
 
 	// nuke
