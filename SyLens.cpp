@@ -153,7 +153,8 @@ public:
 		
 		if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
 		
-		// Time to define how big our output will be
+		// Time to define how big our output will be in terms of format. Format will always be the whole plate.
+		// If it's chopped then we use the bbox to speed things up.
 		int ow, oh;
 		
 		if(kMode == UNDIST) {
