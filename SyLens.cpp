@@ -228,6 +228,7 @@ public:
 			xValues.push_back(pointsOnBbox[i]->x);
 			yValues.push_back(pointsOnBbox[i]->y);
 		}
+		pointsOnBbox.clear();
 		
 		int min_x, min_y, max_x, max_y;
 		
