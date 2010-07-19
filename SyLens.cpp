@@ -229,15 +229,15 @@ public:
 		}
 		pointsOnBbox.clear();
 		
-		int min_x, min_y, max_x, max_y;
+		int minX, minY, maxX, maxY;
 		
 		// Formally speaking, we have to allocate an std::iterator first. But we wont.
-		min_x = *std::min_element(xValues.begin(), xValues.end());
-		max_x = *std::max_element(xValues.begin(), xValues.end());
-		min_y = *std::min_element(yValues.begin(), yValues.end());
-		max_y = *std::max_element(yValues.begin(), yValues.end());
+		minX = *std::min_element(xValues.begin(), xValues.end());
+		maxX = *std::max_element(xValues.begin(), xValues.end());
+		minY = *std::min_element(yValues.begin(), yValues.end());
+		maxY = *std::max_element(yValues.begin(), yValues.end());
 		
-		Box obox(min_x, min_y, max_x, max_y);
+		Box obox(minX, minY, maxX, maxY);
 		
 		if(kTrimToFormat) obox.intersect(_outFormat);
 		
