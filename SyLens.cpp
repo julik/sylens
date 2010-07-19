@@ -217,7 +217,6 @@ public:
 		// format.
 		std::vector<int> xValues;
 		std::vector<int> yValues;
-		std::vector<int>::iterator detector;
 		
 		for(int i = 0; i < pointsOnBbox.size(); i++) {
 			if(kMode == UNDIST) {
@@ -232,17 +231,11 @@ public:
 		
 		int min_x, min_y, max_x, max_y;
 		
-		detector = std::min_element(xValues.begin(), xValues.end());
-		min_x = *detector;
-		
-		detector = std::max_element(xValues.begin(), xValues.end());
-		max_x = *detector;
-		
-		detector = std::min_element(yValues.begin(), yValues.end());
-		min_y = *detector;
-		
-		detector = std::max_element(yValues.begin(), yValues.end());
-		max_y = *detector;
+		// Formally speaking, we have to allocate an std::iterator first. But we wont.
+		min_x = *std::min_element(xValues.begin(), xValues.end());
+		max_x = *std::max_element(xValues.begin(), xValues.end());
+		min_y = *std::min_element(yValues.begin(), yValues.end());
+		max_y = *std::max_element(yValues.begin(), yValues.end());
 		
 		Box obox(min_x, min_y, max_x, max_y);
 		
