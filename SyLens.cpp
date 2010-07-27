@@ -56,8 +56,6 @@ class SyLens : public Iop
 	
 	const char* Class() const { return CLASS; }
 	const char* node_help() const { return HELP; }
-	
-	
 	static const Iop::Description description;
 	
 	Filter filter;
@@ -112,208 +110,12 @@ public:
 	
 	~SyLens () { }
 	
-	void _computeAspects() {
-		// Compute the aspect from the input format
-		Format f = input0().format();
-		
-		double sc = 1.0f + (2.0f * kUnCrop);
-		
-		if(kMode == UNDIST) {
-			_plateWidth = f.width();
-			_plateHeight = f.height();
-			_extWidth = ceil(float(_plateWidth) * sc);
-			_extHeight = ceil(float(_plateHeight) * sc);
-		} else {
-			_plateWidth = floor( float(f.width()) / sc);
-			_plateHeight = floor( float(f.height()) / sc);
-			_extWidth = f.width();
-			_extHeight = f.height();
-		}
-		
-		_paddingW = (_extWidth - _plateWidth) / 2;
-		_paddingH = (_extHeight - _plateHeight) / 2;
-		_aspect = float(_plateWidth) / float(_plateHeight) *  f.pixel_aspect();
-		
-		if(kDbg) printf("SyLens: true plate window with uncrop will be %dx%d\n", _extWidth, _extHeight);
-	}
-	
-	
-	// Here we need to expand the image and the bounding box. This is the most important method in a plug like this so
-	// pay attention
-	void _validate(bool for_real)
-	  {
-		filter.initialize();
-		input0().validate(for_real);
-		copy_info();
-		set_out_channels(Mask_All);
-		
-		info_.black_outside(true);
-		
-		_computeAspects();    
-		
-		if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
-		
-		// Time to define how big our output will be in terms of format. Format will always be the whole plate.
-		// If it's chopped then we use the bbox to speed things up.
-		int ow, oh;
-		
-		if(kMode == UNDIST) {
-			ow = _extWidth;
-			oh = _extHeight;
-		} else {
-			ow = _plateWidth;
-			oh = _plateHeight;
-		}
-		
-		// Nudge outputs to power of 2, upwards
-		if(ow % 2 != 0) ow +=1;
-		if(oh % 2 != 0) oh +=1;
-		
-		// Crucial. Define the format in the info_ - this is what Nuke uses
-		// to know how big OUR output will be. We also pretty much NEED to store it
-		// in an instance var because we cannot keep it on the stack (segfault!)
-		_outFormat = Format(ow, oh, input0().format().pixel_aspect());
-		info_.format( _outFormat );
-		
-		// For the case when we are working with a 8k by 4k plate with a SMALL CG pink elephant rrright in the left
-		// corner we want to actually translate the bbox of the elephant to our distorted pipe downstream. So we need to
-		// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
-		// Grab the bbox from the input first
-		Info inf = input0().info();
-		Format f = input0().format();
-		
-		// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
-		// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
-		// we just take the corners we might be chopping some image away. So to get a reliable bbox we need to check
-		// our padding at 6 points - the 4 extremes and where the bbox crosses the middle of the coordinates
-		int xMid = ow/2;
-		int yMid = oh/2;
-
-		std::vector<Vector2*> pointsOnBbox;
-		
-		// Add the standard two points - LR and TR
-		pointsOnBbox.push_back(new Vector2(inf.x(), inf.y()));
-		pointsOnBbox.push_back(new Vector2(inf.r(), inf.t()));
-		
-		// Add the TL and LR as well
-		pointsOnBbox.push_back(new Vector2(inf.x(), inf.t()));
-		pointsOnBbox.push_back(new Vector2(inf.r(), inf.y()));
-		
-		// If our box intersects the midplane on X add the points where the bbox crosses centerline
-		if((inf.x() < xMid) && (inf.r() > xMid)) {
-			// Find the two intersections and add them
-			pointsOnBbox.push_back( new Vector2(xMid, inf.y()) );
-			pointsOnBbox.push_back( new Vector2(xMid, inf.t()) );
-		}
-		
-		// If our box intersects the midplane on Y add the points where the bbox crosses centerline
-		if((inf.y() < yMid) && (inf.t() > yMid)) {
-			pointsOnBbox.push_back( new Vector2(inf.x(), yMid) );
-			pointsOnBbox.push_back( new Vector2(inf.r(), yMid) );
-		}
-		
-		// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
-		// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
-		// since this is where our bbox corners are going to be in the coordinate plane of the output
-		// format.
-		std::vector<int> xValues;
-		std::vector<int> yValues;
-		
-		for(int i = 0; i < pointsOnBbox.size(); i++) {
-			if(kMode == UNDIST) {
-				undistortVectorIntoDest(*pointsOnBbox[i]);
-			} else {
-				distortVectorIntoSource(*pointsOnBbox[i]);
-			}
-			xValues.push_back(pointsOnBbox[i]->x);
-			yValues.push_back(pointsOnBbox[i]->y);
-		}
-		pointsOnBbox.clear();
-		
-		int minX, minY, maxX, maxY;
-		
-		// Formally speaking, we have to allocate an std::iterator first. But we wont.
-		minX = *std::min_element(xValues.begin(), xValues.end());
-		maxX = *std::max_element(xValues.begin(), xValues.end());
-		minY = *std::min_element(yValues.begin(), yValues.end());
-		maxY = *std::max_element(yValues.begin(), yValues.end());
-		
-		Box obox(minX, minY, maxX, maxY);
-		
-		if(kTrimToFormat) obox.intersect(_outFormat);
-		
-		if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
-		if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
-		
-		info_.set(obox);
-	}
-	
-	// Request the same source area upstream. We pad in the output during engine() call
-	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
-	{
-		if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
-		ChannelSet c1(channels); in_channels(0,c1);
-		// Request the same part of the input plus padding times two. This is an opportunistic
-		// cargo cult approximation but it usually allows us to grab just enough pixels to survive.
-		input0().request(x - (_paddingW * 2), y - (_paddingW * 2), r + (_paddingW * 2), t + (_paddingH * 2), channels, count);
-	}
-
-	// nuke
+	void _computeAspects();
+	void _validate(bool for_real);
+	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
-	
-	// knobs. There is really only one thing to pay attention to - be consistent and call your knobs
-	// "in_snake_case_as_short_as_possible", labels are also lowercase normally
-	void knobs( Knob_Callback f) {
-		// For info on knob flags see Knob.h
-		const int KNOB_ON_SEPARATE_LINE = 0x1000;
-		
-		Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
-		_modeSel->label("mode");
-		_modeSel->tooltip("Pick your poison");
-		
-		Knob* _kKnob = Float_knob( f, &kCoeff, "k" );
-		_kKnob->label("k");
-		_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
-		
-		Knob* _kCubeKnob = Float_knob( f, &kCubeCoeff, "kcube" );
-		_kCubeKnob->label("cubic k");
-		_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
-		
-		Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "uncrop" );
-		_kUncropKnob->label("uncrop expansion");
-		_kUncropKnob->tooltip("Set to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
-		
-		// Add the filter selection menu that comes from the filter obj itself
-		filter.knobs( f );
-		
-		Knob* kTrimKnob = Bool_knob( f, &kTrimToFormat, "trim");
-		kTrimKnob->label("trim bbox");
-		kTrimKnob->tooltip("When checked, SyLens will reduce the bouding box to be within the destination format");
-		kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
-		
-		Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
-		kDbgKnob->label("debug info");
-		kDbgKnob->tooltip("When checked, SyLens will output various debug info to STDOUT");
-		
-		Divider(f, 0);
-		Text_knob(f, (std::string("SyLens v.") + std::string(VERSION)).c_str());
-	}
-	
-	// called whenever a knob is changed
-	int knob_changed(Knob* k) {
-		// Dont dereference unless...
-		if (k == NULL) return 1;
-		
-		// Touching the crop knob changes our output bounds
-		if ((*k).startsWith("uncrop")) {
-			_validate(false);
-		}
-		
-		// Touching the mode changes everything
-		if ((*k).startsWith("mode")) {
-			_validate(false);
-		}
-	}
+	void knobs( Knob_Callback f);
+	int knob_changed(Knob* k);
 	
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will(should?) be flushed automatically
@@ -488,4 +290,206 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 			((float*)out[z])[x] = pixel[z];
 		}
 	}
+}
+
+
+// knobs. There is really only one thing to pay attention to - be consistent and call your knobs
+// "in_snake_case_as_short_as_possible", labels are also lowercase normally
+void SyLens::knobs( Knob_Callback f) {
+	// For info on knob flags see Knob.h
+	const int KNOB_ON_SEPARATE_LINE = 0x1000;
+	
+	Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
+	_modeSel->label("mode");
+	_modeSel->tooltip("Pick your poison");
+	
+	Knob* _kKnob = Float_knob( f, &kCoeff, "k" );
+	_kKnob->label("k");
+	_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
+	
+	Knob* _kCubeKnob = Float_knob( f, &kCubeCoeff, "kcube" );
+	_kCubeKnob->label("cubic k");
+	_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
+	
+	Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "uncrop" );
+	_kUncropKnob->label("uncrop expansion");
+	_kUncropKnob->tooltip("Set to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
+	
+	// Add the filter selection menu that comes from the filter obj itself
+	filter.knobs( f );
+	
+	Knob* kTrimKnob = Bool_knob( f, &kTrimToFormat, "trim");
+	kTrimKnob->label("trim bbox");
+	kTrimKnob->tooltip("When checked, SyLens will reduce the bouding box to be within the destination format");
+	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+	
+	Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
+	kDbgKnob->label("debug info");
+	kDbgKnob->tooltip("When checked, SyLens will output various debug info to STDOUT");
+	
+	Divider(f, 0);
+	Text_knob(f, (std::string("SyLens v.") + std::string(VERSION)).c_str());
+}
+
+// called whenever a knob is changed
+int SyLens::knob_changed(Knob* k) {
+	// Dont dereference unless...
+	if (k == NULL) return 1;
+
+	// Touching the crop knob changes our output bounds
+	if ((*k).startsWith("uncrop")) {
+		_validate(false);
+	}
+
+	// Touching the mode changes everything
+	if ((*k).startsWith("mode")) {
+		_validate(false);
+	}
+}
+	
+void SyLens::_computeAspects() {
+	// Compute the aspect from the input format
+	Format f = input0().format();
+	
+	double sc = 1.0f + (2.0f * kUnCrop);
+	
+	if(kMode == UNDIST) {
+		_plateWidth = f.width();
+		_plateHeight = f.height();
+		_extWidth = ceil(float(_plateWidth) * sc);
+		_extHeight = ceil(float(_plateHeight) * sc);
+	} else {
+		_plateWidth = floor( float(f.width()) / sc);
+		_plateHeight = floor( float(f.height()) / sc);
+		_extWidth = f.width();
+		_extHeight = f.height();
+	}
+	
+	_paddingW = (_extWidth - _plateWidth) / 2;
+	_paddingH = (_extHeight - _plateHeight) / 2;
+	_aspect = float(_plateWidth) / float(_plateHeight) *  f.pixel_aspect();
+	
+	if(kDbg) printf("SyLens: true plate window with uncrop will be %dx%d\n", _extWidth, _extHeight);
+}
+
+	
+// Here we need to expand the image and the bounding box. This is the most important method in a plug like this so
+// pay attention
+void SyLens::_validate(bool for_real)
+{
+	filter.initialize();
+	input0().validate(for_real);
+	copy_info();
+	set_out_channels(Mask_All);
+	
+	info_.black_outside(true);
+	
+	_computeAspects();    
+	
+	if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
+	
+	// Time to define how big our output will be in terms of format. Format will always be the whole plate.
+	// If it's chopped then we use the bbox to speed things up.
+	int ow, oh;
+	
+	if(kMode == UNDIST) {
+		ow = _extWidth;
+		oh = _extHeight;
+	} else {
+		ow = _plateWidth;
+		oh = _plateHeight;
+	}
+	
+	// Nudge outputs to power of 2, upwards
+	if(ow % 2 != 0) ow +=1;
+	if(oh % 2 != 0) oh +=1;
+	
+	// Crucial. Define the format in the info_ - this is what Nuke uses
+	// to know how big OUR output will be. We also pretty much NEED to store it
+	// in an instance var because we cannot keep it on the stack (segfault!)
+	_outFormat = Format(ow, oh, input0().format().pixel_aspect());
+	info_.format( _outFormat );
+	
+	// For the case when we are working with a 8k by 4k plate with a SMALL CG pink elephant rrright in the left
+	// corner we want to actually translate the bbox of the elephant to our distorted pipe downstream. So we need to
+	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
+	// Grab the bbox from the input first
+	Info inf = input0().info();
+	Format f = input0().format();
+	
+	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
+	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
+	// we just take the corners we might be chopping some image away. So to get a reliable bbox we need to check
+	// our padding at 6 points - the 4 extremes and where the bbox crosses the middle of the coordinates
+	int xMid = ow/2;
+	int yMid = oh/2;
+
+	std::vector<Vector2*> pointsOnBbox;
+	
+	// Add the standard two points - LR and TR
+	pointsOnBbox.push_back(new Vector2(inf.x(), inf.y()));
+	pointsOnBbox.push_back(new Vector2(inf.r(), inf.t()));
+	
+	// Add the TL and LR as well
+	pointsOnBbox.push_back(new Vector2(inf.x(), inf.t()));
+	pointsOnBbox.push_back(new Vector2(inf.r(), inf.y()));
+	
+	// If our box intersects the midplane on X add the points where the bbox crosses centerline
+	if((inf.x() < xMid) && (inf.r() > xMid)) {
+		// Find the two intersections and add them
+		pointsOnBbox.push_back( new Vector2(xMid, inf.y()) );
+		pointsOnBbox.push_back( new Vector2(xMid, inf.t()) );
+	}
+	
+	// If our box intersects the midplane on Y add the points where the bbox crosses centerline
+	if((inf.y() < yMid) && (inf.t() > yMid)) {
+		pointsOnBbox.push_back( new Vector2(inf.x(), yMid) );
+		pointsOnBbox.push_back( new Vector2(inf.r(), yMid) );
+	}
+	
+	// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
+	// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
+	// since this is where our bbox corners are going to be in the coordinate plane of the output
+	// format.
+	std::vector<int> xValues;
+	std::vector<int> yValues;
+	
+	for(int i = 0; i < pointsOnBbox.size(); i++) {
+		if(kMode == UNDIST) {
+			undistortVectorIntoDest(*pointsOnBbox[i]);
+		} else {
+			distortVectorIntoSource(*pointsOnBbox[i]);
+		}
+		xValues.push_back(pointsOnBbox[i]->x);
+		yValues.push_back(pointsOnBbox[i]->y);
+	}
+	pointsOnBbox.clear();
+	
+	int minX, minY, maxX, maxY;
+	
+	// Formally speaking, we have to allocate an std::iterator first. But we wont.
+	minX = *std::min_element(xValues.begin(), xValues.end());
+	maxX = *std::max_element(xValues.begin(), xValues.end());
+	minY = *std::min_element(yValues.begin(), yValues.end());
+	maxY = *std::max_element(yValues.begin(), yValues.end());
+	
+	Box obox(minX, minY, maxX, maxY);
+	
+	// If trim is enabled we intersect our obox with the format so that there is no bounding box
+	// outside the crop area. This is handy for redistorted material.
+	if(kTrimToFormat) obox.intersect(_outFormat);
+	
+	if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
+	if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
+	
+	info_.set(obox);
+}
+
+void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int count);
+{
+	if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
+	ChannelSet c1(channels); in_channels(0,c1);
+	// Request the same part of the input plus padding times two. This is an opportunistic
+	// cargo cult approximation but it usually allows us to grab just enough pixels to survive.
+	input0().request(x - (_paddingW * 2), y - (_paddingW * 2), r + (_paddingW * 2), t + (_paddingH * 2), channels, count);
 }
