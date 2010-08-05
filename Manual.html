@@ -44,6 +44,43 @@ h1,h2,h3,h4 {
 		rendered from the undistorted film back size). To redistort, plug your oversize plate into a copy of SyLens with the "mode" switch set to
 		"redistort". <i>See to it that other settings - k, kcube and uncrop - stay the same!</i></p>
 
+	 <h2>Explanation of the UI controls</h2>
+	 <dl>
+			<dt>mode</dt>
+			<dd>When set to <i>undistort</i>, SyLens will remove lens distortion. When set to <i>redistort</i> SyLens will apply lens distortion</dd>
+
+			<dt>k</dt>
+			<dd>Quartic distortion coefficient. This is calculated by Syntheyes and needs to be punched in here.</dd>
+			
+			<dt>kcube</dt>
+			<dd>Cubic distortion modifier. If you used this in Syntheyes you can apply it here as well.</dd>
+			
+			<dt>uncrop expansion<dt>
+			<dd>If you are dealing with pin-cushion distortion, there are parts of the image in the corners that will end up outside of your current
+				image format as the corners of the image are pulled outwards. To account for that, Syntheyes will usually add some "crop" values in the
+				Image Preparation screen to make your camera field of view a tad larger, and your output format a tad bigger to account for these corners.
+				To produce exactly the same image size at the end we need to know this crop value that SynthEyes applies.</dd>
+			
+			<dt>filter</dt>
+			<dd>This selects the filtering algorithm used for sampling the source image, pick one that gives a better-looking result</dd>
+			
+			<dt>trim bbox</dt>
+			<dd>When you apply distortion to the image, the bounding box that SyLens receives will usually grow. For example, when reintroducing distortion,
+				there will be overflow outside of the image:
+				
+				When you are compositing redistorted items onto the source you generally don't want to have this overscan. When you enable <i>trim bbox</i> the
+				size of the bounding box will be reduced to fit within the actual output format, and no overscan pixels will be output or computed.</dd>
+			
+			<dt>debug info</dt>
+			<dd>You can see what SyLens is doing. When you enable this, debug info will be written to STDOUT. If you start Nuke from the terminal then this
+				terminal will contain all the relevant output.</dd>
+			
+			<dt>only format</dt>
+			<dd>If all you need is knowing the size of the background (for example to use as a background for the ScanlineRender node), but no actual pixels.
+				Checking this box will make Syntheyes output the format boxes only, but no computation of pixels will be done and no upstream pixels
+				will be requested or copied (and thing will speed up tenfold). When you use this as input for the 3D you can also enable and disable this
+				knob to check your alignment with the background.</dd>
+		</dl>
   <p>For questions and comments shoot a mail to me _at_ julik.nl</p>
   </body> 
 </html>

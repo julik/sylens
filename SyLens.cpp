@@ -47,7 +47,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 " to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.0.6";
+static const char* const VERSION = "0.0.7";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -77,7 +77,7 @@ class SyLens : public Iop
 	
 	// Stuff driven by knobbz
 	double kCoeff, kCubeCoeff, kUnCrop;
-	bool kDbg, kTrimToFormat;
+	bool kDbg, kTrimToFormat, kOnlyFormat;
 	int kMode;
 	
 	int _lastScanlineSize;
@@ -100,6 +100,7 @@ public:
 		kUnCrop = 0.038f;
 		kDbg = false;
 		kTrimToFormat = false;
+		kOnlyFormat = false;
 		// }} END
 		
 		_aspect = 1.33f;
@@ -257,6 +258,11 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		_lastScanlineSize = r;
 	}
 	
+	if(kOnlyFormat) {
+		out.erase(channels);
+		return;
+	}
+	
 	foreach(z, channels) out.writable(z);
 	
 	Pixel pixel(channels);
@@ -326,6 +332,11 @@ void SyLens::knobs( Knob_Callback f) {
 	Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
 	kDbgKnob->label("debug info");
 	kDbgKnob->tooltip("When checked, SyLens will output various debug info to STDOUT");
+
+	Knob* kOnlyFormatKnob = Bool_knob( f, &kOnlyFormat, "onlyformat");
+	kOnlyFormatKnob->label("only format");
+	kOnlyFormatKnob->tooltip("When checked, SyLens will only output the format that can be used as reference, but will not compute any image");
+	kOnlyFormatKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
 	Divider(f, 0);
 	Text_knob(f, (std::string("SyLens v.") + std::string(VERSION)).c_str());
@@ -485,8 +496,10 @@ void SyLens::_validate(bool for_real)
 	info_.set(obox);
 }
 
-void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int count);
+void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int count)
 {
+	if(kOnlyFormat) return;
+	
 	if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 	ChannelSet c1(channels); in_channels(0,c1);
 	// Request the same part of the input plus padding times two. This is an opportunistic
