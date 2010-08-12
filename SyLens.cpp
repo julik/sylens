@@ -504,7 +504,7 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	ChannelSet c1(channels); in_channels(0,c1);
 	
 	Vector2 bl(x, y);
-	Vector2 br(y, r);
+	Vector2 br(r, y);
 	Vector2 tr(r, t);
 	Vector2 tl(x, t);
 	
@@ -522,5 +522,5 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	
 	// Request the same part of the input plus padding times two. This is an opportunistic
 	// cargo cult approximation but it usually allows us to grab just enough pixels to survive.
-	input0().request(bl.x -1,  bl.y - 1, tr.x + 1, tr.y + 1, channels, count);
+	input0().request(bl.x,  bl.y, tr.x, tr.y, channels, count);
 }
