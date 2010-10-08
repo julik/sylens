@@ -11,7 +11,7 @@ CXXFLAGS ?= -g -c -DUSE_GLEW -I$(NDKDIR)/include -fPIC -msse
 LINKFLAGS ?= -L$(NDKDIR) 
 LIBS ?= -lDDImage
 LINKFLAGS += -shared
-all: syLens.so
+all: SyLens.so
 .PRECIOUS : %.os
 %.os: %.cpp
 	$(MYCXX) $(CXXFLAGS) -o $(@) $<
