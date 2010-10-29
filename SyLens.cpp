@@ -254,7 +254,7 @@ void SyLens::Remove(Vector2& pt) {
 void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
 	if(r != _lastScanlineSize) {
-		if(kDbg) printf("SyLens: Rendering scanline %d pix\n", r);
+		if(kDbg) printf("SyLens: Rendering scanline up to %d X pix starting at %d on X\n", r, x);
 		_lastScanlineSize = r;
 	}
 	
