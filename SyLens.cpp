@@ -121,9 +121,9 @@ public:
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will(should?) be flushed automatically
 	void append(Hash& hash) {
-		int intv;
-		memcpy(&intv, VERSION, strlen(VERSION));
-		hash.append(intv);
+		hash.append(VERSION);
+		hash.append(__DATE__);
+		hash.append(__TIME__);
 	}
 	
 private:
