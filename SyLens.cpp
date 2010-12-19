@@ -47,7 +47,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 " to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.0.7";
+static const char* const VERSION = "0.0.8";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -520,7 +520,10 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 		undistortVectorIntoDest(tr);
 	}
 	
-	// Request the same part of the input plus padding times two. This is an opportunistic
-	// cargo cult approximation but it usually allows us to grab just enough pixels to survive.
-	input0().request(bl.x,  bl.y, tr.x, tr.y, channels, count);
+	// Request the same part of the input distorted. However if rounding errors have taken place 
+	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
+	// If we don't request it we will get black pixels in there, so we add a small margin on all sides
+	// to give us a little cushion
+	const unsigned int safetyPadding = 4;
+	input0().request(bl.x - safetyPadding,  bl.y  - safetyPadding, tr.x + safetyPadding, tr.y + safetyPadding, channels, count);
 }
