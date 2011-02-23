@@ -47,7 +47,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 " to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.0.8";
+static const char* const VERSION = "0.0.9";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -220,6 +220,7 @@ void SyLens::undistortVectorIntoDest(Vector2& absXY) {
 
 // THIS IS SEMI-WRONG! Ported over from distort.szl, does not honor cubic distortion
 void SyLens::Remove(Vector2& pt) {
+	
 	double r, rp, f, rlim, rplim, raw, err, slope;
 	
 	rp = sqrt(_aspect * _aspect * pt.x * pt.x + pt.y * pt.y);
@@ -244,8 +245,13 @@ void SyLens::Remove(Vector2& pt) {
 	}
 	f = r / rp;
 	
-	pt.x = pt.x * f;
-	pt.y = pt.y * f;
+	// For the pixel in the middle of the image the F can
+	// be NaN, so check for that and leave it be.
+	// http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c
+	if(f == f) {
+		pt.x = pt.x * f;
+		pt.y = pt.y * f;
+	}
 }
 
 
@@ -487,7 +493,7 @@ void SyLens::_validate(bool for_real)
 	Box obox(minX, minY, maxX, maxY);
 	
 	// If trim is enabled we intersect our obox with the format so that there is no bounding box
-	// outside the crop area. This is handy for redistorted material.
+	// outside the crop area. Thiis handy for redistorted material.
 	if(kTrimToFormat) obox.intersect(_outFormat);
 	
 	if(kDbg) printf("SyLens: output format will be %dx%d\n", _outFormat.width(), _outFormat.height());
