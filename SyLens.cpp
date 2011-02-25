@@ -2,15 +2,18 @@
 *	This plugin uses the lens distortion model provided by Russ Anderson of the SynthEyes camera tracker
 *	fame. It is made so that it's output is _identical_ to the Image Preparation tool of the SY camera tracker.
 *	so you can use it INSTEAD of the footage Syntheyes prerenders.
-*	It is largely based on tx_nukeLensDistortion by Matti Gruener of Trixter Film and Rising Sun fame. However,
-*	For filtering we also use the standard filtering methods provided by Nuke.
+*	It is largely based on tx_nukeLensDistortion by Matti Gruener of Trixter Film and Rising Sun Films.
+*	The code has however been simplified and some features not present in the original version have been added.
 *	
-*	Written by Julik Tarkhanov in Amsterdam in 2010. me(at)julik.nl
-*	with kind support by HecticElectric.
-*	The beautiful Crimean landscape shot provided by Tim Parshikov, 2010.
+*	Written by Julik Tarkhanov in Amsterdam in 2010-2011 with kind support by HecticElectric.
+*	I thank the users for their continued support and bug reports.
+*	For questions mail me(at)julik.nl
+*
+*	The beautiful Crimean landscape shot used in the test script is provided by Tim Parshikov
+* and Mikhail Mestezky, 2010.
 *	
 *	The code has some more comments than it's 3DE counterpart since we have to do some things that the other plugin
-*	did not (like expanding the image output)
+*	did not
 */
 
 extern "C" {
