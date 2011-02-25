@@ -119,7 +119,9 @@ private:
 };
 
 // Since we do not need channel selectors or masks, we can use our raw Iop
-// directly instead of putting it into a NukeWrapper
+// directly instead of putting it into a NukeWrapper. Besides, the mask input on
+// the NukeWrapper cannot be disabled even though the Foundry doco says it can
+// (Foundry bug #12598)
 static Iop* SyLensCreate( Node* node ) {
 	return new SyLens(node);
 }
@@ -133,13 +135,11 @@ const Iop::Description SyLens::description(CLASS, "Transform/SyLens", SyLensCrea
 // exactly what we want
 double SyLens::toUv(double absValue, int absSide)
 {
-	double x = (absValue / (double)absSide) - 0.5;
-    // .2 to -.3, y is reversed and coords are double
+	double x = (absValue / (double)absSide) - 0.5f;
 	return x * 2;
 }
 
 double SyLens::fromUv(double uvValue, int absSide) {
-    // First, start from zero (-.1 becomes .4)
 	double value_off_corner = (uvValue / 2) + 0.5f;
 	return absSide * value_off_corner;
 }
@@ -312,7 +312,7 @@ void SyLens::knobs( Knob_Callback f) {
 	
 	Knob* kTrimKnob = Bool_knob( f, &kTrimToFormat, "trim");
 	kTrimKnob->label("trim bbox");
-	kTrimKnob->tooltip("When checked, SyLens will reduce the bouding box to be within the destination format");
+	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
 	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
 	Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
@@ -343,7 +343,9 @@ int SyLens::knob_changed(Knob* k) {
 		_validate(false);
 	}
 }
-	
+
+// The algo works in image aspec, not the pixel aspect. We also have to take the uncrop factor
+// into account.
 void SyLens::_computeAspects() {
 	// Compute the aspect from the input format
 	Format f = input0().format();
@@ -374,6 +376,7 @@ void SyLens::_computeAspects() {
 // pay attention
 void SyLens::_validate(bool for_real)
 {
+	// Bookkeeping boilerplate
 	filter.initialize();
 	input0().validate(for_real);
 	copy_info();
@@ -381,12 +384,14 @@ void SyLens::_validate(bool for_real)
 	
 	info_.black_outside(true);
 	
+	// We need to know our aspects so prep them here
 	_computeAspects();    
 	
 	if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", _extWidth, _extHeight);
 	
 	// Time to define how big our output will be in terms of format. Format will always be the whole plate.
-	// If it's chopped then we use the bbox to speed things up.
+	// If we only use a bboxed piece of the image we will limit our request to that. But first of all we need to
+	// compute the format of our output.
 	int ow, oh;
 	
 	if(kMode == UNDIST) {
@@ -444,13 +449,14 @@ void SyLens::_validate(bool for_real)
 		pointsOnBbox.push_back( new Vector2(inf.r(), yMid) );
 	}
 	
+
+	std::vector<int> xValues;
+	std::vector<int> yValues;
+	
 	// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
 	// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
 	// since this is where our bbox corners are going to be in the coordinate plane of the output
 	// format.
-	std::vector<int> xValues;
-	std::vector<int> yValues;
-	
 	for(int i = 0; i < pointsOnBbox.size(); i++) {
 		if(kMode == UNDIST) {
 			undistortVectorIntoDest(*pointsOnBbox[i]);
