@@ -16,6 +16,14 @@
 *	did not
 */
 
+// for our friend printf
+extern "C" {
+#include <stdio.h>
+}
+
+// For max/min on containers
+#include <algorithm>
+
 #include "DDImage/Iop.h"
 #include "DDImage/Row.h"
 #include "DDImage/Pixel.h"
@@ -495,10 +503,7 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 	ChannelSet c1(channels); in_channels(0,c1);
 	
-	Vector2 bl(x, y);
-	Vector2 br(r, y);
-	Vector2 tr(r, t);
-	Vector2 tl(x, t);
+	Vector2 bl(x, y), br(r, y), tr(r, t), tl(x, t);
 	
 	if(kMode == UNDIST) {
 		distortVectorIntoSource(bl);
