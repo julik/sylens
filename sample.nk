@@ -1,38 +1,38 @@
-#! /Applications/Nuke6.0v7-32/Nuke6.0v7.app/Contents/MacOS/Nuke6.0v7 -nx
-version 6.0 v7
+#! /Applications/Nuke6.1v2/Nuke6.1v2.app/Contents/MacOS/Nuke6.1v2 -nx
+version 6.1 v2
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
     <window x="147" y="22" w="1251" h="1024" screen="0">
         <splitter orientation="1">
-            <split size="790"></split>
+            <split size="790"/>
             <splitter orientation="1">
-                <split size="40"></split>
+                <split size="40"/>
                 <dock id="" hideTitles="1" activePageId="Toolbar.1">
-                    <page id="Toolbar.1"></page>
+                    <page id="Toolbar.1"/>
                 </dock>
-                <split size="746"></split>
+                <split size="746"/>
                 <splitter orientation="2">
-                    <split size="556"></split>
+                    <split size="556"/>
                     <dock id="" activePageId="Viewer.1">
-                        <page id="Viewer.1"></page>
+                        <page id="Viewer.1"/>
                     </dock>
-                    <split size="442"></split>
+                    <split size="442"/>
                     <dock id="" activePageId="DAG.1">
-                        <page id="DAG.1"></page>
-                        <page id="Curve Editor.1"></page>
+                        <page id="DAG.1"/>
+                        <page id="Curve Editor.1"/>
                     </dock>
                 </splitter>
             </splitter>
-            <split size="457"></split>
+            <split size="457"/>
             <splitter orientation="2">
-                <split size="868"></split>
+                <split size="868"/>
                 <dock id="" activePageId="Properties.1">
-                    <page id="Properties.1"></page>
-                    <page id="Script Editor.1"></page>
+                    <page id="Properties.1"/>
+                    <page id="Script Editor.1"/>
                 </dock>
-                <split size="130"></split>
+                <split size="130"/>
                 <dock id="" activePageId="Progress.1">
-                    <page id="Progress.1"></page>
+                    <page id="Progress.1"/>
                 </dock>
             </splitter>
         </splitter>
@@ -42,7 +42,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /Code/SyLens/sample.nk
- frame 10
+ frame 50
  last_frame 50
  lock_range true
  format "2048 1234 0 0 2048 1234 1 "
@@ -99,7 +99,7 @@ CheckerBoard2 {
  xpos 1452
  ypos -873
 }
-set N1db1fea0 [stack 0]
+set N31e1000 [stack 0]
 SyLens {
  k -0.02826
  uncrop 0.27
@@ -108,7 +108,7 @@ SyLens {
  xpos 1589
  ypos -786
 }
-push $N1db1fea0
+push $N31e1000
 Crop {
  box {0 0 2048 1234}
  name Crop2
@@ -139,7 +139,7 @@ Read {
  xpos -172
  ypos -773
 }
-set N17cebad0 [stack 0]
+set N35b9e00 [stack 0]
 SyLens {
  k {{curve i x114 -0.01826}}
  uncrop {{curve i x102 0.038}}
@@ -149,7 +149,7 @@ SyLens {
  xpos -172
  ypos -610
 }
-set N18464d20 [stack 0]
+set N3408a00 [stack 0]
 SyLens {
  mode redistort
  k {{curve i x1 -0.01826 x114 -0.01826}}
@@ -161,20 +161,20 @@ SyLens {
  xpos -172
  ypos -584
 }
-push $N17cebad0
+push $N35b9e00
 Dot {
  name Dot1
  xpos -11
  ypos -700
 }
-set N1db18010 [stack 0]
+set N35a4800 [stack 0]
 Difference {
  inputs 2
  name Difference2
  xpos -45
  ypos -523
 }
-push $N1db18010
+push $N35a4800
 SyLens {
  k {{curve x114 -0.01826}}
  uncrop -0.038
@@ -183,7 +183,7 @@ SyLens {
  xpos 99
  ypos -704
 }
-push $N1db18010
+push $N35a4800
 SyLens {
  k 0.19
  uncrop 0
@@ -208,7 +208,7 @@ CheckerBoard2 {
  xpos 318
  ypos -782
 }
-set N17cebf70 [stack 0]
+set N329a600 [stack 0]
 SyLens {
  k 0.1
  uncrop 0
@@ -225,21 +225,21 @@ SyLens {
  xpos 318
  ypos -672
 }
-push $N17cebf70
+push $N329a600
 Dot {
  name Dot2
  xpos 495
  ypos -755
 }
-set N17ce8840 [stack 0]
+set N31d9000 [stack 0]
 Difference {
  inputs 2
  name Difference3
  xpos 318
  ypos -598
 }
-push $N17ce8840
-push $N17ce8840
+push $N31d9000
+push $N31d9000
 SyLens {
  k -0.03
  uncrop 0.063
@@ -263,14 +263,14 @@ Difference {
  xpos 461
  ypos -598
 }
-push $N17ce8840
+push $N31d9000
 Dot {
  name Dot3
  xpos 811
  ypos -755
 }
-set N1db0b9c0 [stack 0]
-push $N1db0b9c0
+set N35b4c00 [stack 0]
+push $N35b4c00
 SyLens {
  k -0.03
  kcube 0.002
@@ -296,14 +296,14 @@ Difference {
  xpos 777
  ypos -596
 }
-push $N1db0b9c0
+push $N35b4c00
 Dot {
  name Dot4
  xpos 1055
  ypos -755
 }
-set N1db40780 [stack 0]
-push $N1db40780
+set N3406800 [stack 0]
+push $N3406800
 SyLens {
  k -0.04
  uncrop 0.088
@@ -335,14 +335,14 @@ Read {
  xpos -442
  ypos -739
 }
-push $N18464d20
+push $N3408a00
 Difference {
  inputs 2
  name Difference1
  xpos -442
  ypos -616
 }
-push $N1db40780
+push $N3406800
 Dot {
  name Dot5
  xpos 1243
@@ -354,13 +354,13 @@ Crop {
  xpos 1260
  ypos -737
 }
-set N1db4c220 [stack 0]
+set N35bba00 [stack 0]
 Dot {
  name Dot6
  xpos 1207
  ypos -696
 }
-push $N1db4c220
+push $N35bba00
 SyLens {
  k -0.03
  uncrop 0.063
@@ -384,12 +384,52 @@ Difference {
  xpos 1202
  ypos -599
 }
+Read {
+ inputs 0
+ file /Users/julik/Desktop/VFX_Projectery/Bavaria_HH/prescans/E002_L009_TXFER5-RSZ.0369.jpg
+ format "2048 1556 0 0 2048 1556 2 ana"
+ name Read3
+ xpos 322
+ ypos -977
+}
+set N36e3000 [stack 0]
+SyLens {
+ k -0.01076
+ uncrop 0.107
+ anamorphic 1.5
+ name SyLens16
+ xpos 322
+ ypos -889
+}
+push $N36e3000
+SyLens {
+ k -0.02276
+ uncrop 0.107
+ name SyLens17
+ xpos 442
+ ypos -891
+}
+Read {
+ inputs 0
+ file /Users/julik/Desktop/VFX_Projectery/Bavaria_HH/prescans/E003_L009_TXFER5-RSZ.%04d.jpg
+ format "2048 1556 0 0 2048 1556 2 ana"
+ last 124
+ name Read4
+ xpos 549
+ ypos -1015
+}
+SyLens {
+ k -0.011
+ uncrop 0.05
+ name SyLens18
+ xpos 549
+ ypos -927
+}
 Viewer {
  inputs 2
- frame 10
+ frame 50
  input_process false
  name Viewer1
- selected true
  xpos 1370
  ypos -685
 }
