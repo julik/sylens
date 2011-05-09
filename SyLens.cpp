@@ -315,6 +315,9 @@ void SyLens::knobs( Knob_Callback f) {
 	_kUncropKnob->label("uncrop expansion");
 	_kUncropKnob->tooltip("Set to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
 	
+	// Make sure uncrop is not negative
+	_kUncropKnob->set_range(0.0f, 4.0f, true);
+	
 	// Add the filter selection menu that comes from the filter obj itself
 	filter.knobs( f );
 	
