@@ -1,4 +1,4 @@
-NDKDIR=/Applications/Nuke6.1v2/Nuke6.1v2.app/Contents/MacOS
+NDKDIR=/Applications/Nuke6.2v4/Nuke6.2v4.app/Contents/MacOS
 
 TARGET=SyLens.dylib
 HEADERS=$(wildcard *.h)

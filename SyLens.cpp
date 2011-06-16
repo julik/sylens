@@ -35,7 +35,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 " to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.0.9";
+static const char* const VERSION = "0.1.0";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -361,16 +361,20 @@ void SyLens::_computeAspects() {
 	// Compute the aspect from the input format
 	Format f = input0().format();
 	
-	double sc = 1.0f + (2.0f * kUnCrop);
+	// Protect from the uncrop factor being negative (meeeeh!)
+	if (kUnCrop < 0) kUnCrop = 0.0f;
+	
+	// Determine complete scaling factor
+	double scaleFactor = 1.0f + (2.0f * kUnCrop);
 	
 	if(kMode == UNDIST) {
 		_plateWidth = f.width();
 		_plateHeight = f.height();
-		_extWidth = ceil(float(_plateWidth) * sc);
-		_extHeight = ceil(float(_plateHeight) * sc);
+		_extWidth = ceil(float(_plateWidth) * scaleFactor);
+		_extHeight = ceil(float(_plateHeight) * scaleFactor);
 	} else {
-		_plateWidth = floor( float(f.width()) / sc);
-		_plateHeight = floor( float(f.height()) / sc);
+		_plateWidth = floor( float(f.width()) / scaleFactor);
+		_plateHeight = floor( float(f.height()) / scaleFactor);
 		_extWidth = f.width();
 		_extHeight = f.height();
 	}
