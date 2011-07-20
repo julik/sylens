@@ -9,7 +9,7 @@ CXX=g++-4.0
 SDKROOT=/Developer/SDKs/MacOSX10.5.sdk
 LIBS ?= -lDDImage -lGLEW
 
-CXXFLAGS+= -c -fPIC -DUSE_GLEW -I$(NDKDIR)/include  -msse -O3 -isysroot /Developer/SDKs/MacOSX10.5.sdk -arch x86_64
+CXXFLAGS+= -c -Wall -fPIC -DUSE_GLEW -I$(NDKDIR)/include  -msse -O3 -isysroot /Developer/SDKs/MacOSX10.5.sdk -arch x86_64
 LNFLAGS+=-bundle -undefined warning -flat_namespace -shared -rdynamic -nodefaultlibs-ggdb -lDDImage -lGLEW
 LNFLAGS+=-L$(NDKDIR) -Wl,-syslibroot,/Developer/SDKs/MacOSX10.5.sdk -arch x86_64
 

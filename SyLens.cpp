@@ -105,6 +105,7 @@ public:
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
 	int knob_changed(Knob* k);
+	int round(double x);
 	
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will(should?) be flushed automatically
@@ -354,6 +355,12 @@ int SyLens::knob_changed(Knob* k) {
 	if ((*k).startsWith("mode")) {
 		_validate(false);
 	}
+	return Iop::knob_changed(k); // Super knows better
+}
+
+// http://stackoverflow.com/questions/485525/round-for-float-in-c
+int SyLens::round(double x) {
+	return floor(x + 0.5);
 }
 
 // The algo works in image aspec, not the pixel aspect. We also have to take the uncrop factor
@@ -369,8 +376,8 @@ void SyLens::_computeAspects() {
 	double scaleFactor = 1.0f + (2.0f * kUnCrop);
 	
 	if(kMode == UNDIST) {
-		_plateWidth = f.width();
-		_plateHeight = f.height();
+		_plateWidth = round(f.width());
+		_plateHeight = round(f.height());
 		_extWidth = ceil(float(_plateWidth) * scaleFactor);
 		_extHeight = ceil(float(_plateHeight) * scaleFactor);
 	} else {
@@ -473,7 +480,7 @@ void SyLens::_validate(bool for_real)
 	// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
 	// since this is where our bbox corners are going to be in the coordinate plane of the output
 	// format.
-	for(int i = 0; i < pointsOnBbox.size(); i++) {
+	for(unsigned int i = 0; i < pointsOnBbox.size(); i++) {
 		if(kMode == UNDIST) {
 			undistortVectorIntoDest(*pointsOnBbox[i]);
 		} else {
@@ -530,5 +537,10 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	// If we don't request it we will get black pixels in there, so we add a small margin on all sides
 	// to give us a little cushion
 	const unsigned int safetyPadding = 4;
-	input0().request(bl.x - safetyPadding,  bl.y  - safetyPadding, tr.x + safetyPadding, tr.y + safetyPadding, channels, count);
+	input0().request(
+		round(bl.x - safetyPadding),  
+		round(bl.y  - safetyPadding),
+		round(tr.x + safetyPadding),
+		round(tr.y + safetyPadding),
+		channels, count);
 }
