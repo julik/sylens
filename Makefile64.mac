@@ -4,6 +4,7 @@ TARGET=SyLens.dylib
 HEADERS=$(wildcard *.h)
 SOURCES=$(wildcard *.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
+CXX=g++-4.0
 
 SDKROOT=/Developer/SDKs/MacOSX10.5.sdk
 LIBS ?= -lDDImage -lGLEW
