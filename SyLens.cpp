@@ -35,7 +35,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 " to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.1.0";
+static const char* const VERSION = "0.1.1";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -112,6 +112,7 @@ public:
 		hash.append(VERSION);
 		hash.append(__DATE__);
 		hash.append(__TIME__);
+		Iop::append(hash); // the super called he wants his pointers back
 	}
 	
 private:
