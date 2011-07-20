@@ -105,7 +105,6 @@ public:
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
 	int knob_changed(Knob* k);
-	int round(double x);
 	
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will(should?) be flushed automatically
@@ -118,6 +117,7 @@ public:
 	
 private:
 	
+	int round(double x);
 	double toUv(double, int);
 	double fromUv(double, int);
 	void vecToUV(Vector2&, Vector2&, int, int);
