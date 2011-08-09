@@ -87,6 +87,27 @@ dt {
 				will be requested or copied (and thing will speed up tenfold). When you use this as input for the 3D you can also enable and disable this
 				knob to check your alignment with the background.</dd>
 		</dl>
-  <p>For questions and comments shoot a mail to me _at_ julik.nl</p>
-  </body> 
+	
+	<h2>Standard projection workflow caveats</h2>
+	
+	<p>SyLens creates images which have overflow bounding box, that is - <b>bounding box that extends outside the image format.</b> For that reason creating a roundtrip
+		projection setup needs a little work to get right.</p>
+	
+	<p>To spare you some grief, here's how your DAG should look:</p>
+	
+	<img src="doc/projection_dag.png" width="896" height="683" alt="Projection Dag" />
+	
+	<p>I am highlighting the special parameters from the node bin which differ from the defaults.</p>
+	
+	<p>Important points:</p>
+	<ul>
+		<li>Project3d will only project the image outside of the format with "crop" checkbox disabled</li>
+		<li>You need to render some overscan from your ScanlineRenderer to fill the bbox covered area. By default the renderer only renders within the format</li>
+		<li>Use your cameras as usual (do not change the field of view)</li>
+	</ul>
+		
+	<p>
+	<p>For questions and comments shoot a mail to me _at_ julik.nl</p>
+	
+  </body>
 </html>
