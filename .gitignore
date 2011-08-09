@@ -5,3 +5,5 @@
 .DS_Store
 *.nk~
 *.nk.autosave
+*_pkg
+*_pkg.zip
