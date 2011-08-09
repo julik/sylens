@@ -26,8 +26,9 @@ dt {
   <p>This plugin helps to prep images that have been undistorted using the Syntheyes matchmoving software. It implements the same undistortion algorithm
     as the one embedded in Syntheyes and explained <a href="http://www.ssontech.com/content/lensalg.htm">here.</a>
   
-	<h2>Undistorting footage</h2>
-	
+	<h2>Undistorting footage </h2>
+
+	<h3>Workflow A</h3>
   <p>To use the plugin, you will need to use the Lens Workflow script included with Syntheyes. When you have solved the shot, lens distortion will likely be
     computed. After that, hit "Lens Workflow".</p>
   <img src="doc/lensw.png" width="600" height="430" alt="Lensw">
@@ -42,6 +43,17 @@ dt {
   <img src="doc/alltogether.png" width="861" height="386" alt="Alltogether">
   <p>and you should get exactly the same undistortion as the one you would have gotten from Syntheyes using the Save Sequence button.</p>
   
+	<h3>Workflow B</h3>
+	
+	<p>Alternatively, you can punch in the lens distortion into the solver panel or let Syntheyes compute it for you</p>
+	<img src="doc/auto_disto.png" width="199" height="267" alt="Auto Disto" />
+	
+	<p>Then just punch in the computed distortion value into the <tt>k</tt> knob</p>
+	
+	<img src="doc/just_k.png" width="495" height="122" alt="Just K" />
+	<p>You will probably note that the bounding box of your output will stick outside the format - this is perfectly fine, read below
+	how to deal with that</h2>
+
 	<h2>Redistorting footage</h2>
 	<p>After all is done you might want to redistort either your whole comp or only the piece of CG that came to you from 3D (since it would have been
 		rendered from the undistorted film back size). To redistort, plug your oversize plate into a copy of SyLens with the "mode" switch set to
