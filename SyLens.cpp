@@ -101,6 +101,7 @@ public:
 	
 	void _computeAspects();
 	void _validate(bool for_real);
+	void _open();
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
@@ -238,6 +239,7 @@ void SyLens::Remove(Vector2& pt) {
 	// For the pixel in the middle of the image the F can
 	// be NaN, so check for that and leave it be.
 	// http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c
+	// If a NaN F does crop up it creates a black pixel in the image - not something we love
 	if(f == f) {
 		pt.x = pt.x * f;
 		pt.y = pt.y * f;
