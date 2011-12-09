@@ -35,7 +35,7 @@ using namespace DD::Image;
 static const char* const CLASS = "SyLens";
 static const char* const HELP =  "This plugin undistorts footage according"
 " to the lens distortion model used by Syntheyes";
-static const char* const VERSION = "0.1.1";
+static const char* const VERSION = "1.0.0";
 static const char* const mode_names[] = { "undistort", "redistort", 0 };
 
 class SyLens : public Iop
@@ -55,10 +55,6 @@ class SyLens : public Iop
 
 	// The size of the filmback we are actually sampling from
 	unsigned int _extWidth, _extHeight;
-	
-	// When we extend the image and get undistorted coordinates, we need to add these
-	// values to the pixel offset
-	int _paddingW, _paddingH;
 	
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
@@ -93,15 +89,12 @@ public:
 		
 		_aspect = 1.33f;
 		_lastScanlineSize = 0;
-		_paddingW = 0;
-		_paddingH = 0;
 	}
 	
 	~SyLens () { }
 	
 	void _computeAspects();
 	void _validate(bool for_real);
-	void _open();
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
@@ -195,14 +188,10 @@ void SyLens::distortVectorIntoSource(Vector2& absXY) {
 	vecToUV(absXY, uvXY, _extWidth, _extHeight);
 	distortVector(uvXY, kCoeff, kCubeCoeff);
 	vecFromUV(absXY, uvXY, _extWidth, _extHeight);
-	absXY.x -= (double)_paddingW;
-	absXY.y -= (double)_paddingH;
 }
 
 // This is still a little wrongish but less wrong than before
 void SyLens::undistortVectorIntoDest(Vector2& absXY) {
-	absXY.x += (double)_paddingW;
-	absXY.y += (double)_paddingH;
 	Vector2 uvXY(0, 0);
 	vecToUV(absXY, uvXY, _extWidth, _extHeight);
 	Remove(uvXY);
@@ -302,6 +291,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 void SyLens::knobs( Knob_Callback f) {
 	// For info on knob flags see Knob.h
 	const int KNOB_ON_SEPARATE_LINE = 0x1000;
+	const int KNOB_HIDDEN = 0x0000000000040000;
 	
 	Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
 	_modeSel->label("mode");
@@ -315,12 +305,13 @@ void SyLens::knobs( Knob_Callback f) {
 	_kCubeKnob->label("cubic k");
 	_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
 	
+	// TODO: this knob is to be removed from SyLens 2.
+	// This is not something we condone, but it is in the older scripts, so we make it a hidden knob
 	Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "uncrop" );
-	_kUncropKnob->label("uncrop expansion");
-	_kUncropKnob->tooltip("Set to the same uncrop value as applied by Syntheyes, it will be the same on all sides");
+	_kUncropKnob->set_flag(KNOB_HIDDEN);
+	// Make sure uncrop is zero
+	_kUncropKnob->set_range(0.0f, 0.0f, true);
 	
-	// Make sure uncrop is not negative
-	_kUncropKnob->set_range(0.0f, 4.0f, true);
 	
 	// Add the filter selection menu that comes from the filter obj itself
 	filter.knobs( f );
@@ -371,28 +362,18 @@ void SyLens::_computeAspects() {
 	// Compute the aspect from the input format
 	Format f = input0().format();
 	
-	// Protect from the uncrop factor being negative (meeeeh!)
-	if (kUnCrop < 0) kUnCrop = 0.0f;
-	
-	// Determine complete scaling factor
-	double scaleFactor = 1.0f + (2.0f * kUnCrop);
-	
 	if(kMode == UNDIST) {
 		_plateWidth = round(f.width());
 		_plateHeight = round(f.height());
-		_extWidth = ceil(float(_plateWidth) * scaleFactor);
-		_extHeight = ceil(float(_plateHeight) * scaleFactor);
+		_extWidth = ceil(float(_plateWidth));
+		_extHeight = ceil(float(_plateHeight));
 	} else {
-		_plateWidth = floor( float(f.width()) / scaleFactor);
-		_plateHeight = floor( float(f.height()) / scaleFactor);
+		_plateWidth = floor( float(f.width()));
+		_plateHeight = floor( float(f.height()));
 		_extWidth = f.width();
 		_extHeight = f.height();
 	}
-	
-	_paddingW = (_extWidth - _plateWidth) / 2;
-	_paddingH = (_extHeight - _plateHeight) / 2;
 	_aspect = float(_plateWidth) / float(_plateHeight) *  f.pixel_aspect();
-	
 	if(kDbg) printf("SyLens: true plate window with uncrop will be %dx%d\n", _extWidth, _extHeight);
 }
 

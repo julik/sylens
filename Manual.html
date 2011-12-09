@@ -31,36 +31,22 @@ dt {
 	 
 	<h2>Undistorting footage </h2>
 
-	<h3>Workflow A</h3>
-  <p>To use the plugin, you will need to use the Lens Workflow script included with Syntheyes. When you have solved the shot, lens distortion will likely be
-    computed. After that, hit "Lens Workflow".</p>
-  <img src="doc/lensw.png" width="600" height="430" alt="Lensw">
-  <p>You will be presented with a choice dialog, and the option you need is the one called "Redistorted"</p>
-  <img src="doc/lenswm2.png" width="750" height="174" alt="Lenswm2">
-  <p>What it does is it undistorts your footage, and simultaneously makes your camera FOV a little wider and
-    your composition size (the film back) a little bigger, to accomodate for image parts that would disappear
-    if you would be undistorting the image by other means.</p>
-  <p>Now open the <b>Shot->Image Preparation</b> menu. Go to the Lens tab and note the values for Distortion and Cubic Distort.
-    Then note down the crop values on the Cropping tab.<p>
-  <p>Load your source footage into Nuke and punch in the values, here's how they are related:</p>
-  <img src="doc/alltogether.png" width="861" height="386" alt="Alltogether">
-  <p>and you should get exactly the same undistortion as the one you would have gotten from Syntheyes using the Save Sequence button.</p>
-  
-	<h3>Workflow B</h3>
-	
-	<p>Alternatively, you can punch in the lens distortion into the solver panel or let Syntheyes compute it for you</p>
+	<p>Punch in the lens distortion into the solver panel or let Syntheyes compute it for you</p>
+	<img src="doc/kappa_value.png" width="404" height="109" alt="Kappa Value" />
+	<p>or let Syntheyes compute it for you...</p>
+	<br />
 	<img src="doc/auto_disto.png" width="199" height="267" alt="Auto Disto" />
 	
 	<p>Then just punch in the computed distortion value into the <tt>k</tt> knob</p>
 	
-	<img src="doc/just_k.png" width="495" height="122" alt="Just K" />
+	<img src="doc/just_k.png" width="495" alt="Just K" />
 	<p>You will probably note that the bounding box of your output will stick outside the format - this is perfectly fine, read below
 	how to deal with that</h2>
 
 	<h2>Redistorting footage</h2>
 	<p>After all is done you might want to redistort either your whole comp or only the piece of CG that came to you from 3D (since it would have been
 		rendered from the undistorted film back size). To redistort, plug your oversize plate into a copy of SyLens with the "mode" switch set to
-		"redistort". <i>See to it that other settings - k, kcube and uncrop - stay the same!</i></p>
+		"redistort". <i>See to it that other settings - k, kcube - stay the same!</i></p>
 		
 		<h2>Cropping and bounding box</h2>
 		<p>The workflow in a nutshell:</p>
@@ -75,12 +61,6 @@ dt {
 			
 			<dt>kcube</dt>
 			<dd>Cubic distortion modifier. If you used this in Syntheyes you can apply it here as well. <b>Note that this will not be reapplied during redistortion</b></dd>
-			
-			<dt>uncrop expansion<dt>
-			<dd>If you are dealing with pin-cushion distortion, there are parts of the image in the corners that will end up outside of your current
-				image format as the corners of the image are pulled outwards. To account for that, Syntheyes will usually add some "crop" values in the
-				Image Preparation screen to make your camera field of view a tad larger, and your output format a tad bigger to account for these corners.
-				To produce exactly the same image size at the end we need to know this crop value that SynthEyes applies.</dd>
 			
 			<dt>filter</dt>
 			<dd>This selects the filtering algorithm used for sampling the source image, pick one that gives a better-looking result</dd>

@@ -14,19 +14,12 @@ Use the included sample.nk script. The following values should produce identical
 to match Sample.jpg.
 
 K distortion of -0.01826
-crop of 0.038 on all sides
 
 This file also contains a number of other examples and check sets.
 
 # BUILDING
 
-At least on Mac, for Nuke 6.2 you will need to use the 4.0 verison of GCC and for 6.3 the 4,2
-
 $make -f Makefile64.mac NDKDIR=/Applications/Nuke6.2v1/Nuke6.2v1.app/Contents/MacOS CXX=g++-4.0
-
-or
-
-$make -f Makefile64.mac NDKDIR=/Applications/Nuke6.3v2/Nuke6.3v2.app/Contents/MacOS CXX=g++-4.2
 
 # CREDITS
 
