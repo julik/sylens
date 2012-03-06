@@ -1,10 +1,6 @@
 // For max/min on containers
 #include <algorithm>
-
-#include "DDImage/Row.h"
-#include "DDImage/Pixel.h"
-#include "DDImage/Filter.h"
-#include "DDImage/Knobs.h"
+#include "DDImage/Thread.h"
 #include "SyDistorter.h"
 
 // The number of discrete points we sample on the radius of the distortion.
@@ -15,16 +11,25 @@ SyDistorter::SyDistorter()
 {
 	set_coefficients(0.0f, 0.0f, 1.78);
 }
+
 void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
 {
 	// Do not reconfigure the object unless it's really needed
+	// TODO: float equality?
 	if (k == k_ && k_cube == k_cube_ && aspect == aspect_) return;
+	
+	// We have a shared data structure (the lookup table vector),
+	// when recomputing it we need to lock the world.
+	Lock* lock = new Lock;
+	lock->lock();
 	
 	k_ = k;
 	k_cube_ = k_cube;
 	aspect_ = aspect;
-	
 	recompute();
+	
+	lock->unlock();
+	delete lock;
 }
 
 SyDistorter::~SyDistorter()
