@@ -20,6 +20,7 @@ void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
 	
 	// We have a shared data structure (the lookup table vector),
 	// when recomputing it we need to lock the world.
+	// http://forums.thefoundry.co.uk/phpBB2/viewtopic.php?t=5955
 	Lock* lock = new Lock;
 	lock->lock();
 	
