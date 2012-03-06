@@ -1,4 +1,5 @@
-*.o
+g*.o
+*.os
 *.dylib
 *.so
 *.dll
@@ -7,3 +8,4 @@
 *.nk.autosave
 *_pkg
 *_pkg.zip
+*.nk~

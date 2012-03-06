@@ -1,0 +1,271 @@
+#! /Applications/Nuke6.3v4/NukeX6.3v4.app/../Nuke6.3v4.app/Contents/MacOS/Nuke6.3v4 -nx
+version 6.3 v4
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="147" y="22" w="1251" h="1024" screen="0">
+        <splitter orientation="1">
+            <split size="790"/>
+            <splitter orientation="1">
+                <split size="40"/>
+                <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                    <page id="Toolbar.1"/>
+                </dock>
+                <split size="746"/>
+                <splitter orientation="2">
+                    <split size="556"/>
+                    <dock id="" activePageId="Viewer.1">
+                        <page id="Viewer.1"/>
+                    </dock>
+                    <split size="442"/>
+                    <dock id="" activePageId="DAG.1">
+                        <page id="DAG.1"/>
+                        <page id="Curve Editor.1"/>
+                    </dock>
+                </splitter>
+            </splitter>
+            <split size="457"/>
+            <splitter orientation="2">
+                <split size="868"/>
+                <dock id="" activePageId="Properties.1">
+                    <page id="Properties.1"/>
+                    <page id="Script Editor.1"/>
+                </dock>
+                <split size="130"/>
+                <dock id="" activePageId="Progress.1">
+                    <page id="Progress.1"/>
+                </dock>
+            </splitter>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /Code/SyLens/sample_scripts/sample.nk
+ frame 50
+ last_frame 50
+ lock_range true
+ format "2048 1234 0 0 2048 1234 1 "
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode1
+ tile_color 0x7171c600
+ label "CLASSIC 2D UNDISTORT-REDISTORT"
+ note_font_size 28
+ xpos -289
+ ypos -745
+ bdwidth 513
+ bdheight 303
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode2
+ tile_color 0x7171c600
+ label "UNDISTORT-REDISTORT WITH UVs AND SYCAMERA"
+ note_font_size 20
+ xpos 341
+ ypos -748
+ bdwidth 502
+ bdheight 292
+}
+Read {
+ inputs 0
+ file "\[file dirname \[value root.name]]/Source.jpg"
+ format "2048 1234 0 0 2048 1234 1 "
+ origset true
+ name Read1
+ xpos 157
+ ypos -1082
+}
+Dot {
+ name Dot3
+ xpos 191
+ ypos -876
+}
+set N5aa9800 [stack 0]
+Dot {
+ name Dot2
+ xpos 191
+ ypos -657
+}
+Dot {
+ name Dot1
+ xpos -11
+ ypos -657
+}
+set N5acb200 [stack 0]
+SyLens {
+ k {{curve i x114 -0.01826}}
+ uncrop {{curve i x102 0.038}}
+ filter Parzen
+ name SyLens_UN
+ tile_color 0xc10000ff
+ label undistort
+ xpos -172
+ ypos -665
+}
+set N5ac6000 [stack 0]
+Transform {
+ scale {1 1.56}
+ center {1024 617}
+ name Transform1
+ xpos -172
+ ypos -599
+}
+SyLens {
+ mode redistort
+ k {{curve i x1 -0.01826 x114 -0.01826}}
+ uncrop {{curve i x114 0.038}}
+ filter Mitchell
+ trim true
+ name SyLens_Re
+ tile_color 0xc10000ff
+ label redistort
+ xpos -172
+ ypos -542
+}
+StickyNote {
+ inputs 0
+ name StickyNote1
+ label "Distortion -0.01826"
+ xpos -279
+ ypos -595
+}
+StickyNote {
+ inputs 0
+ name StickyNote3
+ label "Standard 2D distortion so that straight lines are straight again"
+ note_font_size 9
+ xpos -288
+ ypos -430
+}
+StickyNote {
+ inputs 0
+ name StickyNote2
+ label "Here we first project UVs onto a card, then we undistort the image in 3D. Afterwards we render out the scene with a SyCamera and our render is redistorted back! Note the tweaked vaperture on the Camera node projecting UVs"
+ note_font_size 9
+ xpos 340
+ ypos -444
+}
+push $N5ac6000
+SyLens {
+ mode redistort
+ k {{curve i x1 -0.01826 x114 -0.01826}}
+ uncrop {{curve i x114 0.038}}
+ filter Mitchell
+ trim true
+ name SyLens_Re1
+ tile_color 0xc10000ff
+ label redistort
+ xpos 50
+ ypos -543
+}
+push $N5acb200
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference2
+ xpos -45
+ ypos -483
+}
+SyCamera {
+ inputs 0
+ translate {0 0 1.184999943}
+ k -0.01826
+ aspect 1.65964344
+ name SyCamera1
+ xpos 351
+ ypos -522
+}
+Cylinder {
+ inputs 0
+ radius 0.05
+ height 0.7
+ translate {-0.08200000226 0 0.2039999962}
+ name Cylinder1
+ xpos 362
+ ypos -567
+}
+Camera2 {
+ inputs 0
+ translate {0 0 1.184999943}
+ vaperture 14.872
+ name Camera1
+ xpos 354
+ ypos -665
+}
+push $N5aa9800
+Dot {
+ name Dot4
+ xpos 531
+ ypos -876
+}
+set N5d7dc00 [stack 0]
+Card2 {
+ rotate {0 26.69209412 0}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card1
+ xpos 497
+ ypos -668
+}
+UVProject {
+ inputs 2
+ name UVProject1
+ xpos 497
+ ypos -644
+}
+SyUV {
+ k -0.01826
+ aspect 1.659643436
+ name SyUV1
+ xpos 497
+ ypos -620
+}
+Scene {
+ inputs 2
+ name Scene1
+ xpos 507
+ ypos -588
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender1
+ xpos 497
+ ypos -501
+}
+push $N5d7dc00
+Dot {
+ name Dot5
+ xpos 663
+ ypos -876
+}
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference1
+ xpos 629
+ ypos -506
+}
+Viewer {
+ inputs 2
+ input_process false
+ name Viewer1
+ selected true
+ xpos 331
+ ypos -1000
+}

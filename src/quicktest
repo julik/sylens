@@ -1,0 +1,3 @@
+#!/bin/sh
+# Cleanup all the object files, recompile and launch Nuke with the test script opened.
+make -f Makefile.mac clean && make -f Makefile.mac && cp SyUV.dylib SyLens.dylib SyCamera.dylib ~/.nuke/ && /Applications/Nuke6.3v4/Nuke6.3v4.app/Contents/MacOS/Nuke6.3v4 ../sample_scripts/sample.nk
