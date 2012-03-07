@@ -28,6 +28,9 @@ using namespace DD::Image;
 
 class SyCamera : public CameraOp
 {
+private:
+	double max_corner_u_, max_corner_v_;
+	
 public:
 	static const Description description;
 
@@ -83,6 +86,29 @@ public:
 		ver << "SyCamera v." << VERSION << " " << __DATE__ << " " << __TIME__;
 		Text_knob(f, ver.str().c_str());
 	}
+
+	// Distortion applies to TOTALLY everything in the scene, isolated
+	// by an XY plane at the camera's eye (only vertices in the front of the cam
+	// are processed. This means vertices far outside the frustum 
+	// might bend so extremely that they come back into the image!.
+	// So what we will do is culling away all
+	// the vertices that are too far out of the camera frustum.
+	// We want to cull away all the vertices that are outside the frustum, plus a good bit
+	// of a cushion. We compute where the extremes will be (u1v1)
+	// and add 1 to it, to only distort points which are within the imaginary frustum
+	// of two times our actual frustum size. This way we capture enough points
+	// and prevent the rollaround from occuring. 
+	// We also cache these limits based on the distortion
+	// kappas.	Note that for EXTREME fisheyes wraparound can still occur but
+	// we consider it a corner case at the moment
+	void update_distortion_limits()
+	{
+		distorter.set_coefficients(k_coeff, k_cube, k_aspect);
+		Vector2 max_corner(1.0f, k_aspect);
+		distorter.apply_disto(max_corner);
+		max_corner_u_ = max_corner.x + 1.0f;
+		max_corner_v_ = max_corner.y + 1.0f;
+	}
 	
 	void distort_p(Vector4& pt)
 	{
@@ -91,23 +117,7 @@ public:
 		// Divide out the W coordinate
 		Vector2 uv(pt.x / pt.w, pt.y / pt.w);
 		
-		// Distortion applies to TOTALLY everything in the scene, isolated
-		// by an XY plane at the camera's eye (only vertices in the front of the cam
-		// are processed. This means vertices far outside the frustum 
-		// might bend so extremely that they come back into the image!.
-		// So what we will do is culling away all
-		// the vertices that are too far out of the camera frustum.
-		// We want to cull away all the vertices that are outside the frustum, plus a good bit
-		// of a cushion. First we compute where the corners will land.
-		// TODO: cache this computation!
-		Vector2 max_corner(1.0f, k_aspect);
-		distorter.apply_disto(max_corner);
-		
-		// Then we add 1 as a cushion to isolate the distortion to 2X the maximum corners.
-		max_corner.x += 1.0f;
-		max_corner.y += 1.0f;
-		
-		if(fabs(uv.x) < max_corner.x && fabs(uv.y) < max_corner.y) {
+		if(fabs(uv.x) < max_corner_u_ && fabs(uv.y) < max_corner_v_) {
 			// Apply the distortion since the vector is ALREADY in the -1..1 space.
 			distorter.apply_disto(uv);
 		}
@@ -129,6 +139,8 @@ public:
 	static void sy_camera_nlens_func(Scene* scene, CameraOp* cam, MatrixArray* transforms, VArray* v, int n, void*)
 	{
 		SyCamera* sy_cam = dynamic_cast<SyCamera*>(cam);
+		sy_cam->update_distortion_limits();
+		
 		for (int i=0; i < n; ++i) {
 			// We need to apply distortion in clip space, so do that. We will perform it on
 			// point local values, not on P because we want our Z and W to be computed out
