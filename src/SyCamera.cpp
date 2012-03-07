@@ -100,7 +100,10 @@ public:
 	// and prevent the rollaround from occuring. 
 	// We also cache these limits based on the distortion
 	// kappas.	Note that for EXTREME fisheyes wraparound can still occur but
-	// we consider it a corner case at the moment
+	// we consider it a corner case at the moment.
+	// What is actually needed is finding a limit of the distortion function
+	// where the pin-cushion bends inwards (changes polarity), but we'll do that later.
+	// Maybe.
 	void update_distortion_limits()
 	{
 		distorter.set_coefficients(k_coeff, k_cube, k_aspect);
