@@ -7,7 +7,7 @@
 NDKDIR ?= /Applications/Nuke6.3v4/Nuke6.3v4.app/Contents/MacOS
 MYCXX ?= g++-4.0
 LINK ?= g++-4.0
-CXXFLAGS ?= -g -c -DUSE_GLEW -I$(NDKDIR)/include -isysroot /Developer/SDKs/MacOSX10.5.sdk -arch x86_64
+CXXFLAGS ?= -g -c -Werror -DUSE_GLEW -I$(NDKDIR)/include -isysroot /Developer/SDKs/MacOSX10.5.sdk -arch x86_64
 LINKFLAGS ?= -L$(NDKDIR) -Wl,-syslibroot,/Developer/SDKs/MacOSX10.5.sdk -arch x86_64
 LIBS ?= -lDDImage -lGLEW
 LINKFLAGS += -bundle
