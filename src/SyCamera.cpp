@@ -94,7 +94,8 @@ public:
 		// Distortion applies to TOTALLY everything in the scene, isolated
 		// by an XY plane at the camera's eye (only vertices in the front of the cam
 		// are processed. This means vertices far outside the frustum 
-		// might bend backwards!. So what we will do is culling away all
+		// might bend so extremely that they come back into the image!.
+		// So what we will do is culling away all
 		// the vertices that are too far out of the camera frustum.
 		// We want to cull away all the vertices that are outside the frustum, plus a good bit
 		// of a cushion. First we compute where the corners will land.
