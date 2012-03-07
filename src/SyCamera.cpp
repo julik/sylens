@@ -102,7 +102,7 @@ public:
 		Vector2 max_corner(1.0f, k_aspect);
 		distorter.apply_disto(max_corner);
 		
-		// Then we add 1 as a cushio to isolate the distortion to 2X the maximum corners.
+		// Then we add 1 as a cushion to isolate the distortion to 2X the maximum corners.
 		max_corner.x += 1.0f;
 		max_corner.y += 1.0f;
 		
