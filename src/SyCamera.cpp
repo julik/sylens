@@ -99,6 +99,7 @@ public:
 		// the vertices that are too far out of the camera frustum.
 		// We want to cull away all the vertices that are outside the frustum, plus a good bit
 		// of a cushion. First we compute where the corners will land.
+		// TODO: cache this computation!
 		Vector2 max_corner(1.0f, k_aspect);
 		distorter.apply_disto(max_corner);
 		
