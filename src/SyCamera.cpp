@@ -87,17 +87,25 @@ public:
 	void distort_p(Vector4& pt)
 	{
 		distorter.set_coefficients(k_coeff, k_cube, k_aspect);
+		
 		// Divide out the W coordinate
 		Vector2 uv(pt.x / pt.w, pt.y / pt.w);
 		
 		// Distortion applies to TOTALLY everything in the scene, isolated
 		// by an XY plane at the camera's eye (only vertices in the front of the cam
 		// are processed. This means vertices far outside the frustum 
-		// might bend backwards! So we will only distort
-		// within 3x the frustum.
-		// TODO: replace with proper frustum culling.
-		const double max_off_center = 3.0f;
-		if(fabs(uv.x) < max_off_center && fabs(uv.y) < max_off_center) {
+		// might bend backwards!. So what we will do is culling away all
+		// the vertices that are too far out of the camera frustum.
+		// We want to cull away all the vertices that are outside the frustum, plus a good bit
+		// of a cushion. First we compute where the corners will land.
+		Vector2 max_corner(1.0f, k_aspect);
+		distorter.apply_disto(max_corner);
+		
+		// Then we add 1 as a cushio to isolate the distortion to 2X the maximum corners.
+		max_corner.x += 1.0f;
+		max_corner.y += 1.0f;
+		
+		if(fabs(uv.x) < max_corner.x && fabs(uv.y) < max_corner.y) {
 			// Apply the distortion since the vector is ALREADY in the -1..1 space.
 			distorter.apply_disto(uv);
 		}
