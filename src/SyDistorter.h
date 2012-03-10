@@ -26,7 +26,7 @@ class SyDistorter
 
 private:
 
-	double k_, k_cube_, aspect_;
+	double k_, k_cube_, aspect_, center_shift_u_, center_shift_v_;
 	Lut lut;
 	
 public:
@@ -34,7 +34,7 @@ public:
 	SyDistorter();
 	~SyDistorter();
 	
-	void set_coefficients(double k, double k_cube, double aspect);
+	void set_coefficients(double k, double k_cube, double aspect, double ushift, double vshift);
 	void remove_disto(Vector2&);
 	void apply_disto(Vector2&);
 	void append(Hash&);

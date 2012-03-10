@@ -29,12 +29,12 @@ using namespace DD::Image;
 class SyCamera : public CameraOp
 {
 private:
-	double max_corner_u_, max_corner_v_;
+	double max_corner_u_, max_corner_v_, centerpoint_shift_u_, centerpoint_shift_v_;
+	double k_coeff, k_cube, k_aspect;
 	
 public:
 	static const Description description;
 
-	double k_coeff, k_cube, k_aspect;
 	SyDistorter distorter;
 	
 	const char* Class() const
@@ -52,6 +52,8 @@ public:
 		k_coeff = 0.0f;
 		k_cube = 0.0f;
 		k_aspect = 1.78f; // TODO: retreive from Format
+		centerpoint_shift_v_ = 0;
+		centerpoint_shift_u_ = 0;
 	}
 	
 	void append(Hash& hash)
@@ -80,6 +82,15 @@ public:
 		_aKnob->label("aspect");
 		_aKnob->tooltip("Set to the aspect of your distorted plate (like 1.78 for 16:9)");
 		
+		Knob* _uKnob = Float_knob( f, &centerpoint_shift_u_, "ushift" );
+		_uKnob->label("horizontal shift");
+		_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
+		
+		Knob* _vKnob = Float_knob( f, &centerpoint_shift_v_, "vshift" );
+		_vKnob->label("vertical shift");
+		_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
+		
+		
 		Divider(f, 0);
 		
 		std::ostringstream ver;
@@ -106,7 +117,7 @@ public:
 	// Maybe.
 	void update_distortion_limits()
 	{
-		distorter.set_coefficients(k_coeff, k_cube, k_aspect);
+		distorter.set_coefficients(k_coeff, k_cube, k_aspect, centerpoint_shift_u_, centerpoint_shift_v_);
 		Vector2 max_corner(1.0f, k_aspect);
 		distorter.apply_disto(max_corner);
 		max_corner_u_ = max_corner.x + 1.0f;
@@ -115,8 +126,6 @@ public:
 	
 	void distort_p(Vector4& pt)
 	{
-		distorter.set_coefficients(k_coeff, k_cube, k_aspect);
-		
 		// Divide out the W coordinate
 		Vector2 uv(pt.x / pt.w, pt.y / pt.w);
 		

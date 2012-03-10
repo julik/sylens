@@ -67,6 +67,9 @@ class SyLens : public Iop
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
 	
+	// Movable centerpoint offsets
+	double centerpoint_shift_u_, centerpoint_shift_v_;
+	
 	// Stuff driven by knobbz
 	double kCoeff, kCubeCoeff, kUnCrop;
 	bool kDbg, kTrimToFormat, kOnlyFormat;
@@ -96,12 +99,14 @@ public:
 		kDbg = false;
 		kTrimToFormat = false;
 		kOnlyFormat = false;
+		centerpoint_shift_u_ = 0;
+		centerpoint_shift_v_ = 0;
 		// }} END
 		
 		_aspect = 1.33f;
 		_lastScanlineSize = 0;
 		
-		distorter_.set_coefficients(kCoeff, kCubeCoeff, _aspect);
+		distorter_.set_coefficients(kCoeff, kCubeCoeff, _aspect, centerpoint_shift_u_, centerpoint_shift_v_);
 	}
 	
 	void _computeAspects();
@@ -265,6 +270,14 @@ void SyLens::knobs( Knob_Callback f) {
 	Knob* kOnlyFormatKnob = Bool_knob( f, &kOnlyFormat, "onlyformat");
 	kOnlyFormatKnob->set_flag(KNOB_HIDDEN);
 	
+	Knob* _uKnob = Float_knob( f, &centerpoint_shift_u_, "ushift" );
+	_uKnob->label("horizontal shift");
+	_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
+	
+	Knob* _vKnob = Float_knob( f, &centerpoint_shift_v_, "vshift" );
+	_vKnob->label("vertical shift");
+	_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
+	
 	// Add the filter selection menu that comes from the filter obj itself
 	filter.knobs( f );
 	
@@ -272,6 +285,7 @@ void SyLens::knobs( Knob_Callback f) {
 	kTrimKnob->label("trim bbox");
 	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
 	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+	
 	
 	Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
 	kDbgKnob->label("debug info");
@@ -350,7 +364,7 @@ void SyLens::_validate(bool for_real)
 	_computeAspects();
 	
 	// Configure the distortion
-	distorter_.set_coefficients(kCoeff, kCubeCoeff, _aspect);
+	distorter_.set_coefficients(kCoeff, kCubeCoeff, _aspect, centerpoint_shift_u_, centerpoint_shift_v_);
 	
 	if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", plate_width_, plate_height_);
 	

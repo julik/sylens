@@ -9,14 +9,18 @@ static const unsigned int STEPS = 32;
 
 SyDistorter::SyDistorter()
 {
-	set_coefficients(0.0f, 0.0f, 1.78);
+	set_coefficients(0.0f, 0.0f, 1.78, 0, 0);
 }
 
-void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
+void SyDistorter::set_coefficients(double k, double k_cube, double aspect, double ushift, double vshift)
 {
 	// Do not reconfigure the object unless it's really needed
 	// TODO: float equality?
-	if (k == k_ && k_cube == k_cube_ && aspect == aspect_) return;
+	if (k == k_ && 
+		k_cube == k_cube_ && 
+		aspect == aspect_ && 
+		ushift == center_shift_u_ && 
+		vshift == center_shift_v_) return;
 	
 	// We have a shared data structure (the lookup table vector),
 	// when recomputing it we need to lock the world.
@@ -27,6 +31,9 @@ void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
 	k_ = k;
 	k_cube_ = k_cube;
 	aspect_ = aspect;
+	center_shift_u_ = ushift;
+	center_shift_v_ = vshift;
+	
 	recompute();
 	
 	lock->unlock();
@@ -44,10 +51,18 @@ SyDistorter::~SyDistorter()
 }
 void SyDistorter::remove_disto(Vector2& pt)
 {
+	// Bracket in centerpoint adjustment
+	pt.x += center_shift_u_;
+	pt.y += center_shift_v_;
+	
 	double rp2 = aspect_ * aspect_ * pt.x * pt.x + pt.y * pt.y;
 	double inv_f = undistort_sampled(rp2);
+	
 	pt.x = pt.x * inv_f;
 	pt.y = pt.y * inv_f;
+	
+	pt.x -= center_shift_u_;
+	pt.y -= center_shift_v_;
 }
 
 double SyDistorter::undistort_sampled(double rp2)
@@ -151,8 +166,15 @@ void SyDistorter::apply_disto(Vector2& pt)
 		f = lerp(r2, left->r2, right->r2, left->f, right->f);
 	}
 	
+	// Bracket in centerpoint adjustment
+	pt.x -= center_shift_u_;
+	pt.y -= center_shift_v_;
+	
 	pt.x = pt.x * f;
 	pt.y = pt.y * f;
+	
+	pt.x += center_shift_u_;
+	pt.y += center_shift_v_;
 }
 
 double SyDistorter::distort_radial(double r2)
@@ -172,6 +194,8 @@ void SyDistorter::append(Hash& hash)
 	hash.append(k_);
 	hash.append(k_cube_);
 	hash.append(aspect_);
+	hash.append(center_shift_u_);
+	hash.append(center_shift_v_);
 }
 
 double SyDistorter::lerp(const double x, const double left_x, const double right_x, const double left_y, const double right_y)

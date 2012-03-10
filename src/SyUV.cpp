@@ -25,7 +25,7 @@ class SyUV : public ModifyGeo
 {
 private:
 	
-	double k_coeff, k_cube, aspect;
+	double k_coeff, k_cube, aspect, centerpoint_shift_u_, centerpoint_shift_v_;
 	const char* uv_attrib_name;
 	
 	// The distortion engine
@@ -88,6 +88,14 @@ public:
 		_uvAttributeName->label("uv attrib name");
 		_uvAttributeName->tooltip("Set to the name of the UV attribute you want to modify (default is usually good)");
 		
+		Knob* _uKnob = Float_knob( f, &centerpoint_shift_u_, "ushift" );
+		_uKnob->label("horizontal shift");
+		_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
+		
+		Knob* _vKnob = Float_knob( f, &centerpoint_shift_v_, "vshift" );
+		_vKnob->label("vertical shift");
+		_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
+		
 		Divider(f, 0);
 		
 		std::ostringstream ver;
@@ -147,7 +155,7 @@ public:
 	{
 		const char* uv_attrib_name = "uv";
 		
-		distorter_.set_coefficients(k_coeff, k_cube, aspect);
+		distorter_.set_coefficients(k_coeff, k_cube, aspect, centerpoint_shift_u_, centerpoint_shift_v_);
 		
 		// Call the engine on all the caches:
 		for (unsigned i = 0; i < out.objects(); i++) {
@@ -189,20 +197,20 @@ public:
 		// UV's go 0..1. SY imageplane coordinates go -1..1
 		const double factor = 2;
 		// Centerpoint is in the middle.
-		// TODO: allow for centerpoint shift from the knobs
-		const double centerpoint_shift = 0.5f;
+		const double centerpoint_shift_in_uv_space = 0.5f;
 		
 		// Move the coordinate by 0.5 since Syntheyes assume 0
 		// to be in the optical center of the image, and then scale them to -1..1
-		double x = ((pt.x / pt.w) - centerpoint_shift) * factor;
-		double y = ((pt.y / pt.w) - centerpoint_shift) * factor;
+		double x = ((pt.x / pt.w) - centerpoint_shift_in_uv_space) * factor;
+		double y = ((pt.y / pt.w) - centerpoint_shift_in_uv_space) * factor;
+		
 		Vector2 syntheyes_uv(x, y);
 		
 		// Call the SY algo
 		distorter_.apply_disto(syntheyes_uv);
 		
-		syntheyes_uv.x = ((syntheyes_uv.x / factor) + centerpoint_shift) * pt.w;
-		syntheyes_uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift) * pt.w;
+		syntheyes_uv.x = ((syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space) * pt.w;
+		syntheyes_uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space) * pt.w;
 		
 		pt.set(syntheyes_uv.x, syntheyes_uv.y, pt.z, pt.w);
 	}
