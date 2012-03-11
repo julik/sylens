@@ -71,8 +71,8 @@ class SyLens : public Iop
 	double centerpoint_shift_u_, centerpoint_shift_v_;
 	
 	// Stuff driven by knobbz
-	double kCoeff, kCubeCoeff, kUnCrop;
-	bool kDbg, kTrimToFormat, kOnlyFormat;
+	double k_coeff_, k_cube_coeff_, k_uncrop_factor_;
+	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
 	int kMode;
 	
 	int _lastScanlineSize;
@@ -89,12 +89,12 @@ public:
 		// These are sane defaults - they showcase distortion and uncrop but do not use cubics.
 		// cast in stone BEGIN {{
 		kMode = UNDIST;
-		kCoeff = -0.01826;
-		kCubeCoeff = 0.0f;
-		kUnCrop = 0.038f;
-		kDbg = false;
-		kTrimToFormat = false;
-		kOnlyFormat = false;
+		k_coeff_ = -0.01826;
+		k_cube_coeff_ = 0.0f;
+		k_uncrop_factor_ = 0.038f;
+		k_enable_debug_ = false;
+		k_trim_bbox_to_format_ = false;
+		k_only_format_output_ = false;
 		centerpoint_shift_u_ = 0;
 		centerpoint_shift_v_ = 0;
 		// }} END
@@ -102,7 +102,7 @@ public:
 		_aspect = 1.33f;
 		_lastScanlineSize = 0;
 		
-		distorter_.set_coefficients(kCoeff, kCubeCoeff, _aspect, centerpoint_shift_u_, centerpoint_shift_v_);
+		distorter_.set_coefficients(k_coeff_, k_cube_coeff_, _aspect, centerpoint_shift_u_, centerpoint_shift_v_);
 	}
 	
 	void _computeAspects();
@@ -198,7 +198,7 @@ void SyLens::undistort_px_into_destination(Vector2& absXY) {
 void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
 	if(r != _lastScanlineSize) {
-		if(kDbg) printf("SyLens: Rendering scanline up to %d X pix starting at %d on X\n", r, x);
+		if(k_enable_debug_) printf("SyLens: Rendering scanline up to %d X pix starting at %d on X\n", r, x);
 		_lastScanlineSize = r;
 	}
 	
@@ -250,21 +250,15 @@ void SyLens::knobs( Knob_Callback f) {
 	_modeSel->label("mode");
 	_modeSel->tooltip("Pick your poison");
 	
-	Knob* _kKnob = Float_knob( f, &kCoeff, "k" );
+	Knob* _kKnob = Float_knob( f, &k_coeff_, "k" );
 	_kKnob->label("k");
 	_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
 	_kKnob->set_range(-0.5f, 0.5f, true);
 	
-	Knob* _kCubeKnob = Float_knob( f, &kCubeCoeff, "kcube" );
+	Knob* _kCubeKnob = Float_knob( f, &k_cube_coeff_, "kcube" );
 	_kCubeKnob->label("cubic k");
 	_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
 	_kKnob->set_range(-0.4f, 0.4f, true);
-	
-	// TODO: these two are to be removed from SyLens 2.
-	Knob* _kUncropKnob = Float_knob( f, &kUnCrop, "uncrop" );
-	_kUncropKnob->set_flag(KNOB_HIDDEN);
-	Knob* kOnlyFormatKnob = Bool_knob( f, &kOnlyFormat, "onlyformat");
-	kOnlyFormatKnob->set_flag(KNOB_HIDDEN);
 	
 	Knob* _uKnob = Float_knob( f, &centerpoint_shift_u_, "ushift" );
 	_uKnob->label("horizontal shift");
@@ -277,15 +271,14 @@ void SyLens::knobs( Knob_Callback f) {
 	// Add the filter selection menu that comes from the filter obj itself
 	filter.knobs( f );
 	
-	Knob* kTrimKnob = Bool_knob( f, &kTrimToFormat, "trim");
+	Knob* kTrimKnob = Bool_knob( f, &k_trim_bbox_to_format_, "trim");
 	kTrimKnob->label("trim bbox");
 	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
 	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
-	
-	Knob* kDbgKnob = Bool_knob( f, &kDbg, "debug");
-	kDbgKnob->label("debug info");
-	kDbgKnob->tooltip("When checked, SyLens will output various debug info to STDOUT");
+	Knob* k_enable_debug_Knob = Bool_knob( f, &k_enable_debug_, "debug");
+	k_enable_debug_Knob->label("debug info");
+	k_enable_debug_Knob->tooltip("When checked, SyLens will output various debug info to STDOUT");
 	
 	Divider(f, 0);
 	
@@ -293,6 +286,13 @@ void SyLens::knobs( Knob_Callback f) {
 	std::ostringstream ver;
 	ver << "SyLens v." << VERSION << " " << __DATE__ << " " << __TIME__;
 	Text_knob(f, ver.str().c_str());
+	
+	// Obsolete knobs, kept to prevent the warnings
+	// when using older scripts
+	Knob* _kUncropKnob = Float_knob( f, &k_uncrop_factor_, "uncrop" );
+	_kUncropKnob->set_flag(KNOB_HIDDEN);
+	Knob* k_only_format_output_Knob = Bool_knob( f, &k_only_format_output_, "onlyformat");
+	k_only_format_output_Knob->set_flag(KNOB_HIDDEN);
 }
 
 // called whenever a knob is changed
@@ -327,7 +327,7 @@ void SyLens::_computeAspects() {
 
 	_aspect = float(plate_width_) / float(plate_height_) *  f.pixel_aspect();
 	
-	if(kDbg) printf("SyLens: true plate window with uncrop will be %dx%d\n", plate_width_, plate_height_);
+	if(k_enable_debug_) printf("SyLens: true plate window with uncrop will be %dx%d\n", plate_width_, plate_height_);
 }
 
 	
@@ -360,9 +360,9 @@ void SyLens::_validate(bool for_real)
 	_computeAspects();
 	
 	// Configure the distortion
-	distorter_.set_coefficients(kCoeff, kCubeCoeff, _aspect, centerpoint_shift_u_, centerpoint_shift_v_);
+	distorter_.set_coefficients(k_coeff_, k_cube_coeff_, _aspect, centerpoint_shift_u_, centerpoint_shift_v_);
 	
-	if(kDbg) printf("SyLens: _validate info box to  %dx%d\n", plate_width_, plate_height_);
+	if(k_enable_debug_) printf("SyLens: _validate info box to  %dx%d\n", plate_width_, plate_height_);
 	
 	// Time to define how big our output will be in terms of format. Format will always be the whole plate.
 	// If we only use a bboxed piece of the image we will limit our request to that. But first of all we need to
@@ -442,9 +442,9 @@ void SyLens::_validate(bool for_real)
 	
 	// If trim is enabled we intersect our obox with the format so that there is no bounding box
 	// outside the crop area. Thiis handy for redistorted material.
-	if(kTrimToFormat) obox.intersect(input0().format());
+	if(k_trim_bbox_to_format_) obox.intersect(input0().format());
 	
-	if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
+	if(k_enable_debug_) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
 	
 	info_.set(obox);
 }
@@ -452,7 +452,7 @@ void SyLens::_validate(bool for_real)
 void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int count)
 {
 	
-	if(kDbg) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
+	if(k_enable_debug_) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 	ChannelSet c1(channels); in_channels(0,c1);
 	
 	Vector2 bl(x, y), br(r, y), tr(r, t), tl(x, t);
