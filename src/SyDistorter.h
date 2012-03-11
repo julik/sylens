@@ -34,7 +34,11 @@ public:
 	SyDistorter();
 	~SyDistorter();
 	
-	void set_coefficients(double k, double k_cube, double aspect, double ushift, double vshift);
+	// Sets the coefficients that affect the distortion lookup table.
+	void set_coefficients(double k, double k_cube, double aspect);
+	
+	// Sets centerpoint shifts
+	void set_center_shift(double u, double v);
 	void remove_disto(Vector2&);
 	void apply_disto(Vector2&);
 	void append(Hash&);

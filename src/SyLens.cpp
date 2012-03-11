@@ -78,7 +78,7 @@ class SyLens : public Iop
 	int _lastScanlineSize;
 	
 	// The distortion engine
-	SyDistorter distorter_;
+	SyDistorter distorter;
 	
 public:
 	SyLens( Node *node ) : Iop ( node )
@@ -101,8 +101,6 @@ public:
 		
 		_aspect = 1.33f;
 		_lastScanlineSize = 0;
-		
-		distorter_.set_coefficients(k_coeff_, k_cube_coeff_, _aspect, centerpoint_shift_u_, centerpoint_shift_v_);
 	}
 	
 	void _computeAspects();
@@ -118,7 +116,7 @@ public:
 		hash.append(VERSION);
 		hash.append(__DATE__);
 		hash.append(__TIME__);
-		distorter_.append(hash);
+		distorter.append(hash);
 		Iop::append(hash); // the super called he wants his pointers back
 	}
 	
@@ -182,14 +180,14 @@ void SyLens::distort_px_into_source(Vector2& absXY) {
 	// The gritty bits - get coordinates of the distorted pixel in the coordinates of the
 	// EXTENDED film back
 	absolute_px_to_centered_uv(absXY, plate_width_, plate_height_);
-	distorter_.apply_disto(absXY);
+	distorter.apply_disto(absXY);
 	centered_uv_to_absolute_px(absXY, plate_width_, plate_height_);
 }
 
 // This is still a little wrongish but less wrong than before
 void SyLens::undistort_px_into_destination(Vector2& absXY) {
 	absolute_px_to_centered_uv(absXY, plate_width_, plate_height_);
-	distorter_.remove_disto(absXY);
+	distorter.remove_disto(absXY);
 	centered_uv_to_absolute_px(absXY, plate_width_, plate_height_);
 }
 
@@ -360,7 +358,8 @@ void SyLens::_validate(bool for_real)
 	_computeAspects();
 	
 	// Configure the distortion
-	distorter_.set_coefficients(k_coeff_, k_cube_coeff_, _aspect, centerpoint_shift_u_, centerpoint_shift_v_);
+	distorter.set_coefficients(k_coeff_, k_cube_coeff_, _aspect);
+	distorter.set_center_shift(centerpoint_shift_u_, centerpoint_shift_v_);
 	
 	if(k_enable_debug_) printf("SyLens: _validate info box to  %dx%d\n", plate_width_, plate_height_);
 	

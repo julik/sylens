@@ -29,7 +29,7 @@ private:
 	const char* uv_attrib_name;
 	
 	// The distortion engine
-	SyDistorter distorter_;
+	SyDistorter distorter;
 	
 public:
 
@@ -155,7 +155,8 @@ public:
 	{
 		const char* uv_attrib_name = "uv";
 		
-		distorter_.set_coefficients(k_coeff, k_cube, aspect, centerpoint_shift_u_, centerpoint_shift_v_);
+		distorter.set_coefficients(k_coeff, k_cube, aspect);
+		distorter.set_center_shift(centerpoint_shift_u_, centerpoint_shift_v_);
 		
 		// Call the engine on all the caches:
 		for (unsigned i = 0; i < out.objects(); i++) {
@@ -207,7 +208,7 @@ public:
 		Vector2 syntheyes_uv(x, y);
 		
 		// Call the SY algo
-		distorter_.apply_disto(syntheyes_uv);
+		distorter.apply_disto(syntheyes_uv);
 		
 		syntheyes_uv.x = ((syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space) * pt.w;
 		syntheyes_uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space) * pt.w;

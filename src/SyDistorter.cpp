@@ -9,18 +9,16 @@ static const unsigned int STEPS = 32;
 
 SyDistorter::SyDistorter()
 {
-	set_coefficients(0.0f, 0.0f, 1.78, 0, 0);
+	set_coefficients(0.0f, 0.0f, 1.78);
+	center_shift_u_ = 0;
+	center_shift_v_ = 0;
 }
 
-void SyDistorter::set_coefficients(double k, double k_cube, double aspect, double ushift, double vshift)
+void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
 {
 	// Do not reconfigure the object unless it's really needed
 	// TODO: float equality?
-	if (k == k_ && 
-		k_cube == k_cube_ && 
-		aspect == aspect_ && 
-		ushift == center_shift_u_ && 
-		vshift == center_shift_v_) return;
+	if (k == k_ && k_cube == k_cube_ && aspect == aspect_) return;
 	
 	// We have a shared data structure (the lookup table vector),
 	// when recomputing it we need to lock the world.
@@ -31,13 +29,17 @@ void SyDistorter::set_coefficients(double k, double k_cube, double aspect, doubl
 	k_ = k;
 	k_cube_ = k_cube;
 	aspect_ = aspect;
-	center_shift_u_ = ushift;
-	center_shift_v_ = vshift;
 	
 	recompute();
 	
 	lock->unlock();
 	delete lock;
+}
+
+void SyDistorter::set_center_shift(double u, double v)
+{
+	center_shift_u_ = u;
+	center_shift_v_ = v;
 }
 
 SyDistorter::~SyDistorter()

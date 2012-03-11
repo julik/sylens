@@ -117,7 +117,8 @@ public:
 	*/
 	void update_distortion_limits()
 	{
-		distorter.set_coefficients(k_coeff, k_cube, k_aspect, centerpoint_shift_u_, centerpoint_shift_v_);
+		distorter.set_coefficients(k_coeff, k_cube, k_aspect);
+		distorter.set_center_shift(centerpoint_shift_u_, centerpoint_shift_v_);
 		Vector2 max_corner(1.0f, k_aspect);
 		distorter.apply_disto(max_corner);
 		max_corner_u_ = max_corner.x + 1.0f;
