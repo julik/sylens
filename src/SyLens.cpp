@@ -77,10 +77,6 @@ class SyLens : public Iop
 	
 	int _lastScanlineSize;
 	
-	// Used to store the output format. This needs to be kept between
-	// calls to _request and cannot reside on the stack, so... 
-	Format out_format_;
-	
 	// The distortion engine
 	SyDistorter distorter_;
 	
@@ -380,12 +376,6 @@ void SyLens::_validate(bool for_real)
 	if(ow % 2 != 0) ow +=1;
 	if(oh % 2 != 0) oh +=1;
 	
-	// Crucial. Define the format in the info_ - this is what Nuke uses
-	// to know how big OUR output will be. We also pretty much NEED to store it
-	// in an instance var because we cannot keep it on the stack (segfault!)
-	out_format_ = Format(ow, oh, input0().format().pixel_aspect());
-	info_.format( out_format_ );
-	
 	// For the case when we are working with a 8k by 4k plate with a SMALL CG pink elephant rrright in the left
 	// corner we want to actually translate the bbox of the elephant to our distorted pipe downstream. So we need to
 	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
@@ -452,7 +442,7 @@ void SyLens::_validate(bool for_real)
 	
 	// If trim is enabled we intersect our obox with the format so that there is no bounding box
 	// outside the crop area. Thiis handy for redistorted material.
-	if(kTrimToFormat) obox.intersect(out_format_);
+	if(kTrimToFormat) obox.intersect(input0().format());
 	
 	if(kDbg) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
 	
