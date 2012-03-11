@@ -98,23 +98,23 @@ public:
 		Text_knob(f, ver.str().c_str());
 	}
 
-	// Distortion applies to TOTALLY everything in the scene, isolated
-	// by an XY plane at the camera's eye (only vertices in the front of the cam
-	// are processed. This means vertices far outside the frustum 
-	// might bend so extremely that they come back into the image!.
-	// So what we will do is culling away all
-	// the vertices that are too far out of the camera frustum.
-	// We want to cull away all the vertices that are outside the frustum, plus a good bit
-	// of a cushion. We compute where the extremes will be (u1v1)
-	// and add 1 to it, to only distort points which are within the imaginary frustum
-	// of two times our actual frustum size. This way we capture enough points
-	// and prevent the rollaround from occuring. 
-	// We also cache these limits based on the distortion
-	// kappas.	Note that for EXTREME fisheyes wraparound can still occur but
-	// we consider it a corner case at the moment.
-	// What is actually needed is finding a limit of the distortion function
-	// where the pin-cushion bends inwards (changes polarity), but we'll do that later.
-	// Maybe.
+	/*
+		Distortion applies to TOTALLY everything in the scene, isolated
+		by an XY plane at the camera's eye (only vertices in the front of the cam
+		are processed). This means vertices far outside the frustum 
+		might bend so extremely that they come back into the image!.
+		So what we will do is culling away all
+		the vertices that are too far out of the camera frustum.
+		A non-scientific but efficient way to do it is to compute where the extremes will be (u1v1)
+		at the corners and add 1 to it, and limit our distortion to the coordinates lying inside that limit.
+		This way we capture enough points and prevent the rollaround from occuring. 
+		We also cache these limits based on the distortion
+		kappas. Note that for EXTREME fisheyes wraparound can still occur but
+		we consider it a corner case at the moment.
+		What is actually needed is finding a critical point of the distortion function
+		where the F(r2) changes sign, but we'll do that later.
+		Maybe.
+	*/
 	void update_distortion_limits()
 	{
 		distorter.set_coefficients(k_coeff, k_cube, k_aspect, centerpoint_shift_u_, centerpoint_shift_v_);
