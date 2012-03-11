@@ -75,8 +75,6 @@ class SyLens : public Iop
 	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
 	int kMode;
 	
-	int _lastScanlineSize;
-	
 	// The distortion engine
 	SyDistorter distorter;
 	
@@ -100,7 +98,6 @@ public:
 		// }} END
 		
 		_aspect = 1.33f;
-		_lastScanlineSize = 0;
 	}
 	
 	void _computeAspects();
@@ -177,8 +174,6 @@ void SyLens::centered_uv_to_absolute_px(Vector2& xy, int w, int h)
 // Get a coordinate that we need to sample from the SOURCE distorted image to get at the absXY
 // values in the RESULT
 void SyLens::distort_px_into_source(Vector2& absXY) {
-	// The gritty bits - get coordinates of the distorted pixel in the coordinates of the
-	// EXTENDED film back
 	absolute_px_to_centered_uv(absXY, plate_width_, plate_height_);
 	distorter.apply_disto(absXY);
 	centered_uv_to_absolute_px(absXY, plate_width_, plate_height_);
@@ -195,11 +190,6 @@ void SyLens::undistort_px_into_destination(Vector2& absXY) {
 // r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
 void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
-	if(r != _lastScanlineSize) {
-		if(k_enable_debug_) printf("SyLens: Rendering scanline up to %d X pix starting at %d on X\n", r, x);
-		_lastScanlineSize = r;
-	}
-	
 	
 	foreach(z, channels) out.writable(z);
 	
