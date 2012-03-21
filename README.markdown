@@ -15,13 +15,15 @@ SyLens node works with image inputs.
 Punch in the lens distortion into the lens settings panel
 
 ![Kappa Value][2]
+
 or let Syntheyes compute it for you...
 
-  
 ![Auto Disto][3]
+
 Then just punch in the computed distortion value into the k knob
 
 ![Just K][4]
+
 You will probably note that the bounding box of your output will stick outside the format - this is perfectly fine, read below how to deal with that
 
 ### Redistorting footage
@@ -33,6 +35,7 @@ After all is done you might want to redistort either your whole comp or only the
 The workflow in a nutshell:
 
 ![Cropping workflow][5]
+
 ### Explanation of the UI controls
 
 #### mode
@@ -78,6 +81,7 @@ SyLens creates images which have overflow bounding box, that is - **bounding box
 To spare you some grief, here's how your DAG should look:
 
 ![Projection Dag][6]
+
 I am highlighting the special parameters from the node bin which differ from the defaults.
 
 Important points:
@@ -100,6 +104,7 @@ It is built to account for *projected UVs*.
 Typically you would be using it like this:
 
 ![SyUV DAG][8]
+
 Here we project the UVs from our projection camera.
 
 Make sure that the camera you are projecting UVs from has it's **vertical aperture** set correctly. If you are seeing mismatches between your projected UVs and the actual image, this is the culprit.
@@ -147,18 +152,23 @@ The SyCamera node performs distortion in camera space. You can use it just like 
 Here's how a render looks with the standard Nuke camera:
 
 ![Cam Std][12]
+
 ...and here's how it looks rendered with the SyCamera:
 
 ![Cam Sy][13]
+
 The only difference with the standard Nuke camera is the addition of the SyLens controls tab. Use it the same way you would be using SyLens.
 
 ![Cam Controls][14]
+
 Note that in order to achieve good redistortion you need to have enough vertices in your geometry. For example, a Cylinder having only one span vertically only distorts at the caps with straight lines being traced between vertices:
 
 ![Cam Few Subdivs][15]
+
 ..while a well-subdivided Cylinder will distort like this:
 
 ![Cam Many Subdivs][16]
+
 ### Explanation of the UI controls
 
 #### k
