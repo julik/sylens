@@ -73,6 +73,16 @@ dt {
 		<dt>kcube</dt>
 		<dd>Cubic distortion modifier. If you used this in Syntheyes you can apply it here as well. <b>Note that this will not be reapplied during redistortion</b></dd>
 		
+		<dt>ushift</dt>
+		<dd>Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor
+			(some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint left or right with regards to the
+			center of your digital plate.</dd>
+			
+		<dt>vshift</dt>
+		<dd>Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor
+			(some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint up or down with regards to the
+			center of your digital plate.</dd>
+		
 		<dt>filter</dt>
 		<dd>This selects the filtering algorithm used for sampling the source image, pick one that gives a better-looking result</dd>
 		
@@ -162,7 +172,17 @@ dt {
 		<dt>aspect</dt>
 		<dd>The Syntheyes algorithm <strong>requires</strong> the aspect ratio of your distorted plate. This cannot be automatically deciphered from the UVs so
 			you need to dial it in manually. Use your image's aspect ratio.</dd>
+		
+		<dt>ushift</dt>
+		<dd>Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor
+			(some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint left or right with regards to the
+			center of your digital plate.</dd>
 
+		<dt>vshift</dt>
+		<dd>Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor
+			(some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint up or down with regards to the
+			center of your digital plate.</dd>
+	
 		<dt>uv attrib</dt>
 		<dd>Nuke allows for arbitrary UV attributes to be added to the main geometry. If you want to manipulate a non-standard UV channel punch it's name in
 			here. Normally you would leave this parameter at it's default setting.</dd>
@@ -204,6 +224,17 @@ dt {
 		<dt>aspect</dt>
 		<dd>The Syntheyes algorithm <strong>requires</strong> the aspect ratio of your distorted plate. This cannot be automatically deciphered from the Camera node so
 			you need to dial it in manually. Use your image's aspect ratio.</dd>
+		
+		<dt>ushift</dt>
+		<dd>Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor
+			(some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint left or right with regards to the
+			center of your digital plate.</dd>
+			
+		<dt>vshift</dt>
+		<dd>Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor
+			(some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint up or down with regards to the
+			center of your digital plate.</dd>
+
 	</dl>
 	
 	<h2>Building the plugins</h2>
