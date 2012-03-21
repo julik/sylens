@@ -142,11 +142,10 @@ public:
 	
 	/* The vertex shader that does lens disto.
 	By default it does this (using the point-local PL vector, which is 3-dimensional)
+	Note that we go from PL (point-local) to P (point-global)
 		for (int i=0; i < n; ++i) {
-			Vector4 p_clip = transforms->matrix(LOCAL_TO_CLIP).transform(v[i].PL(), 1);
-			// or alternatively transforms->matrix(LOCAL_TO_CLIP).transform(v[i].P());
-			// but this destroys the proper Z/W relationship and motion vectors won't come out.
-			v[i].P() = transforms->matrix(CLIP_TO_TO_SCREEN).transform(v[i].P());
+			Vector4 p_clip = transforms->matrix(LOCAL_TO_CLIP).transform(v[i].PL());
+			v[i].P() = transforms->matrix(CLIP_TO_TO_SCREEN).transform(p_clip);
 		}
 	*/
 	static void sy_camera_nlens_func(Scene* scene, CameraOp* cam, MatrixArray* transforms, VArray* v, int n, void*)
