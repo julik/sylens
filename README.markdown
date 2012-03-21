@@ -70,10 +70,6 @@ When you apply distortion to the image, the bounding box that SyLens receives wi
 
 You can see what SyLens is doing. When you enable this, debug info will be written to STDOUT. If you start Nuke from the terminal then this terminal will contain all the relevant output.
 
-only format
-
-If all you need is knowing the size of the background (for example to use as a background for the ScanlineRender node), but no actual pixels. Checking this box will make Syntheyes output the format boxes only, but no computation of pixels will be done and no upstream pixels will be requested or copied (and thing will speed up tenfold). When you use this as input for the 3D you can also enable and disable this knob to check your alignment with the background.
-
 ### Standard projection workflow caveats
 
 SyLens creates images which have overflow bounding box, that is - **bounding box that extends outside the image format.** For that reason creating a roundtrip projection setup needs a little work to get right.
