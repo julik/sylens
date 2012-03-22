@@ -58,7 +58,16 @@ public:
 		kShaderType = 0;
 
 	}
-
+	
+	/* virtual */
+	void append(Hash& hash)
+	{
+		hash.append(VERSION);
+		hash.append(__DATE__);
+		hash.append(__TIME__);
+		distorter_.append(hash);
+		Material::append(hash);
+	}
 
 	void _validate(bool for_real) {
 
