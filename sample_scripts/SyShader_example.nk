@@ -1,0 +1,261 @@
+#! /Applications/Nuke6.3v1/Nuke6.3v1.app/Contents/MacOS/Nuke6.3v1 -nx
+version 6.3 v1
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="0" y="22" w="1280" h="774" screen="0">
+        <splitter orientation="1">
+            <split size="808"/>
+            <splitter orientation="1">
+                <split size="40"/>
+                <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                    <page id="Toolbar.1"/>
+                </dock>
+                <split size="764"/>
+                <splitter orientation="2">
+                    <split size="374"/>
+                    <dock id="" activePageId="Viewer.1">
+                        <page id="Viewer.1"/>
+                    </dock>
+                    <split size="374"/>
+                    <dock id="" activePageId="DAG.1">
+                        <page id="DAG.1"/>
+                        <page id="Curve Editor.1"/>
+                        <page id="DopeSheet.1"/>
+                    </dock>
+                </splitter>
+            </splitter>
+            <split size="468"/>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /Users/ivan/Desktop/git/sylens2/sylens2/sample_scripts/SyShader_example.nk
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode1
+ tile_color 0x7171c600
+ label "SyShader - Fragment shader"
+ note_font_size 42
+ xpos 282
+ ypos -244
+ bdwidth 398
+ bdheight 519
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode2
+ tile_color 0x7171c600
+ label "SyShader - Vertex Shader"
+ note_font_size 42
+ xpos -631
+ ypos -254
+ bdwidth 398
+ bdheight 519
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode3
+ tile_color 0x40c628ff
+ label "Equivalent SyLens\nworkflow"
+ note_font_size 42
+ xpos -998
+ ypos -148
+ bdwidth 128
+ bdheight 411
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode4
+ tile_color 0x40c628ff
+ label "Equivalent SyLens\nworkflow"
+ note_font_size 42
+ xpos 937
+ ypos -189
+ bdwidth 128
+ bdheight 411
+}
+StickyNote {
+ inputs 0
+ name StickyNote1
+ label "Using vertex shader for undistortion\n+ a SyCamera for distortion\nensures a 1-to-1 roundtrip.\n\nOnly one filtering hit is applied throughout the 3D scene.\nIn this case, since there's no other transforms done to the card,\nthe result should be 1-to-1 to the original input."
+ note_font_size 21
+ xpos -712
+ ypos 292
+}
+StickyNote {
+ inputs 0
+ name StickyNote2
+ label "If no re-distortion is needed, setting SyShader to\n\"fragment shader mode\" is more precise, since distortion\nis applied to each fragment (pixel)\n\nThe output of this should match the result of an equivalent SyLens node set to \"undistort\""
+ note_font_size 21
+ xpos 111
+ ypos 308
+}
+CheckerBoard2 {
+ inputs 0
+ boxsize 128
+ name CheckerBoard2
+ xpos -449
+ ypos -174
+}
+Dot {
+ name Dot3
+ xpos -421
+ ypos -68
+}
+set N1d7c9270 [stack 0]
+Dot {
+ name Dot4
+ xpos -960
+ ypos -68
+}
+SyLens {
+ k 0.01826
+ name SyLens2
+ label undistort
+ xpos -988
+ ypos 39
+}
+SyLens {
+ mode redistort
+ k 0.01826
+ name SyLens3
+ label redistort
+ xpos -988
+ ypos 185
+}
+SyCamera {
+ inputs 0
+ k 0.01826
+ aspect 1.316195373
+ name SyCamera1
+ xpos -304
+ ypos 120
+}
+push $N1d7c9270
+SyShader {
+ k {{parent.SyLens2.k}}
+ kcube {{parent.SyLens2.kcube}}
+ ushift {{parent.SyLens2.ushift}}
+ vshift {{parent.SyLens2.vshift}}
+ name SyShader2
+ xpos -449
+ ypos 43
+}
+Card2 {
+ z 10
+ lens_in_focal {{parent.SyCamera1.focal}}
+ lens_in_haperture {{parent.SyCamera1.haperture}}
+ translate {{parent.SyCamera1.translate} {parent.SyCamera1.translate} {parent.SyCamera1.translate}}
+ rotate {{parent.SyCamera1.rotate} {parent.SyCamera1.rotate} {parent.SyCamera1.rotate}}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card2
+ xpos -449
+ ypos 140
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender2
+ xpos -449
+ ypos 237
+}
+CheckerBoard2 {
+ inputs 0
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ boxsize 128
+ name CheckerBoard1
+ xpos 464
+ ypos -164
+}
+Dot {
+ name Dot1
+ xpos 492
+ ypos -58
+}
+set N1edcd380 [stack 0]
+Dot {
+ name Dot2
+ xpos 990
+ ypos -58
+}
+SyLens {
+ kcube -0.02
+ name SyLens1
+ label undistort
+ xpos 962
+ ypos 49
+}
+Camera2 {
+ inputs 0
+ name Camera1
+ xpos 610
+ ypos 130
+}
+push $N1edcd380
+SyShader {
+ shader_type "fragment shader"
+ k {{parent.SyLens1.k}}
+ kcube {{parent.SyLens1.kcube}}
+ ushift {{parent.SyLens1.ushift}}
+ vshift {{parent.SyLens1.vshift}}
+ name SyShader1
+ xpos 464
+ ypos 55
+}
+Card2 {
+ z 10
+ lens_in_focal {{parent.Camera1.focal i}}
+ lens_in_haperture {{parent.Camera1.haperture i}}
+ translate {{parent.Camera1.translate i} {parent.Camera1.translate i} {parent.Camera1.translate i}}
+ rotate {{parent.Camera1.rotate i} {parent.Camera1.rotate i} {parent.Camera1.rotate i}}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card1
+ xpos 464
+ ypos 150
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender1
+ xpos 464
+ ypos 247
+}
+Viewer {
+ inputs 2
+ input_number 1
+ input_process false
+ name Viewer1
+ xpos -449
+ ypos 688
+}

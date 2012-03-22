@@ -191,6 +191,27 @@ double SyDistorter::distort_radial(double r2)
 	return f;
 }
 
+void SyDistorter::undistortUV(Vector4& uv)
+{
+	const double factor = 2;
+	const double centerpoint_shift_in_uv_space = 0.5f;
+
+	// Move the coordinate by 0.5 since Syntheyes assume 0
+	// to be in the optical center of the image, and then scale them to -1..1
+	double x = ((uv.x / uv.w) - centerpoint_shift_in_uv_space) * factor;
+	double y = ((uv.y / uv.w) - centerpoint_shift_in_uv_space) * factor;
+
+	Vector2 syntheyes_uv(x, y);
+
+	// Call the SY algo
+
+	apply_disto(syntheyes_uv);
+
+
+	uv.x = ((syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space) * uv.w;
+	uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space) * uv.w;
+}
+
 void SyDistorter::append(Hash& hash)
 {
 	hash.append(k_);
