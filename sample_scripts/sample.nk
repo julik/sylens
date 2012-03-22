@@ -2,7 +2,7 @@
 version 6.3 v4
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="147" y="22" w="1920" h="1174" screen="0">
+    <window x="57" y="22" w="1920" h="1174" screen="0">
         <splitter orientation="1">
             <split size="1214"/>
             <splitter orientation="1">
@@ -73,17 +73,6 @@ BackdropNode {
 }
 BackdropNode {
  inputs 0
- name BackdropNode3
- tile_color 0x7171c600
- label "SyShader - Fragment shader"
- note_font_size 42
- xpos 2633
- ypos -988
- bdwidth 398
- bdheight 519
-}
-BackdropNode {
- inputs 0
  name BackdropNode4
  tile_color 0x7171c600
  label "SyShader - Vertex Shader"
@@ -115,6 +104,28 @@ BackdropNode {
  bdwidth 112
  bdheight 383
 }
+BackdropNode {
+ inputs 0
+ name BackdropNode3
+ tile_color 0x7171c600
+ label "SyShader - Fragment shader"
+ note_font_size 42
+ xpos 2633
+ ypos -988
+ bdwidth 398
+ bdheight 519
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode7
+ tile_color 0x8e8e3800
+ label "SyShader combined with Project3D"
+ note_font_size 42
+ xpos 3779
+ ypos -979
+ bdwidth 278
+ bdheight 306
+}
 Read {
  inputs 0
  file "\[file dirname \[value root.name]]/Source.jpg"
@@ -129,7 +140,7 @@ Dot {
  xpos 191
  ypos -1172
 }
-set N5d83000 [stack 0]
+set N5a7ca00 [stack 0]
 Dot {
  name Dot2
  xpos 191
@@ -140,7 +151,7 @@ Dot {
  xpos -11
  ypos -657
 }
-set N5a7c800 [stack 0]
+set N5ac5600 [stack 0]
 SyLens {
  k {{curve i x114 -0.01826}}
  filter Parzen
@@ -151,7 +162,7 @@ SyLens {
  xpos -172
  ypos -665
 }
-set N5dee600 [stack 0]
+set N5dc8a00 [stack 0]
 Transform {
  scale {1 1.56}
  center {1024 617}
@@ -220,13 +231,13 @@ Camera2 {
  xpos 354
  ypos -665
 }
-push $N5d83000
+push $N5a7ca00
 Dot {
  name Dot4
  xpos 531
  ypos -1172
 }
-set N5d63200 [stack 0]
+set N5d63000 [stack 0]
 Card2 {
  rotate {0 26.69209412 0}
  control_points {3 3 3 6 
@@ -271,13 +282,13 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-push $N5d63200
+push $N5d63000
 Dot {
  name Dot5
  xpos 663
  ypos -1172
 }
-set N5df9800 [stack 0]
+set N5df9a00 [stack 0]
 Difference {
  inputs 2
  output rgba.red
@@ -301,24 +312,25 @@ StickyNote {
  xpos 2462
  ypos -436
 }
-push $N5df9800
+push $N5df9a00
 Dot {
  name Dot10
  xpos 1936
  ypos -1172
 }
-set N2d368000 [stack 0]
+set N5dfb200 [stack 0]
 Dot {
  name Dot11
  xpos 2843
  ypos -1172
 }
+set N5dfb600 [stack 0]
 Dot {
  name Dot8
  xpos 2849
  ypos -802
 }
-set N2d6d5c00 [stack 0]
+set N5dfba00 [stack 0]
 Dot {
  name Dot9
  xpos 3341
@@ -336,7 +348,7 @@ Camera2 {
  xpos 2961
  ypos -614
 }
-push $N2d6d5c00
+push $N5dfba00
 SyShader {
  shader_type "fragment shader"
  k {{parent.SyLens1.k i}}
@@ -345,7 +357,7 @@ SyShader {
  vshift {{parent.SyLens1.vshift i}}
  name SyShader1
  xpos 2815
- ypos -687
+ ypos -690
 }
 Card2 {
  z 10
@@ -374,7 +386,7 @@ ScanlineRender {
  output_motion_vectors_type accurate
  name ScanlineRender3
  xpos 2815
- ypos -499
+ ypos -504
 }
 Viewer {
  inputs 2
@@ -384,13 +396,13 @@ Viewer {
  xpos 1902
  ypos -56
 }
-push $N2d368000
+push $N5dfb200
 Dot {
  name Dot6
  xpos 1936
  ypos -812
 }
-set N23095200 [stack 0]
+set N5e06a00 [stack 0]
 Dot {
  name Dot7
  xpos 1390
@@ -409,37 +421,15 @@ SyLens {
  xpos 1356
  ypos -560
 }
-push $N5dee600
-SyLens {
- mode redistort
- k {{curve i x1 -0.01826 x114 -0.01826}}
- filter Mitchell
- trim true
- uncrop {{curve i x114 0.038}}
- name SyLens_Re1
- tile_color 0xc10000ff
- label redistort
- xpos 50
- ypos -543
-}
-push $N5a7c800
-Difference {
- inputs 2
- output rgba.red
- name Difference2
- xpos -45
- ypos -483
-}
 SyCamera {
  inputs 0
  k 0.01826
  aspect 1.316195373
  name SyCamera2
- selected true
  xpos 2047
  ypos -624
 }
-push $N23095200
+push $N5e06a00
 SyShader {
  k {{parent.SyLens2.k i}}
  kcube {{parent.SyLens2.kcube i}}
@@ -477,6 +467,87 @@ ScanlineRender {
  name ScanlineRender2
  xpos 1902
  ypos -508
+}
+push $N5dc8a00
+SyLens {
+ mode redistort
+ k {{curve i x1 -0.01826 x114 -0.01826}}
+ filter Mitchell
+ trim true
+ uncrop {{curve i x114 0.038}}
+ name SyLens_Re1
+ tile_color 0xc10000ff
+ label redistort
+ xpos 50
+ ypos -543
+}
+push $N5ac5600
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference2
+ xpos -45
+ ypos -483
+}
+Camera2 {
+ inputs 0
+ translate {0 0 1.713999987}
+ name Camera4
+ selected true
+ xpos 3972
+ ypos -743
+}
+Camera2 {
+ inputs 0
+ translate {0 0 1.713999987}
+ rotate {0 1.1 0}
+ name Camera3
+ xpos 3980
+ ypos -893
+}
+push $N5dfb600
+Dot {
+ name Dot13
+ xpos 3823
+ ypos -1172
+}
+SyShader {
+ shader_type "fragment shader"
+ k -0.01826
+ name SyShader3
+ xpos 3789
+ ypos -899
+}
+Project3D {
+ inputs 2
+ name Project3D1
+ xpos 3789
+ ypos -872
+}
+Card2 {
+ image_aspect false
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card4
+ xpos 3789
+ ypos -824
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender4
+ xpos 3789
+ ypos -722
 }
 Viewer {
  inputs 2
