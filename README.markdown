@@ -187,10 +187,18 @@ Sometimes you are dealing with off-center lens distortion. This can occur when a
 
 Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor (some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint up or down with regards to the center of your digital plate.
 
+## The SyShader node
+
+SyShader is a Material modifier that can be applied before any Nuke shader. For example, adding a SyShader
+before a Project3D will undistort the projected texture. SyShader can be used as a *vertex shader* or as 
+a *fragment shader*. Vertex shader is dependent on the geometry, but it will provide good undistortion with
+SyCamera. Fragment shader works on the actual pixels of the texture (so you can use it even with low-density geo),
+but it will not provide good redistortion with SyCamera. It might nevertheless be useful if you are using
+it to undistort the plates and say do a texture extraction.
+
 ## Building the plugins
 
 Go to the src directory, and there:
-
 
 	make -f Makefile.mac NDKDIR=/Applications/Nuke6.3v1/Nuke6.3v1.app/Contents/MacOS # for MacOS
 	make -f Makefile.lin NDKDIR=/mnt/server/thefoundry/Nuke6.3v1/Nuke6.3v1 # for Linux
