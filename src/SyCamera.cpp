@@ -59,8 +59,6 @@ public:
 	void append(Hash& hash)
 	{
 		hash.append(VERSION);
-		hash.append(__DATE__);
-		hash.append(__TIME__);
 		distorter.append(hash);
 		CameraOp::append(hash);
 	}
@@ -94,7 +92,7 @@ public:
 		Divider(f, 0);
 		
 		std::ostringstream ver;
-		ver << "SyCamera v." << VERSION << " " << __DATE__ << " " << __TIME__;
+		ver << "SyCamera v." << VERSION;
 		Text_knob(f, ver.str().c_str());
 	}
 

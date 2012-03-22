@@ -63,8 +63,6 @@ public:
 	void append(Hash& hash)
 	{
 		hash.append(VERSION);
-		hash.append(__DATE__);
-		hash.append(__TIME__);
 		distorter_.append(hash);
 		Material::append(hash);
 	}
@@ -108,15 +106,14 @@ public:
 			input0().fragment_shader(vtx, out);
 		}
 	}
-
-
+	
+	
+	// TODO: write me! now the display is botched
 	bool shade_GL(ViewerContext* ctx, GeoInfo& geo)
 	{
-
 		// Not doing any distortion in the GL view
 		// Passing the input's shade_GL instead
 		return input0().shade_GL(ctx, geo);
-
 	}
 
 	void knobs(Knob_Callback f)
@@ -127,12 +124,14 @@ public:
 				"vertex shader:\n"
 				"    Each vertex's UV is modified according to\n"
 				"    the distortion parameters.\n"
-				"    Surfaces between vertices are linearly interpolated."
+				"    Surfaces between vertices are linearly interpolated.\n"
+				"    The result can be redistorted by SyCamera."
 
 				"\n\nfragment shader:\n"
 				"    Distortion is applied for each fragment (pixel).\n"
 				"    Use this mode if you need an accurate result\n"
-				"    regardless of how dense the geometry is.");
+				"    regardless of how dense the geometry is.\n"
+				"    The result will NOT be redistorted by SyCamera.");
 
 		Knob* _kKnob = Float_knob( f, &k_coeff, "k" );
 		_kKnob->label("k");
@@ -155,7 +154,7 @@ public:
 		Divider(f, 0);
 
 		std::ostringstream ver;
-		ver << "SyShader v." << VERSION << " " << __DATE__ << " " << __TIME__;
+		ver << "SyShader v." << VERSION;
 		Text_knob(f, ver.str().c_str());
 	}
 

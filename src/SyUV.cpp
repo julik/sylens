@@ -55,8 +55,6 @@ public:
 	
 	void append(Hash& hash) {
 		hash.append(VERSION);
-		hash.append(__DATE__);
-		hash.append(__TIME__);
 		
 		// Knobs that change the SyLens algo
 		hash.append(k_coeff);
@@ -99,7 +97,7 @@ public:
 		Divider(f, 0);
 		
 		std::ostringstream ver;
-		ver << "SyUV v." << VERSION << " " << __DATE__ << " " << __TIME__;
+		ver << "SyUV v." << VERSION;
 		Text_knob(f, ver.str().c_str());
 	}
 

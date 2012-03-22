@@ -111,8 +111,6 @@ public:
 	// the plugin all the caches will be flushed automatically
 	void append(Hash& hash) {
 		hash.append(VERSION);
-		hash.append(__DATE__);
-		hash.append(__TIME__);
 		distorter.append(hash);
 		Iop::append(hash); // the super called he wants his pointers back
 	}
@@ -272,7 +270,7 @@ void SyLens::knobs( Knob_Callback f) {
 	
 	
 	std::ostringstream ver;
-	ver << "SyLens v." << VERSION << " " << __DATE__ << " " << __TIME__;
+	ver << "SyLens v." << VERSION;
 	Text_knob(f, ver.str().c_str());
 	
 	// Obsolete knobs, kept to prevent the warnings
