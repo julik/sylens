@@ -140,7 +140,7 @@ Dot {
  xpos 191
  ypos -1172
 }
-set N5a7ca00 [stack 0]
+set N5dd3e00 [stack 0]
 Dot {
  name Dot2
  xpos 191
@@ -151,7 +151,7 @@ Dot {
  xpos -11
  ypos -657
 }
-set N5ac5600 [stack 0]
+set N5a87c00 [stack 0]
 SyLens {
  k {{curve i x114 -0.01826}}
  filter Parzen
@@ -162,7 +162,7 @@ SyLens {
  xpos -172
  ypos -665
 }
-set N5dc8a00 [stack 0]
+set N5a79800 [stack 0]
 Transform {
  scale {1 1.56}
  center {1024 617}
@@ -231,13 +231,13 @@ Camera2 {
  xpos 354
  ypos -665
 }
-push $N5a7ca00
+push $N5dd3e00
 Dot {
  name Dot4
  xpos 531
  ypos -1172
 }
-set N5d63000 [stack 0]
+set N5d63600 [stack 0]
 Card2 {
  rotate {0 26.69209412 0}
  control_points {3 3 3 6 
@@ -282,13 +282,13 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-push $N5d63000
+push $N5d63600
 Dot {
  name Dot5
  xpos 663
  ypos -1172
 }
-set N5df9a00 [stack 0]
+set N5dfa000 [stack 0]
 Difference {
  inputs 2
  output rgba.red
@@ -312,25 +312,25 @@ StickyNote {
  xpos 2462
  ypos -436
 }
-push $N5df9a00
+push $N5dfa000
 Dot {
  name Dot10
  xpos 1936
  ypos -1172
 }
-set N5dfb200 [stack 0]
+set N5dfb800 [stack 0]
 Dot {
  name Dot11
  xpos 2843
  ypos -1172
 }
-set N5dfb600 [stack 0]
+set N5dfbc00 [stack 0]
 Dot {
  name Dot8
  xpos 2849
  ypos -802
 }
-set N5dfba00 [stack 0]
+set N5dfc400 [stack 0]
 Dot {
  name Dot9
  xpos 3341
@@ -348,7 +348,7 @@ Camera2 {
  xpos 2961
  ypos -614
 }
-push $N5dfba00
+push $N5dfc400
 SyShader {
  shader_type "fragment shader"
  k {{parent.SyLens1.k i}}
@@ -396,13 +396,13 @@ Viewer {
  xpos 1902
  ypos -56
 }
-push $N5dfb200
+push $N5dfb800
 Dot {
  name Dot6
  xpos 1936
  ypos -812
 }
-set N5e06a00 [stack 0]
+set N5e03600 [stack 0]
 Dot {
  name Dot7
  xpos 1390
@@ -429,7 +429,7 @@ SyCamera {
  xpos 2047
  ypos -624
 }
-push $N5e06a00
+push $N5e03600
 SyShader {
  k {{parent.SyLens2.k i}}
  kcube {{parent.SyLens2.kcube i}}
@@ -468,7 +468,7 @@ ScanlineRender {
  xpos 1902
  ypos -508
 }
-push $N5dc8a00
+push $N5a79800
 SyLens {
  mode redistort
  k {{curve i x1 -0.01826 x114 -0.01826}}
@@ -481,7 +481,7 @@ SyLens {
  xpos 50
  ypos -543
 }
-push $N5ac5600
+push $N5a87c00
 Difference {
  inputs 2
  output rgba.red
@@ -493,7 +493,6 @@ Camera2 {
  inputs 0
  translate {0 0 1.713999987}
  name Camera4
- selected true
  xpos 3972
  ypos -743
 }
@@ -505,7 +504,7 @@ Camera2 {
  xpos 3980
  ypos -893
 }
-push $N5dfb600
+push $N5dfbc00
 Dot {
  name Dot13
  xpos 3823
@@ -515,6 +514,7 @@ SyShader {
  shader_type "fragment shader"
  k -0.01826
  name SyShader3
+ selected true
  xpos 3789
  ypos -899
 }

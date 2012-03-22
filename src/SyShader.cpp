@@ -88,7 +88,7 @@ public:
 		if (kShaderType == 0) {
 
 			Vector4& uv = vtx.vP.UV();
-			distorter_.undistort_uv(uv);
+			distorter_.distort_uv(uv);
 		}
 
 		input0().vertex_shader(vtx);
@@ -100,7 +100,7 @@ public:
 		if (kShaderType == 1) {
 			VertexContext new_vtx(vtx);
 			Vector4& uv = new_vtx.vP.UV();
-			distorter_.undistort_uv(uv);
+			distorter_.distort_uv(uv);
 			input0().fragment_shader(new_vtx,out);
 		}
 

@@ -172,49 +172,9 @@ public:
 			if(!uv) return;
 			
 			for (unsigned p = 0; p < info.points(); p++) {
-				distort_point(uv->vector4(p));
+				distorter.distort_uv(uv->vector4(p));
 			}
 		}
-	}
-	
-	// Perform a transform in UV space. We need to adjust ALL of the UV coordinates at
-	// once, and there are four of them.
-	// To achieve what we want we need to DISTORT the UV coordinates. Once they are distorted
-	// the end projection will be straightened since it will be sampling from the distorted grid.
-	// TODO: refactor to Distorter::undistort_uv()
-	void distort_point(Vector4& pt)
-	{
-		/* 
-		
-		Citing Jonathan Egstad here:
-		
-		   http://www.mail-archive.com/nuke-dev@support.thefoundry.co.uk/msg00904.html
-		
-		W in a uv coordinate is normally 1.0 unless you've projected a point to produce the uv. In that case w
-		needs to be divided out of the uv values to get the real uv, and this is not done until the poly
-		interpolation/shading stage to preserve correct perspective.
-		
-		*/
-		
-		// UV's go 0..1. SY imageplane coordinates go -1..1
-		const double factor = 2;
-		// Centerpoint is in the middle.
-		const double centerpoint_shift_in_uv_space = 0.5f;
-		
-		// Move the coordinate by 0.5 since Syntheyes assume 0
-		// to be in the optical center of the image, and then scale them to -1..1
-		double x = ((pt.x / pt.w) - centerpoint_shift_in_uv_space) * factor;
-		double y = ((pt.y / pt.w) - centerpoint_shift_in_uv_space) * factor;
-		
-		Vector2 syntheyes_uv(x, y);
-		
-		// Call the SY algo
-		distorter.apply_disto(syntheyes_uv);
-		
-		syntheyes_uv.x = ((syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space) * pt.w;
-		syntheyes_uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space) * pt.w;
-		
-		pt.set(syntheyes_uv.x, syntheyes_uv.y, pt.z, pt.w);
 	}
 };
 

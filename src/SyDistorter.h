@@ -41,7 +41,7 @@ public:
 	void set_center_shift(double u, double v);
 	void remove_disto(Vector2&);
 	void apply_disto(Vector2&);
-	void undistort_uv(Vector4& uv);
+	void distort_uv(Vector4& uv);
 	void append(Hash&);
 
 private:

@@ -191,25 +191,39 @@ double SyDistorter::distort_radial(double r2)
 	return f;
 }
 
-void SyDistorter::undistort_uv(Vector4& uv)
+void SyDistorter::distort_uv(Vector4& uv)
 {
+	/* 
+	
+	Citing Jonathan Egstad here:
+	
+	   http://www.mail-archive.com/nuke-dev@support.thefoundry.co.uk/msg00904.html
+	
+	W in a uv coordinate is normally 1.0 unless you've projected a point to produce the uv. In that case w
+	needs to be divided out of the uv values to get the real uv, and this is not done until the poly
+	interpolation/shading stage to preserve correct perspective.
+	
+	*/
+	
+	// UV's go 0..1. SY imageplane coordinates go -1..1
 	const double factor = 2;
+	// Centerpoint is in the middle.
 	const double centerpoint_shift_in_uv_space = 0.5f;
-
+	
 	// Move the coordinate by 0.5 since Syntheyes assume 0
 	// to be in the optical center of the image, and then scale them to -1..1
 	double x = ((uv.x / uv.w) - centerpoint_shift_in_uv_space) * factor;
 	double y = ((uv.y / uv.w) - centerpoint_shift_in_uv_space) * factor;
-
+	
 	Vector2 syntheyes_uv(x, y);
-
+	
 	// Call the SY algo
-
 	apply_disto(syntheyes_uv);
-
-
-	uv.x = ((syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space) * uv.w;
-	uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space) * uv.w;
+	
+	syntheyes_uv.x = ((syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space) * uv.w;
+	syntheyes_uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space) * uv.w;
+	
+	uv.set(syntheyes_uv.x, syntheyes_uv.y, uv.z, uv.w);
 }
 
 void SyDistorter::append(Hash& hash)
