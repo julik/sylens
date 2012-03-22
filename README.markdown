@@ -203,10 +203,19 @@ See the scripts in the sample_scripts directory.
 
 ## Credits
 
-The plugins have been created by Julik Tarkhanov in Amsterdam in 2010, 2011 and 2012. Based on the 3DE distortion plugin by Matti Grüner.  
-Special thanks to Dmitry Korshunov for the Windows builds, Jonathan Egstad and Ivan Busquets for their tips and advice and to Marijn Eken for bug reports. SyUV and SyCamera have been supported by Elefant Studios, Zürich and Miklos Kozary.
+The plugins are based on the 3DE distortion plugin by Matti Grüner.
 
-The beautiful landscape shot used in the test scripts has been provided by Tim Parshikov and Mikhail Mestezky and the "Drug Druga" production company.
+Contributors, sponsors and beta-testers of SyLens are:
+
+* Julik Tarkhanov and HecticElectric, Amsterdam
+* Ivan Busquets
+* Marijn Eken
+* Dmitri Korshunov
+* Jonathan Egstad
+* Miklos Kozary and Elefant Studios, Zürich
+
+The beautiful landscape shot used in the test script has been provided by Tim Parshikov,
+Mikhail Mestezky and the "Drug Druga" production company.
 
 ## Questions and remarks
 
