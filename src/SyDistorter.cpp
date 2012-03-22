@@ -191,7 +191,7 @@ double SyDistorter::distort_radial(double r2)
 	return f;
 }
 
-void SyDistorter::undistortUV(Vector4& uv)
+void SyDistorter::undistort_uv(Vector4& uv)
 {
 	const double factor = 2;
 	const double centerpoint_shift_in_uv_space = 0.5f;

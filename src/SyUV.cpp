@@ -181,6 +181,7 @@ public:
 	// once, and there are four of them.
 	// To achieve what we want we need to DISTORT the UV coordinates. Once they are distorted
 	// the end projection will be straightened since it will be sampling from the distorted grid.
+	// TODO: refactor to Distorter::undistort_uv()
 	void distort_point(Vector4& pt)
 	{
 		/* 

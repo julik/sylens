@@ -1,36 +1,36 @@
-#! /Applications/Nuke6.3v4/NukeX6.3v4.app/../Nuke6.3v4.app/Contents/MacOS/Nuke6.3v4 -nx
+#! /Applications/Nuke6.3v4/Nuke6.3v4.app/Contents/MacOS/Nuke6.3v4 -nx
 version 6.3 v4
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="147" y="22" w="1251" h="1024" screen="0">
+    <window x="147" y="22" w="1920" h="1174" screen="0">
         <splitter orientation="1">
-            <split size="790"/>
+            <split size="1214"/>
             <splitter orientation="1">
                 <split size="40"/>
                 <dock id="" hideTitles="1" activePageId="Toolbar.1">
                     <page id="Toolbar.1"/>
                 </dock>
-                <split size="746"/>
+                <split size="1170"/>
                 <splitter orientation="2">
-                    <split size="556"/>
+                    <split size="640"/>
                     <dock id="" activePageId="Viewer.1">
                         <page id="Viewer.1"/>
                     </dock>
-                    <split size="442"/>
+                    <split size="508"/>
                     <dock id="" activePageId="DAG.1">
                         <page id="DAG.1"/>
                         <page id="Curve Editor.1"/>
                     </dock>
                 </splitter>
             </splitter>
-            <split size="457"/>
+            <split size="702"/>
             <splitter orientation="2">
-                <split size="868"/>
+                <split size="998"/>
                 <dock id="" activePageId="Properties.1">
                     <page id="Properties.1"/>
                     <page id="Script Editor.1"/>
                 </dock>
-                <split size="130"/>
+                <split size="150"/>
                 <dock id="" activePageId="Progress.1">
                     <page id="Progress.1"/>
                 </dock>
@@ -41,7 +41,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 }
 Root {
  inputs 0
- name /Code/SyLens/sample_scripts/sample.nk
+ name /Code/sylens/sample_scripts/sample.nk
  frame 50
  last_frame 50
  lock_range true
@@ -71,6 +71,50 @@ BackdropNode {
  bdwidth 502
  bdheight 292
 }
+BackdropNode {
+ inputs 0
+ name BackdropNode3
+ tile_color 0x7171c600
+ label "SyShader - Fragment shader"
+ note_font_size 42
+ xpos 2633
+ ypos -988
+ bdwidth 398
+ bdheight 519
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode4
+ tile_color 0x7171c600
+ label "SyShader - Vertex Shader"
+ note_font_size 42
+ xpos 1720
+ ypos -998
+ bdwidth 398
+ bdheight 519
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode6
+ tile_color 0x40c628ff
+ label "Equivalent SyLens\nworkflow"
+ note_font_size 42
+ xpos 3288
+ ypos -933
+ bdwidth 128
+ bdheight 411
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode5
+ tile_color 0x40c628ff
+ label "Equivalent SyLens\nworkflow"
+ note_font_size 42
+ xpos 1353
+ ypos -892
+ bdwidth 112
+ bdheight 383
+}
 Read {
  inputs 0
  file "\[file dirname \[value root.name]]/Source.jpg"
@@ -78,14 +122,14 @@ Read {
  origset true
  name Read1
  xpos 157
- ypos -1082
+ ypos -1378
 }
 Dot {
  name Dot3
  xpos 191
- ypos -876
+ ypos -1172
 }
-set N5aa9800 [stack 0]
+set N5d83000 [stack 0]
 Dot {
  name Dot2
  xpos 191
@@ -96,18 +140,18 @@ Dot {
  xpos -11
  ypos -657
 }
-set N5acb200 [stack 0]
+set N5a7c800 [stack 0]
 SyLens {
  k {{curve i x114 -0.01826}}
- uncrop {{curve i x102 0.038}}
  filter Parzen
+ uncrop {{curve i x102 0.038}}
  name SyLens_UN
  tile_color 0xc10000ff
  label undistort
  xpos -172
  ypos -665
 }
-set N5ac6000 [stack 0]
+set N5dee600 [stack 0]
 Transform {
  scale {1 1.56}
  center {1024 617}
@@ -118,9 +162,9 @@ Transform {
 SyLens {
  mode redistort
  k {{curve i x1 -0.01826 x114 -0.01826}}
- uncrop {{curve i x114 0.038}}
  filter Mitchell
  trim true
+ uncrop {{curve i x114 0.038}}
  name SyLens_Re
  tile_color 0xc10000ff
  label redistort
@@ -150,27 +194,6 @@ StickyNote {
  xpos 340
  ypos -444
 }
-push $N5ac6000
-SyLens {
- mode redistort
- k {{curve i x1 -0.01826 x114 -0.01826}}
- uncrop {{curve i x114 0.038}}
- filter Mitchell
- trim true
- name SyLens_Re1
- tile_color 0xc10000ff
- label redistort
- xpos 50
- ypos -543
-}
-push $N5acb200
-Difference {
- inputs 2
- output rgba.red
- name Difference2
- xpos -45
- ypos -483
-}
 SyCamera {
  inputs 0
  translate {0 0 1.184999943}
@@ -197,13 +220,13 @@ Camera2 {
  xpos 354
  ypos -665
 }
-push $N5aa9800
+push $N5d83000
 Dot {
  name Dot4
  xpos 531
- ypos -876
+ ypos -1172
 }
-set N5d7dc00 [stack 0]
+set N5d63200 [stack 0]
 Card2 {
  rotate {0 26.69209412 0}
  control_points {3 3 3 6 
@@ -248,12 +271,13 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-push $N5d7dc00
+push $N5d63200
 Dot {
  name Dot5
  xpos 663
- ypos -876
+ ypos -1172
 }
+set N5df9800 [stack 0]
 Difference {
  inputs 2
  output rgba.red
@@ -261,11 +285,203 @@ Difference {
  xpos 629
  ypos -506
 }
+StickyNote {
+ inputs 0
+ name StickyNote4
+ label "Using vertex shader for undistortion\n+ a SyCamera for distortion\nensures a 1-to-1 roundtrip.\n\nOnly one filtering hit is applied throughout the 3D scene.\nIn this case, since there's no other transforms done to the card,\nthe result should be 1-to-1 to the original input."
+ note_font_size 21
+ xpos 1639
+ ypos -452
+}
+StickyNote {
+ inputs 0
+ name StickyNote5
+ label "If no re-distortion is needed, setting SyShader to\n\"fragment shader mode\" is more precise, since distortion\nis applied to each fragment (pixel)\n\nThe output of this should match the result of an equivalent SyLens node set to \"undistort\""
+ note_font_size 21
+ xpos 2462
+ ypos -436
+}
+push $N5df9800
+Dot {
+ name Dot10
+ xpos 1936
+ ypos -1172
+}
+set N2d368000 [stack 0]
+Dot {
+ name Dot11
+ xpos 2843
+ ypos -1172
+}
+Dot {
+ name Dot8
+ xpos 2849
+ ypos -802
+}
+set N2d6d5c00 [stack 0]
+Dot {
+ name Dot9
+ xpos 3341
+ ypos -802
+}
+SyLens {
+ name SyLens1
+ label undistort
+ xpos 3313
+ ypos -695
+}
+Camera2 {
+ inputs 0
+ name Camera2
+ xpos 2961
+ ypos -614
+}
+push $N2d6d5c00
+SyShader {
+ shader_type "fragment shader"
+ k {{parent.SyLens1.k i}}
+ kcube {{parent.SyLens1.kcube i}}
+ ushift {{parent.SyLens1.ushift i}}
+ vshift {{parent.SyLens1.vshift i}}
+ name SyShader1
+ xpos 2815
+ ypos -687
+}
+Card2 {
+ z 10
+ lens_in_focal {{parent.Camera2.focal i}}
+ lens_in_haperture {{parent.Camera2.haperture i}}
+ translate {{parent.Camera2.translate i} {parent.Camera2.translate i} {parent.Camera2.translate i}}
+ rotate {{parent.Camera2.rotate i} {parent.Camera2.rotate i} {parent.Camera2.rotate i}}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card3
+ xpos 2815
+ ypos -594
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender3
+ xpos 2815
+ ypos -499
+}
+Viewer {
+ inputs 2
+ frame 1
+ input_process false
+ name Viewer2
+ xpos 1902
+ ypos -56
+}
+push $N2d368000
+Dot {
+ name Dot6
+ xpos 1936
+ ypos -812
+}
+set N23095200 [stack 0]
+Dot {
+ name Dot7
+ xpos 1390
+ ypos -812
+}
+SyLens {
+ name SyLens2
+ label undistort
+ xpos 1356
+ ypos -707
+}
+SyLens {
+ mode redistort
+ name SyLens3
+ label redistort
+ xpos 1356
+ ypos -560
+}
+push $N5dee600
+SyLens {
+ mode redistort
+ k {{curve i x1 -0.01826 x114 -0.01826}}
+ filter Mitchell
+ trim true
+ uncrop {{curve i x114 0.038}}
+ name SyLens_Re1
+ tile_color 0xc10000ff
+ label redistort
+ xpos 50
+ ypos -543
+}
+push $N5a7c800
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference2
+ xpos -45
+ ypos -483
+}
+SyCamera {
+ inputs 0
+ k 0.01826
+ aspect 1.316195373
+ name SyCamera2
+ selected true
+ xpos 2047
+ ypos -624
+}
+push $N23095200
+SyShader {
+ k {{parent.SyLens2.k i}}
+ kcube {{parent.SyLens2.kcube i}}
+ ushift {{parent.SyLens2.ushift i}}
+ vshift {{parent.SyLens2.vshift i}}
+ name SyShader2
+ xpos 1902
+ ypos -701
+}
+Card2 {
+ z 10
+ lens_in_focal {{parent.SyCamera2.focal}}
+ lens_in_haperture {{parent.SyCamera2.haperture}}
+ translate {{parent.SyCamera2.translate} {parent.SyCamera2.translate} {parent.SyCamera2.translate}}
+ rotate {{parent.SyCamera2.rotate} {parent.SyCamera2.rotate} {parent.SyCamera2.rotate}}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card2
+ xpos 1902
+ ypos -604
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender2
+ xpos 1902
+ ypos -508
+}
 Viewer {
  inputs 2
  input_process false
  name Viewer1
- selected true
  xpos 331
- ypos -1000
+ ypos -1296
 }
