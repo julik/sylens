@@ -71,7 +71,6 @@ class SyLens : public Iop
 	double centerpoint_shift_u_, centerpoint_shift_v_;
 	
 	// Stuff driven by knobbz
-	double k_coeff_, k_cube_coeff_, k_uncrop_factor_;
 	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
 	int kMode;
 	
@@ -81,22 +80,7 @@ class SyLens : public Iop
 public:
 	SyLens( Node *node ) : Iop ( node )
 	{
-		// IMPORTANT! these are the knob defaults. If someone has a plugin in
-		// his script and did not change these values this is the values they will expect.
-		// Therefore THESE values have to be here for the life of the plugin, through versions to come.
-		// These are sane defaults - they showcase distortion and uncrop but do not use cubics.
-		// cast in stone BEGIN {{
 		kMode = UNDIST;
-		k_coeff_ = -0.01826;
-		k_cube_coeff_ = 0.0f;
-		k_uncrop_factor_ = 0.038f;
-		k_enable_debug_ = false;
-		k_trim_bbox_to_format_ = false;
-		k_only_format_output_ = false;
-		centerpoint_shift_u_ = 0;
-		centerpoint_shift_v_ = 0;
-		// }} END
-		
 		_aspect = 1.33f;
 	}
 	
@@ -236,49 +220,14 @@ void SyLens::knobs( Knob_Callback f) {
 	_modeSel->label("mode");
 	_modeSel->tooltip("Pick your poison");
 	
-	Knob* _kKnob = Float_knob( f, &k_coeff_, "k" );
-	_kKnob->label("k");
-	_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
-	_kKnob->set_range(-0.5f, 0.5f, true);
-	
-	Knob* _kCubeKnob = Float_knob( f, &k_cube_coeff_, "kcube" );
-	_kCubeKnob->label("cubic k");
-	_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
-	_kKnob->set_range(-0.4f, 0.4f, true);
-	
-	Knob* _uKnob = Float_knob( f, &centerpoint_shift_u_, "ushift" );
-	_uKnob->label("horizontal shift");
-	_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
-	
-	Knob* _vKnob = Float_knob( f, &centerpoint_shift_v_, "vshift" );
-	_vKnob->label("vertical shift");
-	_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
-	
-	// Add the filter selection menu that comes from the filter obj itself
-	filter.knobs( f );
-	
-	Knob* kTrimKnob = Bool_knob( f, &k_trim_bbox_to_format_, "trim");
-	kTrimKnob->label("trim bbox");
-	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
-	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
-	
-	Knob* k_enable_debug_Knob = Bool_knob( f, &k_enable_debug_, "debug");
-	k_enable_debug_Knob->label("debug info");
-	k_enable_debug_Knob->tooltip("When checked, SyLens will output various debug info to STDOUT");
+	distorter.knobs(f);
+	filter.knobs(f);
 	
 	Divider(f, 0);
-	
 	
 	std::ostringstream ver;
 	ver << "SyLens v." << VERSION;
 	Text_knob(f, ver.str().c_str());
-	
-	// Obsolete knobs, kept to prevent the warnings
-	// when using older scripts
-	Knob* _kUncropKnob = Float_knob( f, &k_uncrop_factor_, "uncrop" );
-	_kUncropKnob->set_flag(KNOB_HIDDEN);
-	Knob* k_only_format_output_Knob = Bool_knob( f, &k_only_format_output_, "onlyformat");
-	k_only_format_output_Knob->set_flag(KNOB_HIDDEN);
 }
 
 // called whenever a knob is changed
@@ -345,9 +294,8 @@ void SyLens::_validate(bool for_real)
 	// We need to know our aspects so prep them here
 	_computeAspects();
 	
-	// Configure the distortion
-	distorter.set_coefficients(k_coeff_, k_cube_coeff_, _aspect);
-	distorter.set_center_shift(centerpoint_shift_u_, centerpoint_shift_v_);
+	distorter.set_aspect(_aspect);
+	distorter.recompute_if_needed();
 	
 	if(k_enable_debug_) printf("SyLens: _validate info box to  %dx%d\n", plate_width_, plate_height_);
 	

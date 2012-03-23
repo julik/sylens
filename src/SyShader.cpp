@@ -39,10 +39,8 @@ class SyShader : public Material
 	int kShaderType;
 
 private:
-
-	double k_coeff, k_cube, centerpoint_shift_u_, centerpoint_shift_v_;
 	// The distortion engine
-	SyDistorter distorter_;
+	SyDistorter distorter;
 
 
 public:
@@ -53,31 +51,24 @@ public:
 
 	SyShader(Node* node) : Material(node)
 	{
-		k_coeff = 0.0f;
-		k_cube = 0.0f;
 		kShaderType = 0;
-
 	}
 	
 	/* virtual */
 	void append(Hash& hash)
 	{
 		hash.append(VERSION);
-		distorter_.append(hash);
+		distorter.append(hash);
 		Material::append(hash);
 	}
 
 	void _validate(bool for_real) {
 
 		Format f = input0().format();
-		double _aspect;
-		_aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
-
-		// Set the coefficients for the distorter
-		distorter_.set_coefficients(k_coeff, k_cube, _aspect);
-		distorter_.set_center_shift(centerpoint_shift_u_, centerpoint_shift_v_);
+		double _aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
+		distorter.set_aspect(_aspect);
+		distorter.recompute_if_needed();
 		Material::_validate(for_real);
-
 	}
 
 	/*virtual*/
@@ -86,7 +77,7 @@ public:
 		if (kShaderType == 0) {
 
 			Vector4& uv = vtx.vP.UV();
-			distorter_.distort_uv(uv);
+			distorter.distort_uv(uv);
 		}
 
 		input0().vertex_shader(vtx);
@@ -98,7 +89,7 @@ public:
 		if (kShaderType == 1) {
 			VertexContext new_vtx(vtx);
 			Vector4& uv = new_vtx.vP.UV();
-			distorter_.distort_uv(uv);
+			distorter.distort_uv(uv);
 			input0().fragment_shader(new_vtx,out);
 		}
 
@@ -118,7 +109,6 @@ public:
 
 	void knobs(Knob_Callback f)
 	{
-
 		Knob* _shaderType = Enumeration_knob(f, &kShaderType, k_shader_types, "shader_type");
 		_shaderType->tooltip(
 				"vertex shader:\n"
@@ -132,27 +122,10 @@ public:
 				"    Use this mode if you need an accurate result\n"
 				"    regardless of how dense the geometry is.\n"
 				"    The result will NOT be redistorted by SyCamera.");
-
-		Knob* _kKnob = Float_knob( f, &k_coeff, "k" );
-		_kKnob->label("k");
-		_kKnob->tooltip("Set to the same distortion as calculated by Syntheyes");
-		_kKnob->set_range(-0.5f, 0.5f, true);
-
-		Knob* _kCubeKnob = Float_knob( f, &k_cube, "kcube" );
-		_kCubeKnob->label("kcube");
-		_kCubeKnob->tooltip("Set to the same cubic distortion as applied in the Image Preparation in Syntheyes");
-		_kCubeKnob->set_range(-0.4f, 0.4f, true);
-
-		Knob* _uKnob = Float_knob( f, &centerpoint_shift_u_, "ushift" );
-		_uKnob->label("horizontal shift");
-		_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
-
-		Knob* _vKnob = Float_knob( f, &centerpoint_shift_v_, "vshift" );
-		_vKnob->label("vertical shift");
-		_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
-
+		
+		distorter.knobs(f);
+		
 		Divider(f, 0);
-
 		std::ostringstream ver;
 		ver << "SyShader v." << VERSION;
 		Text_knob(f, ver.str().c_str());

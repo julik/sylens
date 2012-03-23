@@ -7,6 +7,12 @@
 // The rest is going to be interpolated
 static const unsigned int STEPS = 32;
 
+struct disto_params {
+	float k;
+	float cube; 
+	float aspect;
+};
+
 SyDistorter::SyDistorter()
 {
 	set_coefficients(0.0f, 0.0f, 1.78);
@@ -14,26 +20,49 @@ SyDistorter::SyDistorter()
 	center_shift_v_ = 0;
 }
 
-void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
+U64 SyDistorter::compute_hash()
 {
-	// Do not reconfigure the object unless it's really needed
-	// TODO: float equality?
-	if (k == k_ && k_cube == k_cube_ && aspect == aspect_) return;
-	
+	Hash h;
+	h.append(k_);
+	h.append(k_cube_);
+	h.append(aspect_);
+	return h.value();
+}
+
+void SyDistorter::recompute_if_needed()
+{
 	// We have a shared data structure (the lookup table vector),
 	// when recomputing it we need to lock the world.
 	// http://forums.thefoundry.co.uk/phpBB2/viewtopic.php?t=5955
 	Lock* lock = new Lock;
 	lock->lock();
 	
+	int new_hash = compute_hash();
+	if(new_hash != hash) {
+		printf("RECOMPUTING\n");
+		hash =  new_hash;
+		recompute();
+	}
+	
+	lock->unlock();
+	delete lock;
+}
+
+void SyDistorter::set_aspect(double a)
+{
+	aspect_ = a;
+}
+
+void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
+{
+	// Do not reconfigure the object unless it's really needed
+	if (k == k_ && k_cube == k_cube_ && aspect == aspect_) return;
+	
 	k_ = k;
 	k_cube_ = k_cube;
 	aspect_ = aspect;
 	
-	recompute();
-	
-	lock->unlock();
-	delete lock;
+	recompute_if_needed();
 }
 
 void SyDistorter::set_center_shift(double u, double v)
@@ -51,6 +80,7 @@ SyDistorter::~SyDistorter()
 	}
 	// Then the LUT gets deleted
 }
+
 void SyDistorter::remove_disto(Vector2& pt)
 {
 	// Bracket in centerpoint adjustment
@@ -235,12 +265,53 @@ void SyDistorter::append(Hash& hash)
 	hash.append(center_shift_v_);
 }
 
+double SyDistorter::aspect()
+{
+	return aspect_;
+}
+
 double SyDistorter::lerp(const double x, const double left_x, const double right_x, const double left_y, const double right_y)
 {
 	double dx = right_x - left_x;
 	double dy = right_y - left_y;
 	double t = (x - left_x) / dx;
 	return left_y + (dy * t);
+}
+
+// Creates knobs related to lens distortion, but without aspect control
+// The caller should then set the aspect by itself
+void SyDistorter::knobs( Knob_Callback f)
+{
+	// For info on knob flags see Knob.h
+	const int KNOB_ON_SEPARATE_LINE = 0x1000;
+	const int KNOB_HIDDEN = 0x0000000000040000;
+	
+	Knob* _kKnob = Float_knob( f, &k_, "k" );
+	_kKnob->label("k");
+	_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
+	_kKnob->set_range(-0.5f, 0.5f, true);
+	
+	Knob* _kCubeKnob = Float_knob( f, &k_cube_, "kcube" );
+	_kCubeKnob->label("cubic k");
+	_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
+	_kKnob->set_range(-0.4f, 0.4f, true);
+	
+	Knob* _uKnob = Float_knob( f, &center_shift_u_, "ushift" );
+	_uKnob->label("horizontal shift");
+	_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
+	
+	Knob* _vKnob = Float_knob( f, &center_shift_v_, "vshift" );
+	_vKnob->label("vertical shift");
+	_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
+}
+
+// Creates knobs related to lens distortion including the aspect knob
+void SyDistorter::knobs_with_aspect( Knob_Callback f)
+{
+	knobs(f);
+	Knob* _aKnob = Float_knob( f, &aspect_, "aspect" );
+	_aKnob->label("aspect");
+	_aKnob->tooltip("Set to the aspect of your distorted texture (like 1.78 for 16:9)");
 }
 
 

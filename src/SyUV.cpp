@@ -25,7 +25,6 @@ class SyUV : public ModifyGeo
 {
 private:
 	
-	double k_coeff, k_cube, aspect, centerpoint_shift_u_, centerpoint_shift_v_;
 	const char* uv_attrib_name;
 	
 	// The distortion engine
@@ -47,55 +46,23 @@ public:
 
 	SyUV(Node* node) : ModifyGeo(node)
 	{
-		k_coeff = 0.0f;
-		k_cube = 0.0f;
 		uv_attrib_name = "uv";
-		aspect = 1.78f; // TODO: retreive from script defaults
 	}
 	
 	void append(Hash& hash) {
 		hash.append(VERSION);
 		
 		// Knobs that change the SyLens algo
-		hash.append(k_coeff);
-		hash.append(k_cube);
-		hash.append(aspect);
+		hash.append(distorter.compute_hash());
 		hash.append(uv_attrib_name);
-		
 		ModifyGeo::append(hash); // the super called he wants his pointers back
 	}
 	
 	void knobs(Knob_Callback f)
 	{
 		ModifyGeo::knobs(f);
-		
-		Knob* _kKnob = Float_knob( f, &k_coeff, "k" );
-		_kKnob->label("k");
-		_kKnob->tooltip("Set to the same distortion as calculated by Syntheyes");
-		_kKnob->set_range(-0.5f, 0.5f, true);
-		
-		Knob* _kCubeKnob = Float_knob( f, &k_cube, "kcube" );
-		_kCubeKnob->label("kcube");
-		_kCubeKnob->tooltip("Set to the same cubic distortion as applied in the Image Preparation in Syntheyes");
-		
-		Knob* _aKnob = Float_knob( f, &aspect, "aspect" );
-		_aKnob->label("aspect");
-		_aKnob->tooltip("Set to the aspect of your distorted texture (like 1.78 for 16:9)");
-		
-		Knob* _uvAttributeName = String_knob(f, &uv_attrib_name, "uv_attrib_name");
-		_uvAttributeName->label("uv attrib name");
-		_uvAttributeName->tooltip("Set to the name of the UV attribute you want to modify (default is usually good)");
-		
-		Knob* _uKnob = Float_knob( f, &centerpoint_shift_u_, "ushift" );
-		_uKnob->label("horizontal shift");
-		_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
-		
-		Knob* _vKnob = Float_knob( f, &centerpoint_shift_v_, "vshift" );
-		_vKnob->label("vertical shift");
-		_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
-		
+		distorter.knobs_with_aspect(f);
 		Divider(f, 0);
-		
 		std::ostringstream ver;
 		ver << "SyUV v." << VERSION;
 		Text_knob(f, ver.str().c_str());
@@ -107,10 +74,14 @@ public:
 		ModifyGeo::get_geometry_hash();
 		
 		// Knobs that change the SyLens algo:
-		geo_hash[Group_Points].append(k_coeff);
-		geo_hash[Group_Points].append(k_cube);
-		geo_hash[Group_Points].append(aspect);
+		geo_hash[Group_Points].append(distorter.compute_hash());
 		geo_hash[Group_Points].append(uv_attrib_name);
+	}
+	
+	void _validate(bool for_real)
+	{
+		distorter.recompute_if_needed();
+		return ModifyGeo::_validate(for_real);
 	}
 	
 	// This is needed to preserve UVs which are already there
@@ -152,10 +123,6 @@ public:
 	void modify_geometry(int obj, Scene& scene, GeometryList& out)
 	{
 		const char* uv_attrib_name = "uv";
-		
-		distorter.set_coefficients(k_coeff, k_cube, aspect);
-		distorter.set_center_shift(centerpoint_shift_u_, centerpoint_shift_v_);
-		
 		// Call the engine on all the caches:
 		for (unsigned i = 0; i < out.objects(); i++) {
 			GeoInfo& info = out[i];

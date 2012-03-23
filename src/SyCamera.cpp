@@ -29,8 +29,7 @@ using namespace DD::Image;
 class SyCamera : public CameraOp
 {
 private:
-	double max_corner_u_, max_corner_v_, centerpoint_shift_u_, centerpoint_shift_v_;
-	double k_coeff, k_cube, k_aspect;
+	double max_corner_u_, max_corner_v_;
 	
 public:
 	static const Description description;
@@ -49,11 +48,6 @@ public:
 
 	SyCamera(Node* node) : CameraOp(node)
 	{
-		k_coeff = 0.0f;
-		k_cube = 0.0f;
-		k_aspect = 1.78f; // TODO: retreive from Format
-		centerpoint_shift_v_ = 0;
-		centerpoint_shift_u_ = 0;
 	}
 	
 	void append(Hash& hash)
@@ -63,34 +57,17 @@ public:
 		CameraOp::append(hash);
 	}
 	
+	void _validate(bool for_real)
+	{
+		distorter.recompute_if_needed();
+		return CameraOp::_validate(for_real);
+	}
+	
 	void lens_knobs(Knob_Callback f)
 	{
 		Tab_knob(f, "SyLens");
-		
-		Knob* _kKnob = Float_knob( f, &k_coeff, "k" );
-		_kKnob->label("k");
-		_kKnob->tooltip("Set to the same distortion as calculated by Syntheyes");
-		_kKnob->set_range(-0.5f, 0.5f, true);
-		
-		Knob* _kCubeKnob = Float_knob( f, &k_cube, "kcube" );
-		_kCubeKnob->label("kcube");
-		_kCubeKnob->tooltip("Set to the same cubic distortion as applied in the Image Preparation in Syntheyes");
-		
-		Knob* _aKnob = Float_knob( f, &k_aspect, "aspect" );
-		_aKnob->label("aspect");
-		_aKnob->tooltip("Set to the aspect of your distorted plate (like 1.78 for 16:9)");
-		
-		Knob* _uKnob = Float_knob( f, &centerpoint_shift_u_, "ushift" );
-		_uKnob->label("horizontal shift");
-		_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
-		
-		Knob* _vKnob = Float_knob( f, &centerpoint_shift_v_, "vshift" );
-		_vKnob->label("vertical shift");
-		_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
-		
-		
+		distorter.knobs_with_aspect(f);
 		Divider(f, 0);
-		
 		std::ostringstream ver;
 		ver << "SyCamera v." << VERSION;
 		Text_knob(f, ver.str().c_str());
@@ -115,9 +92,8 @@ public:
 	*/
 	void update_distortion_limits()
 	{
-		distorter.set_coefficients(k_coeff, k_cube, k_aspect);
-		distorter.set_center_shift(centerpoint_shift_u_, centerpoint_shift_v_);
-		Vector2 max_corner(1.0f, k_aspect);
+		distorter.recompute_if_needed();
+		Vector2 max_corner(1.0f, distorter.aspect());
 		distorter.apply_disto(max_corner);
 		max_corner_u_ = max_corner.x + 1.0f;
 		max_corner_v_ = max_corner.y + 1.0f;
