@@ -7,12 +7,6 @@
 // The rest is going to be interpolated
 static const unsigned int STEPS = 32;
 
-struct disto_params {
-	float k;
-	float cube; 
-	float aspect;
-};
-
 SyDistorter::SyDistorter()
 {
 	set_coefficients(0.0f, 0.0f, 1.78);
