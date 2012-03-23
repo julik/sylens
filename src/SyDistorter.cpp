@@ -33,7 +33,6 @@ void SyDistorter::recompute_if_needed()
 	
 	int new_hash = compute_hash();
 	if(new_hash != hash) {
-		printf("RECOMPUTING\n");
 		hash =  new_hash;
 		recompute();
 	}
