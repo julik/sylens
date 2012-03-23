@@ -20,6 +20,8 @@ U64 SyDistorter::compute_hash()
 	h.append(k_);
 	h.append(k_cube_);
 	h.append(aspect_);
+	h.append(center_shift_u_);
+	h.append(center_shift_v_);
 	return h.value();
 }
 
@@ -247,15 +249,6 @@ void SyDistorter::distort_uv(Vector4& uv)
 	syntheyes_uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space) * uv.w;
 	
 	uv.set(syntheyes_uv.x, syntheyes_uv.y, uv.z, uv.w);
-}
-
-void SyDistorter::append(Hash& hash)
-{
-	hash.append(k_);
-	hash.append(k_cube_);
-	hash.append(aspect_);
-	hash.append(center_shift_u_);
-	hash.append(center_shift_v_);
 }
 
 double SyDistorter::aspect()

@@ -58,7 +58,7 @@ public:
 	void append(Hash& hash)
 	{
 		hash.append(VERSION);
-		distorter.append(hash);
+		hash.append(distorter.compute_hash());
 		Material::append(hash);
 	}
 

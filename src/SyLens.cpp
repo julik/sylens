@@ -95,7 +95,7 @@ public:
 	// the plugin all the caches will be flushed automatically
 	void append(Hash& hash) {
 		hash.append(VERSION);
-		distorter.append(hash);
+		hash.append(distorter.compute_hash());
 		Iop::append(hash); // the super called he wants his pointers back
 	}
 	

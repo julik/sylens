@@ -37,16 +37,18 @@ public:
 	
 	// Sets the coefficients that affect the distortion lookup table.
 	void set_coefficients(double k, double k_cube, double aspect);
+	// Externally set the aspect
 	void set_aspect(double);
-	
 	// Sets centerpoint shifts
 	void set_center_shift(double u, double v);
+	
 	void remove_disto(Vector2&);
 	void apply_disto(Vector2&);
 	void distort_uv(Vector4& uv);
-	void append(Hash&);
+	
 	void knobs(Knob_Callback f);
 	void knobs_with_aspect(Knob_Callback f);
+	
 	void recompute_if_needed();
 	U64 compute_hash();
 	double aspect();
