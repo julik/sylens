@@ -124,6 +124,8 @@ The UI controls of SyUV are very similar to the standard SyLens plugin.
 
 ![SyUV controls in the node bin][11]k
 
+#### k
+
 Quartic distortion coefficient. This is calculated by Syntheyes and needs to be punched in here.
 
 #### kcube
