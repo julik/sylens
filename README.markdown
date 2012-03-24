@@ -7,7 +7,7 @@ The currently provided plugins are:
 * SyLens for images, footage and roto (works on all channels)
 * SyUV for undistorting projected UVs in your geometry
 * SyShader for undistorting in texture space (material modifier)
-* SyCamera for rendering from ScanlineRendered with lens redistortion baked in
+* SyCamera for rendering from ScanlineRender with lens redistortion baked in
 
 To get started right away, have a look at the sample.nk test file included with the plugin.
 
