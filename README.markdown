@@ -4,6 +4,11 @@ These plugins help to prep images that have been undistorted using the Syntheyes
 
 The currently provided plugins are:
 
+* SyLens for images, footage and roto (works on all channels)
+* SyUV for undistorting projected UVs in your geometry
+* SyShader for undistorting in texture space (material modifier)
+* SyCamera for rendering from ScanlineRendered with lens redistortion baked in
+
 To get started right away, have a look at the sample.nk test file included with the plugin.
 
 ## The SyLens node
