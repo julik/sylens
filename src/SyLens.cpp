@@ -271,17 +271,6 @@ void SyLens::_computeAspects() {
 void SyLens::_validate(bool for_real)
 {
 	
-	// Set the autolabel
-	Knob* al = knob("label");
-	std::string label;
-	if (kMode == UNDIST) {
-		label = "undistort";
-	} else {
-		label = "redistort";
-	}
-	
-	al->set_text(label.c_str());
-	
 	// Bookkeeping boilerplate
 	filter.initialize();
 	input0().validate(for_real);
