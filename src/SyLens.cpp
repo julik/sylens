@@ -89,7 +89,7 @@ public:
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
-	int knob_changed(Knob* k);
+	//int knob_changed(Knob* k);
 	
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will be flushed automatically
@@ -231,6 +231,9 @@ void SyLens::knobs( Knob_Callback f) {
 }
 
 // called whenever a knob is changed
+// All knobs should already change the Op's hash, forcing _validate to be called again if needed,
+// so explicitly calling _validate shouldn't be necessary here?
+/*
 int SyLens::knob_changed(Knob* k) {
 	
 	// Touching the crop knob changes our output bounds
@@ -245,6 +248,7 @@ int SyLens::knob_changed(Knob* k) {
 	
 	return Iop::knob_changed(k); // Super knows better
 }
+*/
 
 // http://stackoverflow.com/questions/485525/round-for-float-in-c
 int SyLens::round(double x) {
