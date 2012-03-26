@@ -216,7 +216,7 @@ void SyLens::knobs( Knob_Callback f) {
 	const int KNOB_ON_SEPARATE_LINE = 0x1000;
 	const int KNOB_HIDDEN = 0x0000000000040000;
 	
-	Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "mode", "Mode");
+	Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "output");
 	_modeSel->label("mode");
 	_modeSel->tooltip("Pick your poison");
 	
