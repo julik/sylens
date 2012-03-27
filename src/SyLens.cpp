@@ -74,16 +74,12 @@ class SyLens : public Iop
 	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
 	int k_output;
 	
-	// Obsolete mode
-	const char* old_mode_flag;
-	
 	// The distortion engine
 	SyDistorter distorter;
 	
 public:
 	SyLens( Node *node ) : Iop ( node )
 	{
-		old_mode_flag = "undistort";
 		k_output = UNDIST;
 		_aspect = 1.33f;
 	}
@@ -221,8 +217,9 @@ void SyLens::knobs( Knob_Callback f) {
 	_output_selector->label("output");
 	_output_selector->tooltip("Pick your poison");
 	
-	// Old mode configuration knob
-	Knob* hidden_mode = String_knob(f, &old_mode_flag, "mode");
+	// Old mode configuration knob that we just hide
+	const char* old_mode_value = "nada";
+	Knob* hidden_mode = String_knob(f, &old_mode_value, "mode");
 	hidden_mode->set_flag(KNOB_HIDDEN);
 	
 	distorter.knobs(f);
