@@ -61,7 +61,13 @@ public:
 	void knobs(Knob_Callback f)
 	{
 		ModifyGeo::knobs(f);
+		
 		distorter.knobs_with_aspect(f);
+		
+		Knob* uv_attr_name_knob = String_knob(f, &uv_attrib_name, "uv_attrib_name");
+		uv_attr_name_knob->label("uv attrib name");
+		uv_attr_name_knob->tooltip("Set to the name of the UV attribute you want to modify (default is usually good)");
+		
 		Divider(f, 0);
 		std::ostringstream ver;
 		ver << "SyUV v." << VERSION;
