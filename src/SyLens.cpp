@@ -46,7 +46,7 @@ static const char* const HELP =  "This plugin undistorts footage according "
 
 #include "VERSION.h"
 
-static const char* const mode_names[] = { "undistort", "redistort", 0 };
+static const char* const output_mode_names[] = { "undistorted", "redistorted", 0 };
 
 
 class SyLens : public Iop
@@ -89,7 +89,6 @@ public:
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
-	//int knob_changed(Knob* k);
 	
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will be flushed automatically
@@ -101,7 +100,6 @@ public:
 	
 	~SyLens () { 
 	}
-	
 private:
 	
 	int round(double x);
@@ -209,6 +207,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 }
 
 
+
 // knobs. There is really only one thing to pay attention to - be consistent and call your knobs
 // "in_snake_case_as_short_as_possible", labels are also lowercase normally
 void SyLens::knobs( Knob_Callback f) {
@@ -216,10 +215,10 @@ void SyLens::knobs( Knob_Callback f) {
 	const int KNOB_ON_SEPARATE_LINE = 0x1000;
 	const int KNOB_HIDDEN = 0x0000000000040000;
 	
-	Knob* _modeSel = Enumeration_knob(f, &kMode, mode_names, "output");
-	_modeSel->label("mode");
-	_modeSel->tooltip("Pick your poison");
-	
+	Knob* _output_selector = Enumeration_knob(f, &kMode, output_mode_names, "output");
+	_output_selector->label("output");
+	_output_selector->tooltip("Pick your poison");
+
 	distorter.knobs(f);
 	filter.knobs(f);
 	
@@ -229,26 +228,6 @@ void SyLens::knobs( Knob_Callback f) {
 	ver << "SyLens v." << VERSION;
 	Text_knob(f, ver.str().c_str());
 }
-
-// called whenever a knob is changed
-// All knobs should already change the Op's hash, forcing _validate to be called again if needed,
-// so explicitly calling _validate shouldn't be necessary here?
-/*
-int SyLens::knob_changed(Knob* k) {
-	
-	// Touching the crop knob changes our output bounds
-	if (k->startsWith("uncrop")) {
-		_validate(false);
-	}
-	
-	// Touching the mode changes everything
-	if (k->startsWith("mode")) {
-		_validate(false);
-	}
-	
-	return Iop::knob_changed(k); // Super knows better
-}
-*/
 
 // http://stackoverflow.com/questions/485525/round-for-float-in-c
 int SyLens::round(double x) {
