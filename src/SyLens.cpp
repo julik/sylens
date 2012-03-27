@@ -225,6 +225,16 @@ void SyLens::knobs( Knob_Callback f) {
 	distorter.knobs(f);
 	filter.knobs(f);
 	
+	// Utility functions
+	Knob* kTrimKnob = Bool_knob( f, &k_trim_bbox_to_format_, "trim");
+	kTrimKnob->label("trim bbox");
+	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
+	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+	
+	Knob* k_enable_debug_Knob = Bool_knob( f, &k_enable_debug_, "debug");
+	k_enable_debug_Knob->label("debug info");
+	k_enable_debug_Knob->tooltip("When checked, SyLens will output various debug info to STDOUT");
+	
 	Divider(f, 0);
 	
 	std::ostringstream ver;
