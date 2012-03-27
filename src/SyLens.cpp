@@ -74,12 +74,16 @@ class SyLens : public Iop
 	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
 	int k_output;
 	
+	// Obsolete mode
+	const char* old_mode_flag;
+	
 	// The distortion engine
 	SyDistorter distorter;
 	
 public:
 	SyLens( Node *node ) : Iop ( node )
 	{
+		old_mode_flag = "undistort";
 		k_output = UNDIST;
 		_aspect = 1.33f;
 	}
@@ -206,8 +210,6 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	}
 }
 
-
-
 // knobs. There is really only one thing to pay attention to - be consistent and call your knobs
 // "in_snake_case_as_short_as_possible", labels are also lowercase normally
 void SyLens::knobs( Knob_Callback f) {
@@ -218,7 +220,11 @@ void SyLens::knobs( Knob_Callback f) {
 	Knob* _output_selector = Enumeration_knob(f, &k_output, output_mode_names, "output");
 	_output_selector->label("output");
 	_output_selector->tooltip("Pick your poison");
-
+	
+	// Old mode configuration knob
+	Knob* hidden_mode = String_knob(f, &old_mode_flag, "mode");
+	hidden_mode->set_flag(KNOB_HIDDEN);
+	
 	distorter.knobs(f);
 	filter.knobs(f);
 	
@@ -253,7 +259,6 @@ void SyLens::_computeAspects() {
 // pay attention
 void SyLens::_validate(bool for_real)
 {
-	
 	// Bookkeeping boilerplate
 	filter.initialize();
 	input0().validate(for_real);
