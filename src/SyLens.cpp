@@ -72,7 +72,7 @@ class SyLens : public Iop
 	
 	// Stuff driven by knobbz
 	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
-	int kMode;
+	int k_output;
 	
 	// The distortion engine
 	SyDistorter distorter;
@@ -80,7 +80,7 @@ class SyLens : public Iop
 public:
 	SyLens( Node *node ) : Iop ( node )
 	{
-		kMode = UNDIST;
+		k_output = UNDIST;
 		_aspect = 1.33f;
 	}
 	
@@ -180,7 +180,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	for (; x < r; x++) {
 		
 		sampleFromXY = Vector2(x, y);
-		if( kMode == UNDIST) {
+		if( k_output == UNDIST) {
 			distort_px_into_source(sampleFromXY);
 		} else {
 			undistort_px_into_destination(sampleFromXY);
@@ -215,7 +215,7 @@ void SyLens::knobs( Knob_Callback f) {
 	const int KNOB_ON_SEPARATE_LINE = 0x1000;
 	const int KNOB_HIDDEN = 0x0000000000040000;
 	
-	Knob* _output_selector = Enumeration_knob(f, &kMode, output_mode_names, "output");
+	Knob* _output_selector = Enumeration_knob(f, &k_output, output_mode_names, "output");
 	_output_selector->label("output");
 	_output_selector->tooltip("Pick your poison");
 
@@ -328,7 +328,7 @@ void SyLens::_validate(bool for_real)
 	// since this is where our bbox corners are going to be in the coordinate plane of the output
 	// format.
 	for(unsigned int i = 0; i < pointsOnBbox.size(); i++) {
-		if(kMode == UNDIST) {
+		if(k_output == UNDIST) {
 			undistort_px_into_destination(*pointsOnBbox[i]);
 		} else {
 			distort_px_into_source(*pointsOnBbox[i]);
@@ -364,7 +364,7 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	
 	Vector2 bl(x, y), br(r, y), tr(r, t), tl(x, t);
 	
-	if(kMode == UNDIST) {
+	if(k_output == UNDIST) {
 		distort_px_into_source(bl);
 		distort_px_into_source(br);
 		distort_px_into_source(tl);
