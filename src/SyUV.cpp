@@ -136,8 +136,6 @@ public:
 			// Copy over old UV attributes
 			keep_uvs(i, info, out);
 			
-			// TODO: investigate difference between vertex and point UVs
-			
 			// Create a point attribute
 			Attribute* uv = out.writable_attribute(i, Group_Points, uv_attrib_name, VECTOR4_ATTRIB);
 			if(!uv) return;
