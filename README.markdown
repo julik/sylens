@@ -33,7 +33,7 @@ You will probably note that the bounding box of your output will stick outside t
 
 ### Redistorting footage
 
-After all is done you might want to redistort either your whole comp or only the piece of CG that came to you from 3D (since it would have been rendered from the undistorted film back size). To redistort, plug your oversize plate into a copy of SyLens with the "mode" switch set to "redistort". *See to it that other settings - k, kcube - stay the same!*
+After all is done you might want to redistort either your whole comp or only the piece of CG that came to you from 3D (since it would have been rendered from the undistorted film back size). To redistort, plug your oversize plate into a copy of SyLens with the "output" switch set to "apply disto". *See to it that other settings - k, kcube - stay the same!*
 
 ### Cropping and bounding box
 
@@ -43,9 +43,9 @@ The workflow in a nutshell:
 
 ### Explanation of the UI controls
 
-#### mode
+#### output
 
-When set to *undistort*, SyLens will remove lens distortion. When set to *redistort* SyLens will apply lens distortion
+When set to *remove disto*, SyLens will remove lens distortion. When set to *apply disto* SyLens will apply lens distortion
 
 #### k
 
