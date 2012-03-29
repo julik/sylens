@@ -285,10 +285,12 @@ void SyDistorter::knobs( Knob_Callback f)
 	Knob* _uKnob = Float_knob( f, &center_shift_u_, "ushift" );
 	_uKnob->label("horizontal shift");
 	_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
+	_kKnob->set_range(-1.0f, 1.0f, true);
 	
 	Knob* _vKnob = Float_knob( f, &center_shift_v_, "vshift" );
 	_vKnob->label("vertical shift");
 	_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
+	_kKnob->set_range(-1.0f, 1.0f, true);
 }
 
 // Creates knobs related to lens distortion including the aspect knob
