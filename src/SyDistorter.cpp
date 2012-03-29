@@ -285,12 +285,12 @@ void SyDistorter::knobs( Knob_Callback f)
 	Knob* _uKnob = Float_knob( f, &center_shift_u_, "ushift" );
 	_uKnob->label("horizontal shift");
 	_uKnob->tooltip("Set this to the X window offset if your optical center is off the centerpoint.");
-	_kKnob->set_range(-1.0f, 1.0f, true);
+	_uKnob->set_range(-1.0f, 1.0f, true);
 	
 	Knob* _vKnob = Float_knob( f, &center_shift_v_, "vshift" );
 	_vKnob->label("vertical shift");
 	_vKnob->tooltip("Set this to the Y window offset if your optical center is off the centerpoint.");
-	_kKnob->set_range(-1.0f, 1.0f, true);
+	_vKnob->set_range(-1.0f, 1.0f, true);
 }
 
 // Creates knobs related to lens distortion including the aspect knob
@@ -299,7 +299,7 @@ void SyDistorter::knobs_with_aspect( Knob_Callback f)
 	knobs(f);
 	Knob* _aKnob = Float_knob( f, &aspect_, "aspect" );
 	_aKnob->label("aspect");
-	_aKnob->tooltip("Set to the aspect of your distorted texture (like 1.78 for 16:9)");
+	_aKnob->tooltip("Set to the aspect of your distorted plate (like 1.78 for 16:9)");
 }
 
 
