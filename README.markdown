@@ -35,11 +35,6 @@ You will probably note that the bounding box of your output will stick outside t
 
 After all is done you might want to redistort either your whole comp or only the piece of CG that came to you from 3D (since it would have been rendered from the undistorted film back size). To redistort, plug your oversize plate into a copy of SyLens with the "output" switch set to "apply disto". *See to it that other settings - k, kcube - stay the same!*
 
-### Cropping and bounding box
-
-The workflow in a nutshell:
-
-![Cropping workflow][5]
 
 ### Explanation of the UI controls
 
@@ -69,7 +64,9 @@ This selects the filtering algorithm used for sampling the source image, pick on
 
 #### trim bbox
 
-When you apply distortion to the image, the bounding box that SyLens receives will usually grow. For example, when reintroducing distortion, there will be overflow outside of the image: When you are compositing redistorted items onto the source you generally don't want to have this overscan. When you enable *trim bbox* the size of the bounding box will be reduced to fit within the actual output format, and no overscan pixels will be output or computed.
+When you apply distortion to the image, the bounding box that SyLens receives will usually grow. For example, when reintroducing distortion, there will be overflow outside of the image. When you are compositing redistorted items onto the source you generally don't want to have this overscan. When you enable *trim bbox* the size of the bounding box will be reduced to fit within the actual output format, and no overscan pixels will be output or computed.
+
+![Cropping workflow][5]
 
 #### debug info
 
