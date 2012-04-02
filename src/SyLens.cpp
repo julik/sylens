@@ -46,8 +46,7 @@ static const char* const HELP =  "This plugin undistorts footage according "
 
 #include "VERSION.h"
 
-static const char* const output_mode_names[] = { "undistorted", "redistorted", 0 };
-
+static const char* const output_mode_names[] = { "remove disto", "apply disto", 0 };
 
 class SyLens : public Iop
 {

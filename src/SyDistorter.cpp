@@ -50,9 +50,6 @@ void SyDistorter::set_aspect(double a)
 
 void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
 {
-	// Do not reconfigure the object unless it's really needed
-	if (k == k_ && k_cube == k_cube_ && aspect == aspect_) return;
-	
 	k_ = k;
 	k_cube_ = k_cube;
 	aspect_ = aspect;
@@ -71,7 +68,7 @@ SyDistorter::~SyDistorter()
 	// Clear out the LUT
 	std::vector<LutTuple*>::iterator tuple_it;
 	for(tuple_it = lut.begin(); tuple_it != lut.end(); tuple_it++) {
-		delete (*tuple_it);
+		delete(*tuple_it);
 	}
 	// Then the LUT gets deleted
 }
@@ -245,10 +242,10 @@ void SyDistorter::distort_uv(Vector4& uv)
 	// Call the SY algo
 	apply_disto(syntheyes_uv);
 	
-	syntheyes_uv.x = ((syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space) * uv.w;
-	syntheyes_uv.y = ((syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space) * uv.w;
+	syntheyes_uv.x = (syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space;
+	syntheyes_uv.y = (syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space;
 	
-	uv.set(syntheyes_uv.x, syntheyes_uv.y, uv.z, uv.w);
+	uv.set(syntheyes_uv.x * uv.w, syntheyes_uv.y * uv.w, uv.z, uv.w);
 }
 
 double SyDistorter::aspect()
