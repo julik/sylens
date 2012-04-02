@@ -2,7 +2,7 @@
 version 6.3 v4
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="57" y="22" w="1920" h="1174" screen="0">
+    <window x="47" y="22" w="1920" h="1174" screen="0">
         <splitter orientation="1">
             <split size="1214"/>
             <splitter orientation="1">
@@ -42,7 +42,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /Code/sylens/sample_scripts/sample.nk
- frame 50
+ frame 12
  last_frame 50
  lock_range true
  format "2048 1234 0 0 2048 1234 1 "
@@ -126,6 +126,24 @@ BackdropNode {
  bdwidth 278
  bdheight 306
 }
+BackdropNode {
+ inputs 0
+ name BackdropNode8
+ tile_color 0x7171c600
+ label "SyUV on different geometries"
+ note_font_size 42
+ xpos 4464
+ ypos -992
+ bdwidth 493
+ bdheight 405
+}
+StickyNote {
+ inputs 0
+ name StickyNote1
+ label "Distortion -0.01826"
+ xpos -279
+ ypos -595
+}
 Read {
  inputs 0
  file "\[file dirname \[value root.name]]/Source.jpg"
@@ -133,14 +151,168 @@ Read {
  origset true
  name Read1
  xpos 157
- ypos -1378
+ ypos -1381
 }
 Dot {
  name Dot3
  xpos 191
  ypos -1172
 }
-set N5d7ee00 [stack 0]
+set N5dd0800 [stack 0]
+Dot {
+ name Dot4
+ xpos 531
+ ypos -1172
+}
+set N5dd1200 [stack 0]
+Dot {
+ name Dot5
+ xpos 663
+ ypos -1172
+}
+set N5a7a600 [stack 0]
+Dot {
+ name Dot10
+ xpos 1936
+ ypos -1172
+}
+set N5a7aa00 [stack 0]
+Dot {
+ name Dot11
+ xpos 2843
+ ypos -1172
+}
+set N5a7b200 [stack 0]
+Dot {
+ name Dot8
+ xpos 2849
+ ypos -802
+}
+set N5a7b600 [stack 0]
+Dot {
+ name Dot9
+ xpos 3341
+ ypos -802
+}
+SyLens {
+ k -0.01826
+ name SyLens1
+ xpos 3307
+ ypos -695
+}
+Camera2 {
+ inputs 0
+ name Camera2
+ xpos 2961
+ ypos -614
+}
+push $N5a7b600
+SyShader {
+ shader_type "fragment shader"
+ k {{parent.SyLens1.k i}}
+ kcube {{parent.SyLens1.kcube i}}
+ ushift {{parent.SyLens1.ushift i}}
+ vshift {{parent.SyLens1.vshift i}}
+ name SyShader1
+ xpos 2815
+ ypos -690
+}
+Card2 {
+ z 10
+ lens_in_focal {{parent.Camera2.focal i}}
+ lens_in_haperture {{parent.Camera2.haperture i}}
+ translate {{parent.Camera2.translate i} {parent.Camera2.translate i} {parent.Camera2.translate i}}
+ rotate {{parent.Camera2.rotate i} {parent.Camera2.rotate i} {parent.Camera2.rotate i}}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card3
+ xpos 2815
+ ypos -594
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender3
+ xpos 2815
+ ypos -503
+}
+Viewer {
+ inputs 2
+ frame 1
+ input_process false
+ name Viewer2
+ xpos 1902
+ ypos -56
+}
+push $N5a7aa00
+Dot {
+ name Dot6
+ xpos 1936
+ ypos -812
+}
+set N5d64000 [stack 0]
+Dot {
+ name Dot7
+ xpos 1390
+ ypos -812
+}
+SyLens {
+ k -0.01826
+ name SyLens2
+ label undistort
+ xpos 1356
+ ypos -705
+}
+SyLens {
+ k -0.01826
+ name SyLens3
+ label redistort
+ xpos 1356
+ ypos -560
+}
+StickyNote {
+ inputs 0
+ name StickyNote2
+ label "Here we first project UVs onto a card, then we undistort the image\nin 3D. Afterwards we render out the scene with a SyCamera and our\nrender is redistorted back! Note the tweaked vaperture on the\nCamera node projecting UVs"
+ note_font_size 12
+ xpos 420
+ ypos -431
+}
+StickyNote {
+ inputs 0
+ name StickyNote3
+ label "Standard 2D distortion so that straight lines are straight again"
+ note_font_size 12
+ xpos -168
+ ypos -410
+}
+StickyNote {
+ inputs 0
+ name StickyNote4
+ label "Using vertex shader for undistortion\n+ a SyCamera for distortion\nensures a 1-to-1 roundtrip.\n\nOnly one filtering hit is applied throughout the 3D scene.\nIn this case, since there's no other transforms done to the card,\nthe result should be 1-to-1 to the original input."
+ note_font_size 21
+ xpos 1640
+ ypos -449
+}
+StickyNote {
+ inputs 0
+ name StickyNote5
+ label "If no re-distortion is needed, setting SyShader to\n\"fragment shader mode\" is more precise, since distortion\nis applied to each fragment (pixel)\n\nThe output of this should match the result of an equivalent SyLens node set to \"undistort\""
+ note_font_size 21
+ xpos 2438
+ ypos -439
+}
+push $N5dd0800
 Dot {
  name Dot2
  xpos 191
@@ -151,17 +323,16 @@ Dot {
  xpos -11
  ypos -657
 }
-set N5deec00 [stack 0]
+set N5e02a00 [stack 0]
 SyLens {
- k {{curve x50 -0.01826 x114 -0.01826}}
+ k {{curve i x50 -0.01826 x114 -0.01826}}
  filter Parzen
  name SyLens_UN
  tile_color 0xc10000ff
- label undistort
  xpos -172
  ypos -665
 }
-set N5dd8400 [stack 0]
+set N5e03200 [stack 0]
 Transform {
  scale {1 1.56}
  center {1024 617}
@@ -170,29 +341,172 @@ Transform {
  ypos -599
 }
 SyLens {
+ output "apply disto"
  mode redistort
  k {{curve i x1 -0.01826 x114 -0.01826}}
  filter Mitchell
- name SyLens_Re
+ trim true
+ name SyLens_Re2
  tile_color 0xc10000ff
- label redistort
+ label "\t"
  xpos -172
- ypos -542
+ ypos -540
+}
+SyCamera {
+ inputs 0
+ k {{SyLens2.k i}}
+ kcube {{SyLens2.kcube i}}
+ ushift {{SyLens2.ushift i}}
+ vshift {{SyLens2.vshift i}}
+ aspect 1.316195373
+ name SyCamera2
+ xpos 2049
+ ypos -626
+}
+push $N5d64000
+SyShader {
+ k {{parent.SyLens2.k i}}
+ kcube {{parent.SyLens2.kcube i}}
+ ushift {{parent.SyLens2.ushift i}}
+ vshift {{parent.SyLens2.vshift i}}
+ name SyShader2
+ xpos 1902
+ ypos -696
+}
+Card2 {
+ z 10
+ lens_in_focal {{parent.SyCamera2.focal i}}
+ lens_in_haperture {{parent.SyCamera2.haperture i}}
+ translate {{parent.SyCamera2.translate i} {parent.SyCamera2.translate i} {parent.SyCamera2.translate i}}
+ rotate {{parent.SyCamera2.rotate i} {parent.SyCamera2.rotate i} {parent.SyCamera2.rotate i}}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card2
+ xpos 1902
+ ypos -603
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender2
+ xpos 1902
+ ypos -504
 }
 StickyNote {
  inputs 0
- name StickyNote1
- label "Distortion -0.01826"
- xpos -279
- ypos -595
+ name StickyNote6
+ label "If you want to combine SyShader with Project3D, you will need to use\nthe fragment shader options (this is primarily useful\nfor baking out texture maps), and connect the SyShader node\nUPSTREAM of the Project3D node"
+ note_font_size 21
+ xpos 3627
+ ypos -628
 }
-StickyNote {
- inputs 0
- name StickyNote3
- label "Standard 2D distortion so that straight lines are straight again"
- note_font_size 9
- xpos -288
- ypos -430
+push $N5e03200
+SyLens {
+ output "apply disto"
+ k {{curve i x1 -0.01826 x114 -0.01826}}
+ filter Mitchell
+ name SyLens_Re1
+ tile_color 0xc10000ff
+ xpos 50
+ ypos -543
+}
+push $N5e02a00
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference2
+ xpos -45
+ ypos -483
+}
+push $N5a7b200
+Dot {
+ name Dot13
+ xpos 3823
+ ypos -1172
+}
+set N5e10400 [stack 0]
+Dot {
+ name Dot12
+ xpos 4647
+ ypos -1172
+}
+set N5e11200 [stack 0]
+Cube {
+ cube {-0.5099999905 -0.5 -0.5 0.5 0.3950000107 0.4839999974}
+ translate {-1.876000047 0 0}
+ name Cube1
+ xpos 4661
+ ypos -905
+}
+SyUV {
+ k 0.095
+ name SyUV2
+ xpos 4674
+ ypos -859
+}
+set C5e10e00 [stack 0]
+push $N5e11200
+Sphere {
+ rows 18
+ columns 18
+ rotate {0 -133.2337544 0}
+ name Sphere1
+ xpos 4474
+ ypos -905
+}
+clone $C5e10e00 {
+ xpos 4474
+ ypos -862
+ selected false
+}
+push $N5e11200
+Card2 {
+ rows 32
+ columns 32
+ translate {1.75 0 0}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card5
+ xpos 4867
+ ypos -912
+}
+clone $C5e10e00 {
+ xpos 4867
+ ypos -866
+ selected false
+}
+Scene {
+ inputs 3
+ name Scene2
+ xpos 4701
+ ypos -713
+}
+set N5e1d400 [stack 0]
+Viewer {
+ inputs 2
+ input_process false
+ name Viewer1
+ xpos 331
+ ypos -1296
 }
 SyCamera {
  inputs 0
@@ -220,13 +534,7 @@ Camera2 {
  xpos 354
  ypos -665
 }
-push $N5d7ee00
-Dot {
- name Dot4
- xpos 531
- ypos -1172
-}
-set N5d63200 [stack 0]
+push $N5dd1200
 Card2 {
  rotate {0 26.69209412 0}
  control_points {3 3 3 6 
@@ -271,14 +579,8 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-set N5df8000 [stack 0]
-push $N5d63200
-Dot {
- name Dot5
- xpos 663
- ypos -1172
-}
-set N5df9c00 [stack 0]
+set N5e2c600 [stack 0]
+push $N5a7a600
 Difference {
  inputs 2
  output rgba.red
@@ -286,189 +588,9 @@ Difference {
  xpos 629
  ypos -506
 }
-StickyNote {
- inputs 0
- name StickyNote4
- label "Using vertex shader for undistortion\n+ a SyCamera for distortion\nensures a 1-to-1 roundtrip.\n\nOnly one filtering hit is applied throughout the 3D scene.\nIn this case, since there's no other transforms done to the card,\nthe result should be 1-to-1 to the original input."
- note_font_size 21
- xpos 1639
- ypos -452
-}
-StickyNote {
- inputs 0
- name StickyNote5
- label "If no re-distortion is needed, setting SyShader to\n\"fragment shader mode\" is more precise, since distortion\nis applied to each fragment (pixel)\n\nThe output of this should match the result of an equivalent SyLens node set to \"undistort\""
- note_font_size 21
- xpos 2462
- ypos -436
-}
-push $N5df9c00
-Dot {
- name Dot10
- xpos 1936
- ypos -1172
-}
-set N5dfb400 [stack 0]
-Dot {
- name Dot11
- xpos 2843
- ypos -1172
-}
-set N5dfb800 [stack 0]
-Dot {
- name Dot8
- xpos 2849
- ypos -802
-}
-set N5dfbc00 [stack 0]
-Dot {
- name Dot9
- xpos 3341
- ypos -802
-}
-SyLens {
- name SyLens1
- label undistort
- xpos 3313
- ypos -695
-}
 Camera2 {
  inputs 0
- name Camera2
- xpos 2961
- ypos -614
-}
-push $N5dfbc00
-SyShader {
- shader_type "fragment shader"
- k {{parent.SyLens1.k i}}
- kcube {{parent.SyLens1.kcube i}}
- ushift {{parent.SyLens1.ushift i}}
- vshift {{parent.SyLens1.vshift i}}
- name SyShader1
- xpos 2815
- ypos -690
-}
-Card2 {
- z 10
- lens_in_focal {{parent.Camera2.focal i}}
- lens_in_haperture {{parent.Camera2.haperture i}}
- translate {{parent.Camera2.translate i} {parent.Camera2.translate i} {parent.Camera2.translate i}}
- rotate {{parent.Camera2.rotate i} {parent.Camera2.rotate i} {parent.Camera2.rotate i}}
- control_points {3 3 3 6 
-
-1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
-1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
-1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
-1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
-1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
-1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
-1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
-1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
-1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
- name Card3
- xpos 2815
- ypos -594
-}
-push 0
-ScanlineRender {
- inputs 3
- output_motion_vectors_type accurate
- name ScanlineRender3
- xpos 2815
- ypos -504
-}
-Viewer {
- inputs 2
- frame 1
- input_process false
- name Viewer2
- xpos 1902
- ypos -56
-}
-push $N5dfb400
-Dot {
- name Dot6
- xpos 1936
- ypos -812
-}
-set N5e06c00 [stack 0]
-Dot {
- name Dot7
- xpos 1390
- ypos -812
-}
-SyLens {
- name SyLens2
- label undistort
- xpos 1356
- ypos -707
-}
-SyLens {
- mode redistort
- name SyLens3
- label redistort
- xpos 1356
- ypos -560
-}
-StickyNote {
- inputs 0
- name StickyNote2
- label "Here we first project UVs onto a card, then we undistort the image in 3D. Afterwards we render out the scene with a SyCamera and our render is redistorted back! Note the tweaked vaperture on the Camera node projecting UVs"
- note_font_size 9
- xpos 342
- ypos -440
-}
-SyCamera {
- inputs 0
- k 0.01826
- aspect 1.316195373
- name SyCamera2
- xpos 2047
- ypos -624
-}
-push $N5e06c00
-SyShader {
- k {{parent.SyLens2.k i}}
- kcube {{parent.SyLens2.kcube i}}
- ushift {{parent.SyLens2.ushift i}}
- vshift {{parent.SyLens2.vshift i}}
- name SyShader2
- xpos 1902
- ypos -701
-}
-Card2 {
- z 10
- lens_in_focal {{parent.SyCamera2.focal}}
- lens_in_haperture {{parent.SyCamera2.haperture}}
- translate {{parent.SyCamera2.translate} {parent.SyCamera2.translate} {parent.SyCamera2.translate}}
- rotate {{parent.SyCamera2.rotate} {parent.SyCamera2.rotate} {parent.SyCamera2.rotate}}
- control_points {3 3 3 6 
-
-1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
-1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
-1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
-1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
-1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
-1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
-1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
-1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
-1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
- name Card2
- xpos 1902
- ypos -604
-}
-push 0
-ScanlineRender {
- inputs 3
- output_motion_vectors_type accurate
- name ScanlineRender2
- xpos 1902
- ypos -508
-}
-Camera2 {
- inputs 0
- translate {0 0 1.713999987}
+ translate {0 0 2.558000088}
  name Camera4
  xpos 3972
  ypos -743
@@ -481,12 +603,7 @@ Camera2 {
  xpos 3980
  ypos -893
 }
-push $N5dfb800
-Dot {
- name Dot13
- xpos 3823
- ypos -1172
-}
+push $N5e10400
 SyShader {
  shader_type "fragment shader"
  k -0.01826
@@ -502,6 +619,7 @@ Project3D {
 }
 Card2 {
  image_aspect false
+ uniform_scale 2
  control_points {3 3 3 6 
 
 1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
@@ -525,30 +643,28 @@ ScanlineRender {
  xpos 3789
  ypos -722
 }
-push $N5dd8400
-SyLens {
- mode redistort
- k {{curve i x1 -0.01826 x114 -0.01826}}
- filter Mitchell
- name SyLens_Re1
- tile_color 0xc10000ff
- label redistort
- xpos 50
- ypos -543
+Camera2 {
+ inputs 0
+ translate {-3.062570572 -5.284231186 5.314462662}
+ rotate {41.27163663 -25.41727858 -16.61894991}
+ name Camera5
+ xpos 4492
+ ypos -657
 }
-push $N5deec00
-Difference {
- inputs 2
- output rgba.red
- name Difference2
- xpos -45
- ypos -483
+push $N5e1d400
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender5
+ xpos 4691
+ ypos -636
 }
-push $N5df8000
+push $N5e2c600
 Viewer {
- inputs 2
  input_process false
- name Viewer1
- xpos 331
- ypos -1296
+ name Viewer3
+ selected true
+ xpos 4349
+ ypos -759
 }
