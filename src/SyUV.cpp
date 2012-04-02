@@ -30,6 +30,9 @@ private:
 	// The distortion engine
 	SyDistorter distorter;
 	
+	// Group type ptr detected in keep_uvs()
+	DD::Image::GroupType t_group_type;
+	
 public:
 
 	static const Description description;
@@ -97,26 +100,25 @@ public:
 		// get the original uv attribute used to restore untouched uv coordinate
 		const AttribContext* context = info.get_attribcontext(uv_attrib_name);
 		AttributePtr uv_original = context ? context->attribute : AttributePtr();
-
+		
 		if(!uv_original){
 			Op::error( "Missing \"%s\" channel from geometry", uv_attrib_name );
 			return;
 		}
 
-		DD::Image::GroupType t_group_type = context->group; // texture coordinate group type
+		t_group_type = context->group; // texture coordinate group type
 
 		// we have two possibilities:
 		// the uv coordinate are stored in Group_Points or in Group_Vertices way
 		// sanity check
 		assert(t_group_type == Group_Points || t_group_type == Group_Vertices);
-
+		
 		// create a buffer to write on it
 		Attribute* uv = out.writable_attribute(index, t_group_type, uv_attrib_name, VECTOR4_ATTRIB);
 		assert(uv);
 
 		// copy all original texture coordinate if available
 		if (uv_original){
-
 			// sanity check
 			assert(uv->size() == uv_original->size());
 
@@ -128,7 +130,6 @@ public:
 	
 	void modify_geometry(int obj, Scene& scene, GeometryList& out)
 	{
-		const char* uv_attrib_name = "uv";
 		// Call the engine on all the caches:
 		for (unsigned i = 0; i < out.objects(); i++) {
 			GeoInfo& info = out[i];
@@ -136,12 +137,27 @@ public:
 			// Copy over old UV attributes
 			keep_uvs(i, info, out);
 			
-			// Create a point attribute
-			Attribute* uv = out.writable_attribute(i, Group_Points, uv_attrib_name, VECTOR4_ATTRIB);
-			if(!uv) return;
+			// Write vertex attribs
+			Attribute* uv;
 			
-			for (unsigned p = 0; p < info.points(); p++) {
-				distorter.distort_uv(uv->vector4(p));
+			// Copy over pt attributes
+			uv = out.writable_attribute(i, Group_Points, uv_attrib_name, VECTOR4_ATTRIB);
+			if(uv) {
+				for (unsigned point_idx = 0; point_idx < info.points(); point_idx++) {
+					distorter.distort_uv(uv->vector4(point_idx));
+				}
+			}
+			
+			// If the previously detected group type is vertex attribute we need to distort it as well
+			// since vertex attribs take precedence and say a Sphere in Nuke has vertex attribs
+			// as opposed to point attribs :-( so justified double work here
+			if(t_group_type == Group_Vertices) {
+				// Copy over vertex attributes
+				uv = out.writable_attribute(i, Group_Vertices, uv_attrib_name, VECTOR4_ATTRIB);
+				if(!uv) return;
+				for (unsigned vtx_idx = 0; vtx_idx < info.vertices(); vtx_idx++) {
+					distorter.distort_uv(uv->vector4(vtx_idx));
+				}				
 			}
 		}
 	}
