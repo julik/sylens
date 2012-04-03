@@ -102,6 +102,8 @@ public:
 		max_corner_v_ = max_corner.y + 1.0f;
 	}
 	
+	// Distort a point in clip space. It's almost like a UV point (with embedded W)
+	// but it's already in the right Syntheyes coordinate system
 	void distort_p(Vector4& pt)
 	{
 		// Divide out the W coordinate
