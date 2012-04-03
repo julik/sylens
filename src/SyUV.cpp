@@ -157,7 +157,7 @@ public:
 				if(!uv) return;
 				for (unsigned vtx_idx = 0; vtx_idx < info.vertices(); vtx_idx++) {
 					distorter.distort_uv(uv->vector4(vtx_idx));
-				}				
+				}
 			}
 		}
 	}
