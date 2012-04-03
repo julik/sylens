@@ -137,7 +137,7 @@ public:
 			// Copy over old UV attributes
 			keep_uvs(i, info, out);
 			
-			// Write vertex attribs
+			// Reusable pointer for the attribute we are going to be writing to
 			Attribute* uv;
 			
 			// Copy over pt attributes
