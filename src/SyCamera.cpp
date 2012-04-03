@@ -133,6 +133,7 @@ public:
 			// point local values, not on P because we want our Z and W to be computed out
 			// correctly for the motion vectors
 			Vector4 ps = transforms->matrix(LOCAL_TO_CLIP).transform(v[i].PL(), 1);
+			// Perform the disto magic
 			sy_cam->distort_p(ps);
 			// and transform to screen space, assign to position
 			Vector4 ps_screen = transforms->matrix(CLIP_TO_SCREEN).transform(ps);
