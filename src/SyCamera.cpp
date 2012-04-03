@@ -60,9 +60,12 @@ public:
 	void _validate(bool for_real)
 	{
 		distorter.recompute_if_needed();
+		update_distortion_limits();
 		CameraOp::_validate(for_real);
 	}
 	
+	/* This is a virtual method on every CameraOp made exactly for this purpose, it's called from within
+	the standard knobs() */
 	void lens_knobs(Knob_Callback f)
 	{
 		Tab_knob(f, "SyLens");
@@ -125,8 +128,6 @@ public:
 	static void sy_camera_nlens_func(Scene* scene, CameraOp* cam, MatrixArray* transforms, VArray* v, int n, void*)
 	{
 		SyCamera* sy_cam = dynamic_cast<SyCamera*>(cam);
-		sy_cam->update_distortion_limits();
-		
 		for (int i=0; i < n; ++i) {
 			// We need to apply distortion in clip space, so do that. We will perform it on
 			// point local values, not on P because we want our Z and W to be computed out
