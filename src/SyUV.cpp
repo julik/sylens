@@ -128,6 +128,15 @@ public:
 		}
 	}
 	
+	// Apply distortion to each element in the passed vertex or point attribute
+	void distort_each_element_in_attribute(Attribute* attr, unsigned const int num_of_elements)
+	{
+		if(!attr) return;
+		for (unsigned point_idx = 0; point_idx < num_of_elements; point_idx++) {
+			distorter.distort_uv(attr->vector4(point_idx));
+		}
+	}
+	
 	void modify_geometry(int obj, Scene& scene, GeometryList& out)
 	{
 		// Call the engine on all the caches:
@@ -142,22 +151,14 @@ public:
 			
 			// Copy over pt attributes
 			uv = out.writable_attribute(i, Group_Points, uv_attrib_name, VECTOR4_ATTRIB);
-			if(uv) {
-				for (unsigned point_idx = 0; point_idx < info.points(); point_idx++) {
-					distorter.distort_uv(uv->vector4(point_idx));
-				}
-			}
+			distort_each_element_in_attribute(uv, info.points());
 			
 			// If the previously detected group type is vertex attribute we need to distort it as well
 			// since vertex attribs take precedence and say a Sphere in Nuke has vertex attribs
 			// as opposed to point attribs :-( so justified double work here
 			if(t_group_type == Group_Vertices) {
-				// Copy over vertex attributes
 				uv = out.writable_attribute(i, Group_Vertices, uv_attrib_name, VECTOR4_ATTRIB);
-				if(!uv) return;
-				for (unsigned vtx_idx = 0; vtx_idx < info.vertices(); vtx_idx++) {
-					distorter.distort_uv(uv->vector4(vtx_idx));
-				}
+				distort_each_element_in_attribute(uv, info.vertices()); // Copy over vertex attributes
 			}
 		}
 	}
