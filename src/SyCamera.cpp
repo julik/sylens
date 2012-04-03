@@ -60,7 +60,7 @@ public:
 	void _validate(bool for_real)
 	{
 		distorter.recompute_if_needed();
-		return CameraOp::_validate(for_real);
+		CameraOp::_validate(for_real);
 	}
 	
 	void lens_knobs(Knob_Callback f)
