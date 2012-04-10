@@ -5,7 +5,7 @@
 
 // The number of discrete points we sample on the radius of the distortion.
 // The rest is going to be interpolated
-static const unsigned int STEPS = 128;
+static const unsigned int STEPS = 32;
 
 SyDistorter::SyDistorter()
 {
@@ -122,7 +122,8 @@ double SyDistorter::undistort_sampled(double rd)
 
 void SyDistorter::apply_disto(Vector2& pt)
 {
-	float r = pt.x * aspect_;
+	float x = pt.x * aspect_;
+	float r = sqrt(x * x + (pt.y * pt.y));
 	
 	std::vector<LutTuple*>::iterator tuple_it;
 	LutTuple* left = NULL;
@@ -147,7 +148,7 @@ void SyDistorter::apply_disto(Vector2& pt)
 	
 	// If we could not find neighbour points do NOT distort
 	if(left == NULL || right == NULL) {
-		f = 1;
+		f = distort_radial(r);
 	} else {
 		// TODO: spline interpolation instead using neighbouring pts
 		f = lerp(r, left->r, right->r, left->f, right->f);
@@ -170,7 +171,7 @@ double SyDistorter::distort_radial(double r)
 	double f;
 	// Skipping the square root speeds things up if we don't need it
 	if (fabs(k_cube_) > 0.00001) {
-		f = 1 + r2*(k_ + k_cube_ * sqrt(r2));
+		f = 1 + r2*(k_ + k_cube_ * r);
 	} else {
 		f = 1 + r2*(k_);
 	}
@@ -282,7 +283,6 @@ void SyDistorter::recompute()
 	lut.clear();
 	
 	lut.push_back(new LutTuple(0,1));
-
 	for(unsigned i = 0; i < STEPS; i++) {
 		r += increment;
 		lut.push_back(new LutTuple(r, distort_radial(r)));
