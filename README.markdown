@@ -48,7 +48,7 @@ Quartic distortion coefficient. This is calculated by Syntheyes and needs to be 
 
 #### kcube
 
-Cubic distortion modifier. If you used this in Syntheyes you can apply it here as well. **Note that this will not be reapplied during redistortion**
+Cubic distortion modifier. If you used this in Syntheyes you can apply it here as well.
 
 #### ushift
 

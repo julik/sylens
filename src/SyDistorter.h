@@ -11,11 +11,12 @@ using namespace DD::Image;
 class LutTuple
 {
 public:
-	double r2, f, rp;
-	LutTuple(double nr2, double nf2) {
-		r2 = nr2;
-		f = nf2;
-		rp = r2 * f;
+	double r, f, m;
+	
+	LutTuple(double radius, double disto_f) {
+		r = radius;
+		f = disto_f;
+		m = r * f;
 	}
 };
 

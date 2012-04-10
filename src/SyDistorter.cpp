@@ -79,36 +79,32 @@ void SyDistorter::remove_disto(Vector2& pt)
 	pt.x += center_shift_u_;
 	pt.y += center_shift_v_;
 	
-	double rp2 = aspect_ * aspect_ * pt.x * pt.x + pt.y * pt.y;
-	double inv_f = undistort_sampled(rp2);
+	double x = pt.x * aspect_;
+	double rd = sqrt((fabs(x) * fabs(x)) + (fabs(pt.y) * fabs(pt.y)));
+	double inv_f = undistort_sampled(rd);
 	
-	pt.x = pt.x * inv_f;
-	pt.y = pt.y * inv_f;
+	pt.x = pt.x / inv_f;
+	pt.y = pt.y / inv_f;
 	
 	pt.x -= center_shift_u_;
 	pt.y -= center_shift_v_;
 }
 
-double SyDistorter::undistort_sampled(double rp2)
+double SyDistorter::undistort_sampled(double rd)
 {
-	/* This is commented out because it's NOT working yet. We want to store the rp2
-	value per point so that we know how to find it in the LUT and possibly do other manipulations
-	with root finding
-	
 	std::vector<LutTuple*>::iterator tuple_it;
 	LutTuple* left = NULL;
 	LutTuple* right = NULL;
 	
 	// Only iterate as long as the points are not found
 	bool found = 0;
-	rp = sqrt(rp2);
 	// Only iterate as long as the points are not found
 	for(tuple_it = lut.begin(); (tuple_it != lut.end() && !found); tuple_it++) {
 		// If the tuple is less than r2 we found the first element
-		if((*tuple_it)->rp < rp) {
+		if((*tuple_it)->m < rd) {
 			left = *tuple_it;
 		}
-		if ((*tuple_it)->rp > rp) {
+		if ((*tuple_it)->m > rd) {
 			right = *tuple_it;
 		}
 		if(left && right) {
@@ -118,48 +114,16 @@ double SyDistorter::undistort_sampled(double rp2)
 	
 	// If we could not find neighbour points to not interpolate and recompute raw
 	if(left == NULL || right == NULL) {
-		printf("LUT undisto impossible with RP %0.5f\n", rp);
+		printf("LUT undisto impossible with RP %0.5f\n", rd);
 		return 1.0f;
 	}
-	return lerp(rp, left->r2, right->r2, left->f, right->f);
-	*/
-	
-	double rp = sqrt(rp2);
-	double r, f, rlim, rplim, raw, err, slope;
-
-	if (k_ < 0.0f) {
-		rlim = sqrt((-1.0/3.0) / k_);
-		rplim = rlim * (1 + k_*rlim*rlim);
-		if (rp >= 0.99 * rplim) {
-			f = rlim / rp;
-			return f;
-		}
-	}
-
-	r = rp;
-	for (int i = 0; i < 20; i++) {
-		raw = k_ * r * r;
-		slope = 1 + 3*raw;
-		err = rp - r * (1 + raw);
-		if (fabs(err) < 1.0e-10) break;
-		r += (err / slope);
-	}
-	f = r / rp;
-
-	// For the pixel in the middle of the image the F can
-	// be NaN, so check for that and leave it be.
-	// http://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c
-	// If a NaN F does crop up it creates a black pixel in the image - not something we love
-	if(f == f) {
-		return f;
-	} else {
-		return 1.0f;
-	}
+	return lerp(rd, left->m, right->m, left->f, right->f);
 }
 
 void SyDistorter::apply_disto(Vector2& pt)
 {
-	float r2 = aspect_ * aspect_ * pt.x * pt.x + pt.y * pt.y;
+	float x = pt.x * aspect_;
+	float r = sqrt(x * x + (pt.y * pt.y));
 	
 	std::vector<LutTuple*>::iterator tuple_it;
 	LutTuple* left = NULL;
@@ -169,10 +133,10 @@ void SyDistorter::apply_disto(Vector2& pt)
 	// Only iterate as long as the points are not found
 	for(tuple_it = lut.begin(); (tuple_it != lut.end() && !found); tuple_it++) {
 		// If the tuple is less than r2 we found the first element
-		if((*tuple_it)->r2 < r2) {
+		if((*tuple_it)->r < r) {
 			left = *tuple_it;
 		}
-		if ((*tuple_it)->r2 > r2) {
+		if ((*tuple_it)->r > r) {
 			right = *tuple_it;
 		}
 		if(left && right) {
@@ -184,10 +148,10 @@ void SyDistorter::apply_disto(Vector2& pt)
 	
 	// If we could not find neighbour points do NOT distort
 	if(left == NULL || right == NULL) {
-		f = distort_radial(r2);
+		f = distort_radial(r);
 	} else {
 		// TODO: spline interpolation instead using neighbouring pts
-		f = lerp(r2, left->r2, right->r2, left->f, right->f);
+		f = lerp(r, left->r, right->r, left->f, right->f);
 	}
 	
 	// Bracket in centerpoint adjustment
@@ -201,12 +165,13 @@ void SyDistorter::apply_disto(Vector2& pt)
 	pt.y += center_shift_v_;
 }
 
-double SyDistorter::distort_radial(double r2)
+double SyDistorter::distort_radial(double r)
 {
+	double r2 = r * r;
 	double f;
 	// Skipping the square root speeds things up if we don't need it
 	if (fabs(k_cube_) > 0.00001) {
-		f = 1 + r2*(k_ + k_cube_ * sqrt(r2));
+		f = 1 + r2*(k_ + k_cube_ * r);
 	} else {
 		f = 1 + r2*(k_);
 	}
@@ -305,9 +270,9 @@ void SyDistorter::recompute()
 {
 	unsigned steps = STEPS;
 	
-	double r2 = 0;
-	double max_r2 = (aspect_ * aspect_) * 2; // One and a half aspect is plenty
-	double increment = max_r2 / float(STEPS);
+	double r = 0;
+	double max_r = aspect_ * 2; // One and a half aspect is plenty
+	double increment = max_r / float(STEPS);
 	
 	// Clear out the LUT elements so that they don't leak. We could use std::auto_ptr
 	// as well...
@@ -318,18 +283,10 @@ void SyDistorter::recompute()
 	lut.clear();
 	
 	lut.push_back(new LutTuple(0,1));
-
 	for(unsigned i = 0; i < STEPS; i++) {
-		r2 += increment;
-		lut.push_back(new LutTuple(r2, distort_radial(r2)));
+		r += increment;
+		lut.push_back(new LutTuple(r, distort_radial(r)));
 	}
 	
-#ifdef DEBUG	
-	printf("Built up LUT with %d elems\n", lut.size());
-	for(tuple_it = lut.begin(); tuple_it != lut.end(); tuple_it++) {
-		printf("Lut element r2 %0.5f  f %0.5f rp  %0.5f\n", (*tuple_it)->r2, (*tuple_it)->f, (*tuple_it)->rp);
-	}
-#endif
-
 	return;
 }
