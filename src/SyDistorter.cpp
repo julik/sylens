@@ -113,10 +113,8 @@ double SyDistorter::undistort_sampled(double rd)
 	}
 	
 	// If we could not find neighbour points to not interpolate and recompute raw
-	if(left == NULL || right == NULL) {
-		printf("LUT undisto impossible with RP %0.5f\n", rd);
-		return 1.0f;
-	}
+	if(left == NULL || right == NULL) return 1.0f;
+	
 	return lerp(rd, left->m, right->m, left->f, right->f);
 }
 
@@ -146,7 +144,7 @@ void SyDistorter::apply_disto(Vector2& pt)
 	
 	float f;
 	
-	// If we could not find neighbour points do NOT distort
+	// If we could not find neighbour points just compute it
 	if(left == NULL || right == NULL) {
 		f = distort_radial(r);
 	} else {
