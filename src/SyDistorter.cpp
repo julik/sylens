@@ -96,10 +96,9 @@ double SyDistorter::undistort_sampled(double rd)
 	LutTuple* left = NULL;
 	LutTuple* right = NULL;
 	
-	// Only iterate as long as the points are not found
-	bool found = 0;
-	// Only iterate as long as the points are not found
-	for(tuple_it = lut.begin(); (tuple_it != lut.end() && !found); tuple_it++) {
+	for(tuple_it = lut.begin(); 
+		tuple_it != lut.end() && !(left && right);
+		tuple_it++) {
 		// If the tuple is less than r2 we found the first element
 		if((*tuple_it)->m < rd) {
 			left = *tuple_it;
@@ -107,15 +106,14 @@ double SyDistorter::undistort_sampled(double rd)
 		if ((*tuple_it)->m > rd) {
 			right = *tuple_it;
 		}
-		if(left && right) {
-			found = 1;
-		}
 	}
 	
 	// If we could not find neighbour points to not interpolate and recompute raw
-	if(left == NULL || right == NULL) return 1.0f;
-	
-	return lerp(rd, left->m, right->m, left->f, right->f);
+	if(left && right) {
+		return lerp(rd, left->m, right->m, left->f, right->f);
+	} else {
+		return 1.0f;
+	}
 }
 
 void SyDistorter::apply_disto(Vector2& pt)
@@ -126,10 +124,11 @@ void SyDistorter::apply_disto(Vector2& pt)
 	std::vector<LutTuple*>::iterator tuple_it;
 	LutTuple* left = NULL;
 	LutTuple* right = NULL;
-	bool found = 0;
 	
 	// Only iterate as long as the points are not found
-	for(tuple_it = lut.begin(); (tuple_it != lut.end() && !found); tuple_it++) {
+	for(tuple_it = lut.begin(); 
+		tuple_it != lut.end() && !(left && right); 
+		tuple_it++) {
 		// If the tuple is less than r2 we found the first element
 		if((*tuple_it)->r < r) {
 			left = *tuple_it;
@@ -137,19 +136,16 @@ void SyDistorter::apply_disto(Vector2& pt)
 		if ((*tuple_it)->r > r) {
 			right = *tuple_it;
 		}
-		if(left && right) {
-			found = 1;
-		}
 	}
 	
 	float f;
 	
 	// If we could not find neighbour points just compute it
-	if(left == NULL || right == NULL) {
-		f = distort_radial(r);
-	} else {
+	if(left && right) {
 		// TODO: spline interpolation instead using neighbouring pts
 		f = lerp(r, left->r, right->r, left->f, right->f);
+	} else {
+		f = distort_radial(r);
 	}
 	
 	// Bracket in centerpoint adjustment
