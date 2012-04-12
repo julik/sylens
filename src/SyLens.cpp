@@ -57,6 +57,7 @@ class SyLens : public Iop
 	static const Iop::Description description;
 	
 	Filter filter;
+	Format output_format;
 	
 	enum { UNDIST, REDIST };
 	
@@ -70,8 +71,9 @@ class SyLens : public Iop
 	double centerpoint_shift_u_, centerpoint_shift_v_;
 	
 	// Stuff driven by knobbz
-	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
+	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
 	int k_output;
+	int sampling_offset_x_, sampling_offset_y_;
 	
 	// The distortion engine
 	SyDistorter distorter;
@@ -80,7 +82,10 @@ public:
 	SyLens( Node *node ) : Iop ( node )
 	{
 		k_output = UNDIST;
+		k_grow_format_ = 0;
 		_aspect = 1.33f;
+		sampling_offset_x_ = 0;
+		sampling_offset_y_ = 0;
 	}
 	
 	void _computeAspects();
@@ -173,7 +178,8 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	foreach(z, channels) out.writable(z);
 	
 	Pixel pixel(channels);
-	const float sampleOff = 0.5f;
+	const float sample_offset_x = 0.5f + sampling_offset_x_;
+	const float sample_offset_y = 0.5f + sampling_offset_y_;
 	
 	Vector2 sampleFromXY(0.0f, 0.0f);
 	for (; x < r; x++) {
@@ -190,7 +196,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
 		input0().sample(
-			sampleFromXY.x + sampleOff , sampleFromXY.y + sampleOff, 
+			sampleFromXY.x + sample_offset_x , sampleFromXY.y + sample_offset_y, 
 			1.0f, 
 			1.0f,
 			&filter,
@@ -224,11 +230,17 @@ void SyLens::knobs( Knob_Callback f) {
 	distorter.knobs(f);
 	filter.knobs(f);
 	
-	// Utility functions
+	// Trim bbox
 	Knob* kTrimKnob = Bool_knob( f, &k_trim_bbox_to_format_, "trim");
 	kTrimKnob->label("trim bbox");
 	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
 	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+	
+	// Grow plate
+	Knob* kGrowKnob = Bool_knob( f, &k_grow_format_, "grow");
+	kGrowKnob->label("grow format");
+	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox");
+	kGrowKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
 	Knob* k_enable_debug_Knob = Bool_knob( f, &k_enable_debug_, "debug");
 	k_enable_debug_Knob->label("debug info");
@@ -299,7 +311,7 @@ void SyLens::_validate(bool for_real)
 	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 	// Grab the bbox from the input first
 	Info inf = input0().info();
-	Format f = input0().format();
+	output_format = input0().format();
 	
 	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
 	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
@@ -360,9 +372,30 @@ void SyLens::_validate(bool for_real)
 	
 	// If trim is enabled we intersect our obox with the format so that there is no bounding box
 	// outside the crop area. Thiis handy for redistorted material.
-	if(k_trim_bbox_to_format_) obox.intersect(input0().format());
+	if(k_trim_bbox_to_format_) obox.intersect(output_format);
 	
 	if(k_enable_debug_) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
+	
+	// If we need to grow the plate, do it here.
+	if(k_grow_format_) {
+		// Determine the offset of the left bottom corner
+		Vector2 corner(0,0);
+		undistort_px_into_destination(corner);
+		sampling_offset_x_ = round(corner.x) * -1;
+		sampling_offset_y_ = round(corner.x) * -1;
+		
+		output_format = Format(
+			output_format.width()  + sampling_offset_x_ + sampling_offset_x_,
+			output_format.height()  + sampling_offset_y_ + sampling_offset_y_,
+			output_format.pixel_aspect()
+		);
+		
+		// Also set() our own output format so that Nuke knows we will grow the output format
+		info_.format(output_format);
+	} else {
+		sampling_offset_x_ = 0;
+		sampling_offset_y_ = 0;
+	}
 	
 	info_.set(obox);
 }
@@ -393,10 +426,10 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	// to give us a little cushion
 	const unsigned int safetyPadding = 16;
 	input0().request(
-		round(bl.x - safetyPadding),  
-		round(bl.y  - safetyPadding),
-		round(tr.x + safetyPadding),
-		round(tr.y + safetyPadding),
+		round(bl.x - safetyPadding) - sampling_offset_x_,  
+		round(bl.y  - safetyPadding) - sampling_offset_x_,
+		round(tr.x + safetyPadding) + sampling_offset_x_,
+		round(tr.y + safetyPadding) + sampling_offset_y_,
 		channels, count
 	);
 }
