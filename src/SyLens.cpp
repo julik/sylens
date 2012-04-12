@@ -164,7 +164,7 @@ void SyLens::undistort_px_into_destination(Vector2& absXY) {
 	distorter.remove_disto(absXY);
 	centered_uv_to_absolute_px(absXY, plate_width_, plate_height_);
 }
-
+ 
 // The image processor that works by scanline. Y is the scanline offset, x is the pix,
 // r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
 void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
