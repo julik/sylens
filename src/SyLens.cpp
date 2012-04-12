@@ -378,9 +378,16 @@ void SyLens::_validate(bool for_real)
 	
 	// If we need to grow the plate, do it here.
 	if(k_grow_format_) {
+		
 		// Determine the offset of the left bottom corner
 		Vector2 corner(0,0);
-		undistort_px_into_destination(corner);
+		
+		if(k_output == UNDIST) {
+			undistort_px_into_destination(corner);
+		} else {
+			distort_px_into_source(corner);
+		}
+		
 		sampling_offset_x_ = round(corner.x) * -1;
 		sampling_offset_y_ = round(corner.x) * -1;
 		
