@@ -367,6 +367,7 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	ChannelSet c1(channels);
 	in_channels(0,c1);
 	
+	// Honor the shift we need to apply if we change the output format
 	Vector2 bl(x-x_px_shift, y-y_px_shift), br(r-x_px_shift, y+y_px_shift), tr(r+x_px_shift, t+y_px_shift), tl(x-x_px_shift, t+y_px_shift);
 	
 	if(k_output == UNDIST) {
@@ -403,18 +404,11 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	foreach(z, channels) out.writable(z);
 	
 	Pixel pixel(channels);
-	const float half = 0.5f;
 	
 	Vector2 sampleFromXY(0.0f, 0.0f);
 	for (; x < r; x++) {
 		
 		sampleFromXY = Vector2(x, y);
-		
-		// If we are in a grown plate honor offsets
-		if(k_grow_format_) {
-			sampleFromXY.x -= x_px_shift;
-			sampleFromXY.y -= y_px_shift;
-		}
 		
 		if( k_output == UNDIST) {
 			distort_px_into_source(sampleFromXY);
@@ -427,7 +421,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
 		input0().sample(
-			sampleFromXY.x + half , sampleFromXY.y + half, 
+			sampleFromXY.x + 0.5f, sampleFromXY.y + 0.5f, 
 			1.0f, 
 			1.0f,
 			&filter,
