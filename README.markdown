@@ -35,6 +35,8 @@ You will probably note that the bounding box of your output will stick outside t
 
 After all is done you might want to redistort either your whole comp or only the piece of CG that came to you from 3D (since it would have been rendered from the undistorted film back size). To redistort, plug your oversize plate into a copy of SyLens with the "output" switch set to "apply disto". *See to it that other settings - k, kcube - stay the same!*
 
+![SyLens controls][17]
+
 
 ### Explanation of the UI controls
 
@@ -278,3 +280,4 @@ For questions and comments shoot a mail to me \_at\_ julik.nl
  [14]: https://github.com/julik/sylens/raw/master/images/cam_controls.png
  [15]: https://github.com/julik/sylens/raw/master/images/cam_few_subdivs.png
  [16]: https://github.com/julik/sylens/raw/master/images/cam_many_subdivs.png
+ [17]: https://github.com/julik/sylens/raw/master/images/sylens_controls.png
