@@ -71,7 +71,7 @@ class SyLens : public Iop
 	double centerpoint_shift_u_, centerpoint_shift_v_;
 	
 	// Stuff driven by knobbz
-	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
+	bool k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
 	int k_output;
 	int x_px_shift, y_px_shift;
 	
@@ -201,10 +201,6 @@ void SyLens::knobs( Knob_Callback f) {
 	kGrowKnob->label("grow format");
 	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox");
 	kGrowKnob->set_flag(KNOB_ON_SEPARATE_LINE);
-	
-	Knob* k_enable_debug_Knob = Bool_knob( f, &k_enable_debug_, "debug");
-	k_enable_debug_Knob->label("debug info");
-	k_enable_debug_Knob->tooltip("When checked, SyLens will output various debug info to STDOUT");
 	
 	Divider(f, 0);
 	
@@ -408,7 +404,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	Vector2 sampleFromXY(0.0f, 0.0f);
 	for (; x < r; x++) {
 		
-		sampleFromXY = Vector2(x, y);
+		sampleFromXY = Vector2(x - (x_px_shift/2), y - (y_px_shift/2));
 		
 		if( k_output == UNDIST) {
 			distort_px_into_source(sampleFromXY);
