@@ -2,35 +2,35 @@
 version 6.3 v4
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="47" y="22" w="1920" h="1174" screen="0">
+    <window x="142" y="22" w="1680" h="1024" screen="0">
         <splitter orientation="1">
-            <split size="1214"/>
+            <split size="1062"/>
             <splitter orientation="1">
                 <split size="40"/>
                 <dock id="" hideTitles="1" activePageId="Toolbar.1">
                     <page id="Toolbar.1"/>
                 </dock>
-                <split size="1170"/>
+                <split size="1018"/>
                 <splitter orientation="2">
-                    <split size="640"/>
+                    <split size="556"/>
                     <dock id="" activePageId="Viewer.1">
                         <page id="Viewer.1"/>
                     </dock>
-                    <split size="508"/>
+                    <split size="442"/>
                     <dock id="" activePageId="DAG.1">
                         <page id="DAG.1"/>
                         <page id="Curve Editor.1"/>
                     </dock>
                 </splitter>
             </splitter>
-            <split size="702"/>
+            <split size="614"/>
             <splitter orientation="2">
-                <split size="998"/>
+                <split size="868"/>
                 <dock id="" activePageId="Properties.1">
                     <page id="Properties.1"/>
                     <page id="Script Editor.1"/>
                 </dock>
-                <split size="150"/>
+                <split size="130"/>
                 <dock id="" activePageId="Progress.1">
                     <page id="Progress.1"/>
                 </dock>
@@ -48,17 +48,6 @@ Root {
  format "2048 1234 0 0 2048 1234 1 "
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
-}
-BackdropNode {
- inputs 0
- name BackdropNode1
- tile_color 0x7171c600
- label "CLASSIC 2D UNDISTORT-REDISTORT"
- note_font_size 28
- xpos -289
- ypos -745
- bdwidth 513
- bdheight 303
 }
 BackdropNode {
  inputs 0
@@ -139,14 +128,25 @@ BackdropNode {
 }
 BackdropNode {
  inputs 0
- name BackdropNode9
+ name BackdropNode1
  tile_color 0x7171c600
  label "CLASSIC 2D UNDISTORT-REDISTORT"
  note_font_size 28
- xpos -934
- ypos -751
+ xpos -289
+ ypos -745
  bdwidth 513
  bdheight 303
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode9
+ tile_color 0x7171c600
+ label "CLASSIC 2D UNDISTORT-REDISTORT\nGROWING THE PLATE FORMAT"
+ note_font_size 28
+ xpos -934
+ ypos -751
+ bdwidth 518
+ bdheight 266
 }
 StickyNote {
  inputs 0
@@ -162,44 +162,44 @@ Read {
  origset true
  name Read1
  xpos 157
- ypos -1381
+ ypos -1377
 }
 Dot {
  name Dot3
  xpos 191
  ypos -1172
 }
-set N5861800 [stack 0]
+set N5dbba00 [stack 0]
 Dot {
  name Dot4
  xpos 531
  ypos -1172
 }
-set N5cc2e00 [stack 0]
+set N5b1e600 [stack 0]
 Dot {
  name Dot5
  xpos 663
  ypos -1172
 }
-set N5cc3200 [stack 0]
+set N5d9a600 [stack 0]
 Dot {
  name Dot10
  xpos 1936
  ypos -1172
 }
-set N5cc1a00 [stack 0]
+set N5aaba00 [stack 0]
 Dot {
  name Dot11
  xpos 2843
  ypos -1172
 }
-set N5cc1e00 [stack 0]
+set N5aabe00 [stack 0]
 Dot {
  name Dot8
  xpos 2849
  ypos -802
 }
-set N5a90e00 [stack 0]
+set N5cbe800 [stack 0]
 Dot {
  name Dot9
  xpos 3341
@@ -217,7 +217,7 @@ Camera2 {
  xpos 2961
  ypos -614
 }
-push $N5a90e00
+push $N5cbe800
 SyShader {
  shader_type "fragment shader"
  k {{parent.SyLens1.k i}}
@@ -265,13 +265,13 @@ Viewer {
  xpos 1902
  ypos -56
 }
-push $N5cc1a00
+push $N5aaba00
 Dot {
  name Dot6
  xpos 1936
  ypos -812
 }
-set N5df1c00 [stack 0]
+set N5de3800 [stack 0]
 Dot {
  name Dot7
  xpos 1390
@@ -323,7 +323,7 @@ StickyNote {
  xpos 2438
  ypos -439
 }
-push $N5861800
+push $N5dbba00
 Dot {
  name Dot2
  xpos 191
@@ -334,16 +334,17 @@ Dot {
  xpos -11
  ypos -657
 }
-set N5df7200 [stack 0]
+set N5de8a00 [stack 0]
 SyLens {
- k {{curve x50 -0.01826 x114 -0.01826}}
+ k {{curve i x50 -0.01826 x114 -0.01826}}
  filter Parzen
  name SyLens_UN
  tile_color 0xc10000ff
+ selected true
  xpos -172
  ypos -665
 }
-set N5df6a00 [stack 0]
+set N5de8200 [stack 0]
 Transform {
  scale {1 1.56}
  center {1024 617}
@@ -371,7 +372,7 @@ StickyNote {
  xpos 3627
  ypos -628
 }
-push $N5df6a00
+push $N5de8200
 SyLens {
  output "apply disto"
  k {{curve i x1 -0.01826 x114 -0.01826}}
@@ -381,7 +382,7 @@ SyLens {
  xpos 49
  ypos -542
 }
-push $N5df7200
+push $N5de8a00
 Difference {
  inputs 2
  output rgba.red
@@ -389,13 +390,13 @@ Difference {
  xpos -45
  ypos -484
 }
-push $N5cc1e00
+push $N5aabe00
 Dot {
  name Dot13
  xpos 3823
  ypos -1172
 }
-set N5dfb000 [stack 0]
+set N5dec800 [stack 0]
 BlackOutside {
  name BlackOutside1
  xpos 4509
@@ -406,7 +407,7 @@ Dot {
  xpos 4647
  ypos -1172
 }
-set N5dfc600 [stack 0]
+set N5dede00 [stack 0]
 Cube {
  cube {-0.5099999905 -0.5 -0.5 0.5 0.3950000107 0.4839999974}
  translate {-1.876000047 0 0}
@@ -420,8 +421,8 @@ SyUV {
  xpos 4674
  ypos -859
 }
-set C5dff400 [stack 0]
-push $N5dfc600
+set C5df0c00 [stack 0]
+push $N5dede00
 Sphere {
  rows 32
  columns 32
@@ -430,12 +431,12 @@ Sphere {
  xpos 4474
  ypos -905
 }
-clone $C5dff400 {
+clone $C5df0c00 {
  xpos 4474
  ypos -861
  selected false
 }
-push $N5dfc600
+push $N5dede00
 Card2 {
  rows 32
  columns 32
@@ -455,7 +456,7 @@ Card2 {
  xpos 4867
  ypos -912
 }
-clone $C5dff400 {
+clone $C5df0c00 {
  xpos 4867
  ypos -866
  selected false
@@ -466,7 +467,7 @@ Scene {
  xpos 4701
  ypos -713
 }
-set N5e02000 [stack 0]
+set N5df3800 [stack 0]
 Viewer {
  inputs 2
  input_process false
@@ -489,7 +490,7 @@ Camera2 {
  xpos 3980
  ypos -893
 }
-push $N5dfb000
+push $N5dec800
 SyShader {
  shader_type "fragment shader"
  k -0.01826
@@ -537,7 +538,7 @@ Camera2 {
  xpos 4492
  ypos -657
 }
-push $N5e02000
+push $N5df3800
 push 0
 ScanlineRender {
  inputs 3
@@ -572,7 +573,7 @@ Camera2 {
  xpos 354
  ypos -665
 }
-push $N5cc2e00
+push $N5b1e600
 Card2 {
  rotate {0 26.69209412 0}
  control_points {3 3 3 6 
@@ -617,21 +618,13 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-push $N5cc3200
+push $N5d9a600
 Difference {
  inputs 2
  output rgba.red
  name Difference1
  xpos 629
  ypos -506
-}
-StickyNote {
- inputs 0
- name StickyNote8
- label "Standard 2D distortion so that straight lines are straight again"
- note_font_size 12
- xpos -760
- ypos -435
 }
 SyCamera {
  inputs 0
@@ -644,7 +637,7 @@ SyCamera {
  xpos 2049
  ypos -626
 }
-push $N5df1c00
+push $N5de3800
 SyShader {
  k {{parent.SyLens2.k i}}
  kcube {{parent.SyLens2.kcube i}}
@@ -683,57 +676,42 @@ ScanlineRender {
  xpos 1902
  ypos -504
 }
-push $N5861800
+push $N5dbba00
 Dot {
  name Dot16
  xpos -454
  ypos -1172
+}
+BlackOutside {
+ name BlackOutside2
+ xpos -488
+ ypos -917
 }
 Dot {
  name Dot14
  xpos -454
  ypos -663
 }
-set N5e34c00 [stack 0]
-push $N5e34c00
+set N5e26800 [stack 0]
+push $N5e26800
 Dot {
  name Dot15
  xpos -656
  ypos -663
 }
-set N5e35000 [stack 0]
 SyLens {
- k {{curve i x50 -0.01826 x114 -0.01826}}
- kcube 0.0021
+ k {{curve x12 -0.01826 x50 -0.01826 x114 -0.01826}}
  filter Parzen
+ grow true
  name SyLens_UN1
  tile_color 0xc10000ff
- xpos -817
- ypos -671
-}
-SyLens {
- output "apply disto"
- k {{curve x50 -0.01826 x114 -0.01826}}
- kcube 0.0021
- filter Parzen
- name SyLens_UN2
- tile_color 0xc10000ff
- xpos -817
- ypos -549
-}
-push $N5e35000
-Difference {
- inputs 2
- output rgba.red
- name Difference3
  xpos -690
- ypos -491
+ ypos -585
 }
 Viewer {
  inputs 2
  input_process false
  name Viewer3
- selected true
  xpos 4349
  ypos -759
 }

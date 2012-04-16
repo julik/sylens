@@ -93,6 +93,7 @@ public:
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
+	int knob_changed(Knob*);
 	
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will be flushed automatically
@@ -136,7 +137,8 @@ double SyLens::toUv(double absValue, int absSide)
 	return x * 2;
 }
 
-double SyLens::fromUv(double uvValue, int absSide) {
+double SyLens::fromUv(double uvValue, int absSide)
+{
 	double value_off_corner = (uvValue / 2) + 0.5f;
 	return absSide * value_off_corner;
 }
@@ -157,19 +159,25 @@ void SyLens::centered_uv_to_absolute_px(Vector2& xy, int w, int h)
 
 // Get a coordinate that we need to sample from the SOURCE distorted image to get at the absXY
 // values in the RESULT
-void SyLens::distort_px_into_source(Vector2& absXY) {
+void SyLens::distort_px_into_source(Vector2& absXY)
+{
 	absolute_px_to_centered_uv(absXY, plate_width_, plate_height_);
 	distorter.apply_disto(absXY);
 	centered_uv_to_absolute_px(absXY, plate_width_, plate_height_);
 }
 
 // This is still a little wrongish but less wrong than before
-void SyLens::undistort_px_into_destination(Vector2& absXY) {
+void SyLens::undistort_px_into_destination(Vector2& absXY)
+{
 	absolute_px_to_centered_uv(absXY, plate_width_, plate_height_);
 	distorter.remove_disto(absXY);
 	centered_uv_to_absolute_px(absXY, plate_width_, plate_height_);
 }
 
+int SyLens::knob_changed(Knob* k)
+{
+	return Iop::knob_changed(k);
+}
 
 // knobs. There is really only one thing to pay attention to - be consistent and call your knobs
 // "in_snake_case_as_short_as_possible", labels are also lowercase normally
@@ -199,7 +207,8 @@ void SyLens::knobs( Knob_Callback f) {
 	// Grow plate
 	Knob* kGrowKnob = Bool_knob( f, &k_grow_format_, "grow");
 	kGrowKnob->label("grow format");
-	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox");
+	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox."
+		"\nThis is useful if you are going to do a matte painting of the output.");
 	kGrowKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
 	Divider(f, 0);
@@ -231,6 +240,7 @@ void SyLens::_computeAspects() {
 // pay attention
 void SyLens::_validate(bool for_real)
 {
+
 	// Bookkeeping boilerplate
 	filter.initialize();
 	input0().validate(for_real);
