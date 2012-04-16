@@ -73,7 +73,7 @@ class SyLens : public Iop
 	// Stuff driven by knobbz
 	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
 	int k_output;
-	int x_padding_, y_padding_;
+	int x_px_shift, y_px_shift;
 	
 	// The distortion engine
 	SyDistorter distorter;
@@ -84,8 +84,8 @@ public:
 		k_output = UNDIST;
 		k_grow_format_ = 0;
 		_aspect = 1.33f;
-		x_padding_ = 0;
-		y_padding_ = 0;
+		x_px_shift = 0;
+		y_px_shift = 0;
 	}
 	
 	void _computeAspects();
@@ -228,8 +228,6 @@ void SyLens::_computeAspects() {
 	plate_height_ = round(f.height());
 
 	_aspect = float(plate_width_) / float(plate_height_) *  f.pixel_aspect();
-	
-	if(k_enable_debug_) printf("SyLens: true plate window with uncrop will be %dx%d\n", plate_width_, plate_height_);
 }
 
 	
@@ -271,23 +269,23 @@ void SyLens::_validate(bool for_real)
 	Info inf = input0().info();
 	output_format = input0().format();
 	
+	x_px_shift = 0;
+	y_px_shift = 0;
+
 	// If we need to grow the plate, do it here.
-	x_padding_ = 0;
-	y_padding_ = 0;
 	if(k_grow_format_ && k_output == UNDIST) {
 		
 		// Determine the offset of the left bottom corner
 		Vector2 corner(0.0f, 0.0f);
 		undistort_px_into_destination(corner);
-		
+		// Only do it if we need to make the plate bigger
 		if(corner.x < 0.0f || corner.y < 0.0f) {
-			int out_width = ow - (2 * round(corner.y));
-			int out_height = oh - (2 * round(corner.x));
+			int out_width = ow + (2 * round(fabs(corner.x)));
+			int out_height = oh + (2 * round(fabs(corner.y)));
 			
 			output_format = Format(out_width, out_height, output_format.pixel_aspect());
-			x_padding_ = round(corner.x);
-			y_padding_ = round(corner.y);
-			// Also set() our own output format so that Nuke knows we will grow the output format
+			x_px_shift = out_width - ow;
+			y_px_shift = out_height - oh;
 			info_.format(output_format);
 		}
 	}
@@ -347,14 +345,18 @@ void SyLens::_validate(bool for_real)
 	minY = *std::min_element(yValues.begin(), yValues.end());
 	maxY = *std::max_element(yValues.begin(), yValues.end());
 	
+	if(k_grow_format_) {
+		minX -= x_px_shift;
+		minY -= y_px_shift;
+		maxX += x_px_shift;
+		maxY += y_px_shift;
+	}
+	
 	Box obox(minX, minY, maxX, maxY);
-	
-	
-	if(k_enable_debug_) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
 	
 	// If trim is enabled we intersect our obox with the format so that there is no bounding box
 	// outside the crop area. Thiis handy for redistorted material.
-	if(k_trim_bbox_to_format_) obox.intersect(output_format);
+	if(k_trim_bbox_to_format_ || k_grow_format_) obox.intersect(output_format);
 	
 	info_.set(obox);
 }
@@ -362,11 +364,10 @@ void SyLens::_validate(bool for_real)
 void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int count)
 {
 	
-	if(k_enable_debug_) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
 	ChannelSet c1(channels);
 	in_channels(0,c1);
 	
-	Vector2 bl(x, y), br(r, y), tr(r, t), tl(x, t);
+	Vector2 bl(x-x_px_shift, y-y_px_shift), br(r-x_px_shift, y+y_px_shift), tr(r+x_px_shift, t+y_px_shift), tl(x-x_px_shift, t+y_px_shift);
 	
 	if(k_output == UNDIST) {
 		distort_px_into_source(bl);
@@ -402,13 +403,19 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	foreach(z, channels) out.writable(z);
 	
 	Pixel pixel(channels);
-	const float dx = 0.5f + x_padding_;
-	const float dy = 0.5f;// + y_padding_;
+	const float half = 0.5f;
 	
 	Vector2 sampleFromXY(0.0f, 0.0f);
 	for (; x < r; x++) {
 		
 		sampleFromXY = Vector2(x, y);
+		
+		// If we are in a grown plate honor offsets
+		if(k_grow_format_) {
+			sampleFromXY.x -= x_px_shift;
+			sampleFromXY.y -= y_px_shift;
+		}
+		
 		if( k_output == UNDIST) {
 			distort_px_into_source(sampleFromXY);
 		} else {
@@ -420,7 +427,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
 		// have to deal with a slight offset which is *not* desired.
 		input0().sample(
-			sampleFromXY.x + dx , sampleFromXY.y + dy, 
+			sampleFromXY.x + half , sampleFromXY.y + half, 
 			1.0f, 
 			1.0f,
 			&filter,
