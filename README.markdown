@@ -66,6 +66,12 @@ This selects the filtering algorithm used for sampling the source image, pick on
 
 When you apply distortion to the image, the bounding box that SyLens receives will usually grow. For example, when reintroducing distortion, there will be overflow outside of the image. When you are compositing redistorted items onto the source you generally don't want to have this overscan. When you enable *trim bbox* the size of the bounding box will be reduced to fit within the actual output format, and no overscan pixels will be output or computed.
 
+#### grow format
+
+Sometimes it's not that handy to have an overflow bounding box in the standard format - for example, when you need to render your images out for matte painting.
+So we provide a shortcut checkbox that you can use to create outputs bigger than the original plate. This will mess up other calculations that depend on the correct
+field of view of the camera, so be careful with that one. It will only have effect on images that have barrel distortion.
+
 ![Cropping workflow][5]
 
 #### debug info

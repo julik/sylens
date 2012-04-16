@@ -125,11 +125,10 @@ void SyDistorter::apply_disto(Vector2& pt)
 	LutTuple* left = NULL;
 	LutTuple* right = NULL;
 	
-	// Only iterate as long as the points are not found
+	// Find the neihgbouring defined points in the LUT
 	for(tuple_it = lut.begin(); 
 		tuple_it != lut.end() && !(left && right); 
 		tuple_it++) {
-		// If the tuple is less than r2 we found the first element
 		if((*tuple_it)->r < r) {
 			left = *tuple_it;
 		}
@@ -142,13 +141,14 @@ void SyDistorter::apply_disto(Vector2& pt)
 	
 	// If we could not find neighbour points just compute it
 	if(left && right) {
-		// TODO: spline interpolation instead using neighbouring pts
+		// TODO: spline interpolation instead of linear
 		f = lerp(r, left->r, right->r, left->f, right->f);
 	} else {
 		f = distort_radial(r);
 	}
 	
 	// Bracket in centerpoint adjustment
+	// move camera gate -> distort -> move camera gate back
 	pt.x -= center_shift_u_;
 	pt.y -= center_shift_v_;
 	
