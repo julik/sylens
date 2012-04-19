@@ -368,7 +368,10 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	in_channels(0,c1);
 	
 	// Honor the shift we need to apply if we change the output format
-	Vector2 bl(x-x_px_shift, y-y_px_shift), br(r-x_px_shift, y+y_px_shift), tr(r+x_px_shift, t+y_px_shift), tl(x-x_px_shift, t+y_px_shift);
+	Vector2 bl(x-x_px_shift, y-y_px_shift), 
+		br(r-x_px_shift, y+y_px_shift),
+		tr(r+x_px_shift, t+y_px_shift),
+		tl(x-x_px_shift, t+y_px_shift);
 	
 	if(k_output == UNDIST) {
 		distort_px_into_source(bl);
@@ -386,7 +389,7 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
 	// If we don't request it we will get black pixels in there, so we add a small margin on all sides
 	// to give us a little cushion
-	const unsigned int safetyPadding = 16;
+	const unsigned int safetyPadding = 4;
 	input0().request(
 		round(bl.x - safetyPadding),  
 		round(bl.y  - safetyPadding),

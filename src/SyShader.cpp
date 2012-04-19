@@ -82,6 +82,13 @@ public:
 
 		input0().vertex_shader(vtx);
 	}
+	
+	/* Request some more image - TODO */
+	/*virtual*/
+	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
+	{
+		Material::_request(x - pad, y - pad, r + pad, t + pad, channels, count);
+	}
 
 	/*virtual*/
 	void fragment_shader(const VertexContext& vtx, Pixel& out) {
@@ -91,9 +98,7 @@ public:
 			Vector4& uv = new_vtx.vP.UV();
 			distorter.distort_uv(uv);
 			input0().fragment_shader(new_vtx,out);
-		}
-
-		else {
+		} else {
 			input0().fragment_shader(vtx, out);
 		}
 	}

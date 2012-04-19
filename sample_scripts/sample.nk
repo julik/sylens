@@ -169,37 +169,37 @@ Dot {
  xpos 191
  ypos -1172
 }
-set N5dd7e00 [stack 0]
+set N5861400 [stack 0]
 Dot {
  name Dot4
  xpos 531
  ypos -1172
 }
-set N5d98c00 [stack 0]
+set N5a74600 [stack 0]
 Dot {
  name Dot5
  xpos 663
  ypos -1172
 }
-set N5b14200 [stack 0]
+set N5a74a00 [stack 0]
 Dot {
  name Dot10
  xpos 1936
  ypos -1172
 }
-set N5b14600 [stack 0]
+set N5cc3e00 [stack 0]
 Dot {
  name Dot11
  xpos 2843
  ypos -1172
 }
-set N5a8ec00 [stack 0]
+set N5cc4200 [stack 0]
 Dot {
  name Dot8
  xpos 2849
  ypos -802
 }
-set N5a8f000 [stack 0]
+set N5cc2a00 [stack 0]
 Dot {
  name Dot9
  xpos 3341
@@ -213,11 +213,12 @@ SyLens {
 }
 Camera2 {
  inputs 0
+ focal 35
  name Camera2
  xpos 2961
  ypos -614
 }
-push $N5a8f000
+push $N5cc2a00
 SyShader {
  shader_type "fragment shader"
  k {{parent.SyLens1.k i}}
@@ -229,11 +230,12 @@ SyShader {
  ypos -690
 }
 Card2 {
- z 10
+ z 7.2
  lens_in_focal {{parent.Camera2.focal i}}
  lens_in_haperture {{parent.Camera2.haperture i}}
  translate {{parent.Camera2.translate i} {parent.Camera2.translate i} {parent.Camera2.translate i}}
  rotate {{parent.Camera2.rotate i} {parent.Camera2.rotate i} {parent.Camera2.rotate i}}
+ uniform_scale 0.82
  control_points {3 3 3 6 
 
 1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
@@ -255,7 +257,7 @@ ScanlineRender {
  output_motion_vectors_type accurate
  name ScanlineRender3
  xpos 2815
- ypos -503
+ ypos -502
 }
 Viewer {
  inputs 2
@@ -265,13 +267,13 @@ Viewer {
  xpos 1902
  ypos -56
 }
-push $N5b14600
+push $N5cc3e00
 Dot {
  name Dot6
  xpos 1936
  ypos -812
 }
-set N5de2c00 [stack 0]
+set N5df3a00 [stack 0]
 Dot {
  name Dot7
  xpos 1390
@@ -323,7 +325,7 @@ StickyNote {
  xpos 2438
  ypos -439
 }
-push $N5dd7e00
+push $N5861400
 Dot {
  name Dot2
  xpos 191
@@ -334,7 +336,7 @@ Dot {
  xpos -11
  ypos -657
 }
-set N5de8200 [stack 0]
+set N5df8800 [stack 0]
 SyLens {
  k {{curve i x50 -0.01826 x114 -0.01826}}
  filter Parzen
@@ -343,45 +345,18 @@ SyLens {
  xpos -172
  ypos -665
 }
-set N5de7a00 [stack 0]
-Transform {
- scale {1 1.56}
- center {1024 617}
- name Transform1
- xpos -172
- ypos -599
-}
+set N5df9800 [stack 0]
 SyLens {
  output "apply disto"
- mode redistort
- k {{curve i x1 -0.01826 x114 -0.01826}}
+ k {{curve x1 -0.01826 x114 -0.01826}}
  filter Mitchell
  trim true
- name SyLens_Re2
- tile_color 0xc10000ff
- label "\t"
- xpos -172
- ypos -540
-}
-StickyNote {
- inputs 0
- name StickyNote6
- label "If you want to combine SyShader with Project3D, you will need to use\nthe fragment shader options (this is primarily useful\nfor baking out texture maps), and connect the SyShader node\nUPSTREAM of the Project3D node"
- note_font_size 21
- xpos 3627
- ypos -628
-}
-push $N5de7a00
-SyLens {
- output "apply disto"
- k {{curve i x1 -0.01826 x114 -0.01826}}
- filter Mitchell
  name SyLens_Re1
  tile_color 0xc10000ff
  xpos 49
  ypos -542
 }
-push $N5de8200
+push $N5df8800
 Difference {
  inputs 2
  output rgba.red
@@ -389,13 +364,13 @@ Difference {
  xpos -45
  ypos -484
 }
-push $N5a8ec00
+push $N5cc4200
 Dot {
  name Dot13
  xpos 3823
- ypos -1172
+ ypos -1176
 }
-set N5dec000 [stack 0]
+set N5dfba00 [stack 0]
 BlackOutside {
  name BlackOutside1
  xpos 4509
@@ -406,7 +381,7 @@ Dot {
  xpos 4647
  ypos -1172
 }
-set N5ded600 [stack 0]
+set N5dfb600 [stack 0]
 Cube {
  cube {-0.5099999905 -0.5 -0.5 0.5 0.3950000107 0.4839999974}
  translate {-1.876000047 0 0}
@@ -420,8 +395,8 @@ SyUV {
  xpos 4674
  ypos -859
 }
-set C5df0400 [stack 0]
-push $N5ded600
+set C5dfc200 [stack 0]
+push $N5dfb600
 Sphere {
  rows 32
  columns 32
@@ -430,12 +405,12 @@ Sphere {
  xpos 4474
  ypos -905
 }
-clone $C5df0400 {
+clone $C5dfc200 {
  xpos 4474
  ypos -861
  selected false
 }
-push $N5ded600
+push $N5dfb600
 Card2 {
  rows 32
  columns 32
@@ -455,7 +430,7 @@ Card2 {
  xpos 4867
  ypos -912
 }
-clone $C5df0400 {
+clone $C5dfc200 {
  xpos 4867
  ypos -866
  selected false
@@ -466,7 +441,7 @@ Scene {
  xpos 4701
  ypos -713
 }
-set N5df3000 [stack 0]
+set N5e07200 [stack 0]
 Viewer {
  inputs 2
  input_process false
@@ -476,68 +451,13 @@ Viewer {
 }
 Camera2 {
  inputs 0
- translate {0 0 2.558000088}
- name Camera4
- xpos 3972
- ypos -743
-}
-Camera2 {
- inputs 0
- translate {0 0 1.713999987}
- rotate {0 1.1 0}
- name Camera3
- xpos 3980
- ypos -893
-}
-push $N5dec000
-SyShader {
- shader_type "fragment shader"
- k -0.01826
- name SyShader3
- xpos 3789
- ypos -896
-}
-Project3D {
- inputs 2
- name Project3D1
- xpos 3789
- ypos -872
-}
-Card2 {
- image_aspect false
- uniform_scale 2
- control_points {3 3 3 6 
-
-1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
-1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
-1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
-1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
-1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
-1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
-1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
-1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
-1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
- name Card4
- xpos 3789
- ypos -820
-}
-push 0
-ScanlineRender {
- inputs 3
- output_motion_vectors_type accurate
- name ScanlineRender4
- xpos 3789
- ypos -722
-}
-Camera2 {
- inputs 0
  translate {-3.062570572 -5.284231186 5.314462662}
  rotate {41.27163663 -25.41727858 -16.61894991}
  name Camera5
  xpos 4492
  ypos -657
 }
-push $N5df3000
+push $N5e07200
 push 0
 ScanlineRender {
  inputs 3
@@ -572,7 +492,7 @@ Camera2 {
  xpos 354
  ypos -665
 }
-push $N5d98c00
+push $N5a74600
 Card2 {
  rotate {0 26.69209412 0}
  control_points {3 3 3 6 
@@ -617,13 +537,137 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-push $N5b14200
+push $N5a74a00
 Difference {
  inputs 2
  output rgba.red
  name Difference1
  xpos 629
  ypos -506
+}
+SyCamera {
+ inputs 0
+ translate {0 0 1.184999943}
+ k -0.03826
+ aspect 1.65964344
+ name SyCamera3
+ xpos -1452
+ ypos -1106
+}
+CheckerBoard2 {
+ inputs 0
+ name CheckerBoard1
+ xpos -1378
+ ypos -1213
+}
+Card2 {
+ rows 128
+ columns 128
+ translate {0.1829999983 0 0}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card6
+ xpos -1370
+ ypos -1125
+}
+set N5e21800 [stack 0]
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender6
+ xpos -1305
+ ypos -1085
+}
+SyCamera {
+ inputs 0
+ translate {0 0 1.184999943}
+ aspect 1.65964344
+ name SyCamera4
+ xpos -992
+ ypos -1170
+}
+push $N5e21800
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender7
+ xpos -1168
+ ypos -1105
+}
+SyLens {
+ output "apply disto"
+ k -0.11826
+ name SyLens4
+ xpos -1168
+ ypos -1081
+}
+set N5e2b600 [stack 0]
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference3
+ xpos -1235
+ ypos -1029
+}
+push $N5df9800
+Transform {
+ scale {1 1.56}
+ center {1024 617}
+ name Transform1
+ xpos -172
+ ypos -599
+}
+SyLens {
+ output "apply disto"
+ k {{curve i x1 -0.01826 x114 -0.01826}}
+ filter Mitchell
+ trim true
+ name SyLens_Re2
+ tile_color 0xc10000ff
+ label "\t"
+ xpos -172
+ ypos -542
+}
+push $N5861400
+Dot {
+ name Dot16
+ xpos -454
+ ypos -1172
+}
+BlackOutside {
+ name BlackOutside2
+ xpos -488
+ ypos -917
+}
+Dot {
+ name Dot14
+ xpos -454
+ ypos -663
+}
+Dot {
+ name Dot15
+ xpos -656
+ ypos -663
+}
+SyLens {
+ k {{curve i x12 -0.01826 x50 -0.01826 x114 -0.01826}}
+ filter Parzen
+ grow true
+ name SyLens_UN1
+ tile_color 0xc10000ff
+ xpos -690
+ ypos -585
 }
 SyCamera {
  inputs 0
@@ -636,7 +680,7 @@ SyCamera {
  xpos 2049
  ypos -626
 }
-push $N5de2c00
+push $N5df3a00
 SyShader {
  k {{parent.SyLens2.k i}}
  kcube {{parent.SyLens2.kcube i}}
@@ -675,38 +719,72 @@ ScanlineRender {
  xpos 1902
  ypos -504
 }
-push $N5dd7e00
-Dot {
- name Dot16
- xpos -454
- ypos -1172
+StickyNote {
+ inputs 0
+ name StickyNote6
+ label "If you want to combine SyShader with Project3D, you will need to use\nthe fragment shader options (this is primarily useful\nfor baking out texture maps), and connect the SyShader node.\nUPSTREAM of the Project3D node.\nNote that \"Crop\" on Project3D is disabled!"
+ note_font_size 21
+ xpos 3627
+ ypos -628
 }
-BlackOutside {
- name BlackOutside2
- xpos -488
- ypos -917
+push $N5e2b600
+Camera2 {
+ inputs 0
+ translate {0 0 2.558000088}
+ focal 53
+ name Camera4
+ xpos 3972
+ ypos -743
 }
-Dot {
- name Dot14
- xpos -454
- ypos -663
+Camera2 {
+ inputs 0
+ translate {0 0 1.713999987}
+ rotate {0 1.1 0}
+ name Camera3
+ xpos 3980
+ ypos -893
 }
-set N5e25c00 [stack 0]
-push $N5e25c00
-Dot {
- name Dot15
- xpos -656
- ypos -663
-}
-SyLens {
- k {{curve x12 -0.01826 x50 -0.01826 x114 -0.01826}}
- filter Parzen
- grow true
- name SyLens_UN1
- tile_color 0xc10000ff
+push $N5dfba00
+SyShader {
+ shader_type "fragment shader"
+ k -0.01826
+ name SyShader3
  selected true
- xpos -690
- ypos -585
+ xpos 3789
+ ypos -896
+}
+Project3D {
+ inputs 2
+ crop false
+ name Project3D1
+ xpos 3789
+ ypos -872
+}
+Card2 {
+ image_aspect false
+ uniform_scale 2
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card4
+ xpos 3789
+ ypos -820
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender4
+ xpos 3789
+ ypos -722
 }
 Viewer {
  inputs 2
