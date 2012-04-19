@@ -189,11 +189,6 @@ void SyLens::knobs( Knob_Callback f) {
 	_output_selector->label("output");
 	_output_selector->tooltip("Pick your poison");
 	
-	// Old mode configuration knob that we just hide
-	const char* old_mode_value = "nada";
-	Knob* hidden_mode = String_knob(f, &old_mode_value, "mode");
-	hidden_mode->set_flag(KNOB_HIDDEN);
-	
 	distorter.knobs(f);
 	filter.knobs(f);
 	
