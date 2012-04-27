@@ -105,7 +105,7 @@ public:
 	void update_distortion_limits()
 	{
 		distorter.recompute_if_needed();
-		Vector2 max_corner(1.0f, distorter.aspect());
+		Vector2 max_corner(distorter.aspect(), 1.0f);
 		distorter.apply_disto(max_corner);
 		max_corner_u_ = max_corner.x + 1.0f;
 		max_corner_v_ = max_corner.y + 1.0f;
