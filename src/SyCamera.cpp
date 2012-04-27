@@ -30,6 +30,7 @@ class SyCamera : public CameraOp
 {
 private:
 	double max_corner_u_, max_corner_v_;
+	bool distortion_enabled;
 	
 public:
 	static const Description description;
@@ -48,6 +49,7 @@ public:
 
 	SyCamera(Node* node) : CameraOp(node)
 	{
+		distortion_enabled = 1;
 	}
 	
 	void append(Hash& hash)
@@ -70,7 +72,14 @@ public:
 	{
 		Tab_knob(f, "SyLens");
 		distorter.knobs_with_aspect(f);
+		
+		// Allow bypass
+		Knob* k_bypass = Bool_knob( f, &distortion_enabled, "disto_enabled");
+		k_bypass->label("enable distortion");
+		k_bypass->tooltip("You can deactivate this to suppress redistortion (if you want to use SyCamera without any distortion but do not want to change the parameters)");
+		
 		Divider(f, 0);
+		
 		std::ostringstream ver;
 		ver << "SyCamera v." << VERSION;
 		Text_knob(f, ver.str().c_str());
@@ -145,7 +154,7 @@ public:
 	
 	LensNFunc* lensNfunction(int mode) const
 	{
-		if (mode == LENS_PERSPECTIVE) {
+		if (mode == LENS_PERSPECTIVE && distortion_enabled) {
 			return sy_camera_nlens_func;
 		}
 		return CameraOp::lensNfunction(mode);
