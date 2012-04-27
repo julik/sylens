@@ -41,7 +41,7 @@ class SyShader : public Material
 private:
 	// The distortion engine
 	SyDistorter distorter;
-
+	float _aspect;
 
 public:
 
@@ -52,6 +52,7 @@ public:
 	SyShader(Node* node) : Material(node)
 	{
 		kShaderType = 0;
+		_aspect = 1.0f;
 	}
 	
 	/* virtual */
@@ -65,7 +66,7 @@ public:
 	void _validate(bool for_real) {
 
 		Format f = input0().format();
-		double _aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
+		_aspect = float(f.width()) / float(f.height()) *  f.pixel_aspect();
 		distorter.set_aspect(_aspect);
 		distorter.recompute_if_needed();
 		Material::_validate(for_real);
@@ -85,10 +86,14 @@ public:
 	
 	/* Request some more image - TODO */
 	/*virtual*/
-	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
-	{
-		Material::_request(x - pad, y - pad, r + pad, t + pad, channels, count);
-	}
+//	void _request(int x, int y, int r, int t, ChannelMask channels, int count)
+//	{
+//		Vector2 corner(_aspect, 1);
+//		distorter.apply_disto(corner);
+//		float x_mult = 1 / corner.x;
+//		float y_mult = 1 / corner.y;
+//		Material::_request(ceil(x * x_mult), ceil(y * y_mult), ceil(r * x_mult), ceil(t * y_mult), channels, count);
+//	}
 
 	/*virtual*/
 	void fragment_shader(const VertexContext& vtx, Pixel& out) {
