@@ -13,7 +13,7 @@ LIBS ?= -lDDImage -lGLEW
 LINKFLAGS += -bundle
 FRAMEWORKS ?= -framework QuartzCore -framework IOKit -framework CoreFoundation -framework Carbon -framework ApplicationServices -framework OpenGL -framework AGL 
 
-all: SyLens.dylib SyUV.dylib SyCamera.dylib SyShader.dylib
+all: SyGeo.dylib SyLens.dylib SyUV.dylib SyCamera.dylib SyShader.dylib
 
 .PRECIOUS : %.os
 
