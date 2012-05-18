@@ -195,6 +195,7 @@ void SyDistorter::distort_uv(Vector4& uv)
 	// to be in the optical center of the image, and then scale them to -1..1
 	double x = ((uv.x / uv.w) - centerpoint_shift_in_uv_space) * factor;
 	double y = ((uv.y / uv.w) - centerpoint_shift_in_uv_space) * factor;
+	double z = sqrt(x*x + y*y);
 	
 	Vector2 syntheyes_uv(x, y);
 	
@@ -204,7 +205,7 @@ void SyDistorter::distort_uv(Vector4& uv)
 	syntheyes_uv.x = (syntheyes_uv.x / factor) + centerpoint_shift_in_uv_space;
 	syntheyes_uv.y = (syntheyes_uv.y / factor) + centerpoint_shift_in_uv_space;
 	
-	uv.set(syntheyes_uv.x * uv.w, syntheyes_uv.y * uv.w, uv.z, uv.w);
+	uv.set(syntheyes_uv.x * uv.w, syntheyes_uv.y * uv.w, z, uv.w);
 }
 
 double SyDistorter::aspect()
@@ -262,8 +263,6 @@ void SyDistorter::knobs_with_aspect( Knob_Callback f)
 // Updates the internal lookup table
 void SyDistorter::recompute()
 {
-	unsigned steps = STEPS;
-	
 	double r = 0;
 	double max_r = aspect_ * 2; // One and a half aspect is plenty
 	double increment = max_r / float(STEPS);
