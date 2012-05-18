@@ -6,6 +6,7 @@ The currently provided plugins are:
 
 * SyLens for images, footage and roto (works on all channels)
 * SyUV for undistorting projected UVs in your geometry
+* SyGeo for undistorting your geometry itself (primarily cards)
 * SyShader for undistorting in texture space (material modifier)
 * SyCamera for rendering from ScanlineRender with lens redistortion baked in
 
@@ -153,6 +154,43 @@ Sometimes you are dealing with off-center lens distortion. This can occur when a
 
 Nuke allows for arbitrary UV attributes to be added to the main geometry. If you want to manipulate a non-standard UV channel punch it's name in here. Normally you would leave this parameter at it's default setting.
 
+## The SyGeo node
+
+SyGeo undistorts the vertex coordinates in your geometry. It's primarily designed to undistort Card nodes that you place your footage on.
+
+### Workflow with UV distortion
+
+Typically you would be using it like this:
+
+![SyUV DAG][18]
+
+Here we pump the footage into a Card node, which then gets straightened. This is analogous
+to the distortion parameters of the Card node itself.
+
+### Explanation of the UI controls
+
+#### k
+
+Quartic distortion coefficient. This is calculated by Syntheyes and needs to be punched in here.
+
+#### kcube
+
+Cubic distortion modifier. If you used this in Syntheyes you can apply it here as well.
+
+#### aspect
+
+The Syntheyes algorithm **requires** the aspect ratio of your distorted plate. This cannot be automatically deciphered from the UVs so you need to dial it in manually. Use your image's aspect ratio.
+
+#### ushift
+
+Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor (some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint left or right with regards to the center of your digital plate.
+
+#### vshift
+
+Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor (some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint up or down with regards to the center of your digital plate.
+
+
+
 ## The SyCamera node
 
 The SyCamera node performs distortion in camera space. You can use it just like you would use a standard Nuke camera node. However, once plugged into the render node it will distort the rendered output according to the Syntheyes algorithm.
@@ -281,3 +319,4 @@ For questions and comments shoot a mail to me \_at\_ julik.nl
  [15]: https://github.com/julik/sylens/raw/master/images/cam_few_subdivs.png
  [16]: https://github.com/julik/sylens/raw/master/images/cam_many_subdivs.png
  [17]: https://github.com/julik/sylens/raw/master/images/sylens_controls.png
+ [18]: https://github.com/julik/sylens/raw/master/images/sygeo.png
