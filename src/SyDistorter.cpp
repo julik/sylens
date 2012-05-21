@@ -112,6 +112,7 @@ double SyDistorter::undistort_sampled(double rd)
 	if(left && right) {
 		return lerp(rd, left->m, right->m, left->f, right->f);
 	} else {
+		// We do not have this value in the LUT, so assume F stays constant on that R
 		return 1.0f;
 	}
 }
@@ -232,12 +233,12 @@ void SyDistorter::knobs( Knob_Callback f)
 	Knob* _kKnob = Float_knob( f, &k_, "k" );
 	_kKnob->label("k");
 	_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
-	_kKnob->set_range(-0.5f, 0.5f, true);
+	_kKnob->set_range(-0.3f, 0.3f, true);
 	
 	Knob* _kCubeKnob = Float_knob( f, &k_cube_, "kcube" );
 	_kCubeKnob->label("cubic k");
 	_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
-	_kKnob->set_range(-0.4f, 0.4f, true);
+	_kCubeKnob->set_range(-0.1f, 0.1f, true);
 	
 	Knob* _uKnob = Float_knob( f, &center_shift_u_, "ushift" );
 	_uKnob->label("horizontal shift");

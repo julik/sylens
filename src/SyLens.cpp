@@ -82,7 +82,10 @@ public:
 	SyLens( Node *node ) : Iop ( node )
 	{
 		k_output = UNDIST;
+		
 		k_grow_format_ = 0;
+		k_trim_bbox_to_format_ = 0;
+		
 		_aspect = 1.33f;
 		x_px_shift = 0;
 		y_px_shift = 0;
@@ -94,17 +97,11 @@ public:
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
 	int knob_changed(Knob*);
-	
-	// Hashing for caches. We append our version to the cache hash, so that when you update
-	// the plugin all the caches will be flushed automatically
-	void append(Hash& hash) {
-		hash.append(VERSION);
-		hash.append(distorter.compute_hash());
-		Iop::append(hash); // the super called he wants his pointers back
-	}
+	void append(Hash& hash);
 	
 	~SyLens () { 
 	}
+	
 private:
 	
 	int round(double x);
@@ -178,6 +175,13 @@ int SyLens::knob_changed(Knob* k)
 	return Iop::knob_changed(k);
 }
 
+	
+void SyLens::append(Hash& hash) {
+	hash.append(VERSION);
+	hash.append(distorter.compute_hash());
+	Iop::append(hash); // the super called he wants his pointers back
+}
+	
 // knobs. There is really only one thing to pay attention to - be consistent and call your knobs
 // "in_snake_case_as_short_as_possible", labels are also lowercase normally
 void SyLens::knobs( Knob_Callback f) {
