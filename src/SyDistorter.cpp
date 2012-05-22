@@ -148,6 +148,11 @@ double SyDistorter::undistort_sampled(double rd)
 
 void SyDistorter::apply_disto(Vector2& pt)
 {
+	// Bracket in centerpoint adjustment
+	// move camera gate -> distort -> move camera gate back
+	pt.x -= center_shift_u_;
+	pt.y -= center_shift_v_;
+	
 	float x = pt.x * aspect_;
 	float r = sqrt(x * x + (pt.y * pt.y));
 	
@@ -176,11 +181,6 @@ void SyDistorter::apply_disto(Vector2& pt)
 	} else {
 		f = distort_radial(r);
 	}
-	
-	// Bracket in centerpoint adjustment
-	// move camera gate -> distort -> move camera gate back
-	pt.x -= center_shift_u_;
-	pt.y -= center_shift_v_;
 	
 	pt.x = pt.x * f;
 	pt.y = pt.y * f;
