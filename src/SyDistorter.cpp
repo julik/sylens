@@ -2,10 +2,7 @@
 #include <algorithm>
 #include "DDImage/Thread.h"
 #include "SyDistorter.h"
-
-// The number of discrete points we sample on the radius of the distortion.
-// The rest is going to be interpolated
-static const unsigned int STEPS = 32;
+#include <iostream>
 
 SyDistorter::SyDistorter()
 {
@@ -81,13 +78,52 @@ void SyDistorter::remove_disto(Vector2& pt)
 	
 	double x = pt.x * aspect_;
 	double rd = sqrt((fabs(x) * fabs(x)) + (fabs(pt.y) * fabs(pt.y)));
-	double inv_f = undistort_sampled(rd);
+	double inv_f = undistort(rd);
 	
 	pt.x = pt.x / inv_f;
 	pt.y = pt.y / inv_f;
 	
 	pt.x -= center_shift_u_;
 	pt.y -= center_shift_v_;
+}
+
+double SyDistorter::undistort(double radius_distorted)
+{
+	if(radius_distorted < lut.back()->r_distorted) {
+		undistort_sampled(radius_distorted);
+	} else {
+		undistort_approximated(radius_distorted);
+	}
+}
+
+/* If there is no available value in our LUT we are dealing with image outside of our original coordinates.
+All we can do at this point is approximate towards it and compare the resulting distorted radius
+with our given one. This has a number of disadvantages. First of all, it's going to get slower the
+more we go to the outside of the image frame since the same difference in radius will produce a bigger
+distortion. Second, it's kind of slow. However, not many points outside of the image will be estimated that way
+but only a handful, so this method will end up unused most of the time.
+*/
+double SyDistorter::undistort_approximated(double rp)
+{
+	double r, f, approx_rp, delta;
+	r = 0.1f;
+	const double inc = 0.001f;
+	while(r < 1000) { // Make sure the loop completes at some point
+		r += inc;
+		f = distort_radial(r);
+		approx_rp = r / f;
+		if(approx_rp > rp) {
+			// We found the upper bound, so we can now go back one step and interpolate
+			// between it and the upper bound F.
+			r -= inc;
+			double left_f = distort_radial(r);
+			double left_rp = r / left_f;
+			return lerp(rp, left_rp, approx_rp, left_f, f);
+		}
+	}
+	
+	// FAIL!
+	return 1.0f;
 }
 
 double SyDistorter::undistort_sampled(double rd)
@@ -99,22 +135,15 @@ double SyDistorter::undistort_sampled(double rd)
 	for(tuple_it = lut.begin(); 
 		tuple_it != lut.end() && !(left && right);
 		tuple_it++) {
-		// If the tuple is less than r2 we found the first element
-		if((*tuple_it)->m < rd) {
+			
+		if((*tuple_it)->r_distorted < rd) {
 			left = *tuple_it;
 		}
-		if ((*tuple_it)->m > rd) {
+		if ((*tuple_it)->r_distorted > rd) {
 			right = *tuple_it;
 		}
 	}
-	
-	// If we could not find neighbour points to not interpolate and recompute raw
-	if(left && right) {
-		return lerp(rd, left->m, right->m, left->f, right->f);
-	} else {
-		// We do not have this value in the LUT, so assume F stays constant on that R
-		return 1.0f;
-	}
+	return lerp(rd, left->r_distorted, right->r_distorted, left->f, right->f);
 }
 
 void SyDistorter::apply_disto(Vector2& pt)
@@ -233,12 +262,12 @@ void SyDistorter::knobs( Knob_Callback f)
 	Knob* _kKnob = Float_knob( f, &k_, "k" );
 	_kKnob->label("k");
 	_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
-	_kKnob->set_range(-0.3f, 0.3f, true);
+	_kKnob->set_range(-0.3f, 0.3f, false);
 	
 	Knob* _kCubeKnob = Float_knob( f, &k_cube_, "kcube" );
 	_kCubeKnob->label("cubic k");
 	_kCubeKnob->tooltip("Set to the same cubic distortion as applied by Syntheyes");
-	_kCubeKnob->set_range(-0.1f, 0.1f, true);
+	_kCubeKnob->set_range(-0.1f, 0.1f, false);
 	
 	Knob* _uKnob = Float_knob( f, &center_shift_u_, "ushift" );
 	_uKnob->label("horizontal shift");
@@ -260,12 +289,16 @@ void SyDistorter::knobs_with_aspect( Knob_Callback f)
 	_aKnob->tooltip("Set to the aspect of your distorted plate (like 1.78 for 16:9)");
 }
 
+// The number of discrete points we sample on the radius of the distortion.
+// The rest is going to be interpolated
+static const unsigned int STEPS = 64;
 
 // Updates the internal lookup table
 void SyDistorter::recompute()
 {
 	double r = 0;
-	double max_r = aspect_ * 2; // One and a half aspect is plenty
+	// Max radius will be the original radius at the top-right corner
+	double max_r = sqrt((aspect_ * aspect_) + 1);
 	double increment = max_r / float(STEPS);
 	
 	// Clear out the LUT elements so that they don't leak. We could use std::auto_ptr
