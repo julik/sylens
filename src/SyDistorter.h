@@ -11,13 +11,13 @@ using namespace DD::Image;
 class LutTuple
 {
 public:
-	double r, f, m;
-	
+	double r, f, r_distorted;
 	LutTuple(double radius, double disto_f) {
 		r = radius;
 		f = disto_f;
-		m = r * f;
+		r_distorted = radius * f;
 	}
+	bool operator<(LutTuple rhs) { return r < rhs.r; }
 };
 
 typedef std::vector<LutTuple*> Lut;
@@ -56,7 +56,9 @@ public:
 	
 private:
 	double lerp(double x, double left_x, double right_x, double left_y, double right_y);
+	double undistort(double);
 	double undistort_sampled(double);
+	double undistort_approximated(double);
 	double distort_sampled(double);
 	double distort_radial(double);
 	void recompute();
