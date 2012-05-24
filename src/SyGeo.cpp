@@ -1,5 +1,7 @@
 static const char* const CLASS = "SyGeo";
-static const char* const HELP = "This node will undistort the XY coordinates of the vertices\n"
+static const char* const HELP = "This node will undistort the XY coordinates of the vertices.\n"
+	"if it's input object. It's best for working with Cards with \"image aspect\" enabled.\n"
+	"Note that the input Card should not have any transforms since the distortion happens in the world space.\n"
 	"Contact me@julik.nl if you need help with the plugin.";
 
 #include "VERSION.h"
@@ -8,8 +10,8 @@ static const char* const HELP = "This node will undistort the XY coordinates of 
 #include "DDImage/Scene.h"
 #include "DDImage/Knob.h"
 #include "DDImage/Knobs.h"
-#include <sstream>
 #include "SyDistorter.cpp"
+#include <sstream>
 
 using namespace DD::Image;
 
@@ -73,15 +75,16 @@ public:
 	
 	void modify_geometry(int obj, Scene& scene, GeometryList& out)
 	{
-		PointList* points = out.writable_points(obj);
+		PointList* points = out.writable_vertices(obj);
 		const unsigned n = points->size();
 		// Transform points:
 		for (unsigned i = 0; i < n; i++) {
 			Vector3& v = (*points)[i];
-			Vector2 xy(v.x, v.y);
+			// The Card has it's vertices in the [-0.5, 0.5] space with aspect applied
+			Vector2 xy(v.x * 2, v.y * 2);
 			distorter.remove_disto(xy);
-			v.x = xy.x;
-			v.y = xy.y;
+			v.x = xy.x / 2.0f;
+			v.y = xy.y / 2.0f;
 		}
 	}
 };
