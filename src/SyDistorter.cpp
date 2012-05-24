@@ -2,7 +2,6 @@
 #include <algorithm>
 #include "DDImage/Thread.h"
 #include "SyDistorter.h"
-#include <iostream>
 
 SyDistorter::SyDistorter()
 {
