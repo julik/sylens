@@ -3,6 +3,10 @@
 #include "DDImage/Thread.h"
 #include "SyDistorter.h"
 
+// The number of discrete points we sample on the radius of the distortion.
+// The rest is going to be interpolated
+static const unsigned int STEPS = 64;
+
 SyDistorter::SyDistorter()
 {
 	set_coefficients(0.0f, 0.0f, 1.78);
@@ -105,23 +109,24 @@ but only a handful, so this method will end up unused most of the time.
 double SyDistorter::undistort_approximated(double rp)
 {
 	double r, f, approx_rp, delta;
-	r = 0.1f;
-	const double inc = 0.001f;
-	while(r < 1000) { // Make sure the loop completes at some point
+	r = lut.back()->r;
+	const double inc = 0.01f;
+	while(r < 2000) { // Make sure the loop completes at some point
 		r += inc;
 		f = distort_radial(r);
-		approx_rp = r / f;
+		approx_rp = r * f;
 		if(approx_rp > rp) {
 			// We found the upper bound, so we can now go back one step and interpolate
 			// between it and the upper bound F.
 			r -= inc;
 			double left_f = distort_radial(r);
-			double left_rp = r / left_f;
+			double left_rp = r * left_f;
 			return lerp(rp, left_rp, approx_rp, left_f, f);
 		}
 	}
 	
-	// FAIL!
+	// FAIL! At this point the F becomes negative and the image
+	// wraps. Syntheyes' also does not have stellar handling for this.
 	return 1.0f;
 }
 
@@ -287,10 +292,6 @@ void SyDistorter::knobs_with_aspect( Knob_Callback f)
 	_aKnob->label("aspect");
 	_aKnob->tooltip("Set to the aspect of your distorted plate (like 1.78 for 16:9)");
 }
-
-// The number of discrete points we sample on the radius of the distortion.
-// The rest is going to be interpolated
-static const unsigned int STEPS = 64;
 
 // Updates the internal lookup table
 void SyDistorter::recompute()
