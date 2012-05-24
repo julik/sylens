@@ -2,7 +2,7 @@
 version 6.3 v4
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="142" y="22" w="1680" h="1024" screen="0">
+    <window x="123" y="22" w="1680" h="1024" screen="0">
         <splitter orientation="1">
             <split size="1062"/>
             <splitter orientation="1">
@@ -42,7 +42,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /Code/sylens/sample_scripts/sample.nk
- frame 17
+ frame 8
  last_frame 50
  lock_range true
  format "2048 1234 0 0 2048 1234 1 "
@@ -106,17 +106,6 @@ BackdropNode {
 }
 BackdropNode {
  inputs 0
- name BackdropNode7
- tile_color 0x8e8e3800
- label "SyShader combined with Project3D"
- note_font_size 42
- xpos 3779
- ypos -979
- bdwidth 278
- bdheight 306
-}
-BackdropNode {
- inputs 0
  name BackdropNode8
  tile_color 0x7171c600
  label "SyUV on different geometries"
@@ -159,6 +148,17 @@ BackdropNode {
  bdwidth 251
  bdheight 415
 }
+BackdropNode {
+ inputs 0
+ name BackdropNode7
+ tile_color 0x8e8e3800
+ label "SyShader combined with Project3D"
+ note_font_size 42
+ xpos 3779
+ ypos -1016
+ bdwidth 310
+ bdheight 323
+}
 StickyNote {
  inputs 0
  name StickyNote1
@@ -175,36 +175,37 @@ Read {
  xpos 157
  ypos -1377
 }
+set N5ab0c00 [stack 0]
 Dot {
  name Dot3
  xpos 191
  ypos -1172
 }
-set N5e35e00 [stack 0]
+set N5dd8400 [stack 0]
 Dot {
  name Dot4
  xpos 531
  ypos -1172
 }
-set N5e3be00 [stack 0]
+set N5a88200 [stack 0]
 Dot {
  name Dot5
  xpos 663
  ypos -1172
 }
-set N5e3c200 [stack 0]
+set N5a88600 [stack 0]
 Dot {
  name Dot10
  xpos 1936
  ypos -1172
 }
-set N5b2ce00 [stack 0]
+set N5da0600 [stack 0]
 Dot {
  name Dot6
  xpos 1936
  ypos -812
 }
-set N5b2d200 [stack 0]
+set N5da0a00 [stack 0]
 Dot {
  name Dot7
  xpos 1390
@@ -256,7 +257,7 @@ StickyNote {
  xpos 2438
  ypos -439
 }
-push $N5e35e00
+push $N5dd8400
 Dot {
  name Dot2
  xpos 191
@@ -267,7 +268,7 @@ Dot {
  xpos -11
  ypos -657
 }
-set N5d24200 [stack 0]
+set N5d9ba00 [stack 0]
 SyLens {
  k {{curve i x50 -0.01826 x114 -0.01826}}
  filter Parzen
@@ -276,26 +277,7 @@ SyLens {
  xpos -172
  ypos -665
 }
-set N5d24600 [stack 0]
-SyLens {
- output "apply disto"
- k {{curve x1 -0.01826 x114 -0.01826}}
- filter Mitchell
- trim true
- name SyLens_Re1
- tile_color 0xc10000ff
- xpos 49
- ypos -542
-}
-push $N5d24200
-Difference {
- inputs 2
- output rgba.red
- name Difference2
- xpos -45
- ypos -484
-}
-push $N5d24600
+set N5a7fc00 [stack 0]
 Transform {
  scale {1 1.56}
  center {1024 617}
@@ -314,57 +296,19 @@ SyLens {
  xpos -172
  ypos -542
 }
-push $N5e35e00
-Dot {
- name Dot16
- xpos -454
- ypos -1172
-}
-BlackOutside {
- name BlackOutside2
- xpos -488
- ypos -917
-}
-Dot {
- name Dot14
- xpos -454
- ypos -663
-}
-Dot {
- name Dot15
- xpos -656
- ypos -663
-}
-SyLens {
- k {{curve i x12 -0.01826 x50 -0.01826 x114 -0.01826}}
- filter Parzen
- grow true
- name SyLens_UN1
- tile_color 0xc10000ff
- xpos -690
- ypos -585
-}
-StickyNote {
- inputs 0
- name StickyNote6
- label "If you want to combine SyShader with Project3D, you will need to use\nthe fragment shader options (this is primarily useful\nfor baking out texture maps), and connect the SyShader node.\nUPSTREAM of the Project3D node.\nNote that \"Crop\" on Project3D is disabled!"
- note_font_size 21
- xpos 3631
- ypos -644
-}
-push $N5b2ce00
+push $N5da0600
 Dot {
  name Dot11
  xpos 2843
  ypos -1172
 }
-set N5dbf200 [stack 0]
+set N5d5dc00 [stack 0]
 Dot {
  name Dot13
  xpos 3823
  ypos -1176
 }
-set N5dbfa00 [stack 0]
+set N5d5e000 [stack 0]
 Card2 {
  lens_in_distortion -0.01826
  control_points {3 3 3 6 
@@ -408,7 +352,7 @@ Camera2 {
  xpos 354
  ypos -665
 }
-push $N5e3be00
+push $N5a88200
 Card2 {
  rows 32
  columns 32
@@ -455,7 +399,7 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-push $N5e3c200
+push $N5a88600
 Difference {
  inputs 2
  output rgba.red
@@ -463,13 +407,13 @@ Difference {
  xpos 629
  ypos -506
 }
-push $N5dbf200
+push $N5d5dc00
 Dot {
  name Dot8
  xpos 2849
  ypos -802
 }
-set N5e68800 [stack 0]
+set N5e06000 [stack 0]
 Dot {
  name Dot9
  xpos 3341
@@ -488,7 +432,7 @@ Camera2 {
  xpos 2961
  ypos -614
 }
-push $N5e68800
+push $N5e06000
 SyShader {
  shader_type "fragment shader"
  k {{parent.SyLens1.k i}}
@@ -529,63 +473,6 @@ ScanlineRender {
  xpos 2815
  ypos -501
 }
-Camera2 {
- inputs 0
- translate {0 0 2.558000088}
- focal 53
- name Camera4
- xpos 3972
- ypos -743
-}
-Camera2 {
- inputs 0
- translate {0 0 1.713999987}
- rotate {0 1.1 0}
- name Camera3
- xpos 3980
- ypos -893
-}
-push $N5dbfa00
-SyShader {
- shader_type "fragment shader"
- k -0.01826
- name SyShader3
- xpos 3789
- ypos -896
-}
-Project3D {
- inputs 2
- crop false
- name Project3D1
- xpos 3789
- ypos -872
-}
-Card2 {
- image_aspect false
- uniform_scale 2
- control_points {3 3 3 6 
-
-1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
-1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
-1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
-1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
-1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
-1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
-1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
-1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
-1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
- name Card4
- xpos 3789
- ypos -820
-}
-push 0
-ScanlineRender {
- inputs 3
- output_motion_vectors_type accurate
- name ScanlineRender4
- xpos 3789
- ypos -722
-}
 SyCamera {
  inputs 0
  k {{SyLens2.k i}}
@@ -597,7 +484,7 @@ SyCamera {
  xpos 2049
  ypos -617
 }
-push $N5b2d200
+push $N5da0a00
 SyShader {
  k {{parent.SyLens2.k i}}
  kcube {{parent.SyLens2.kcube i}}
@@ -645,7 +532,7 @@ Camera2 {
  xpos 4492
  ypos -657
 }
-push $N5dbfa00
+push $N5d5e000
 BlackOutside {
  name BlackOutside1
  xpos 4509
@@ -656,7 +543,7 @@ Dot {
  xpos 4647
  ypos -1172
 }
-set N5e82000 [stack 0]
+set N5e1ba00 [stack 0]
 Cube {
  cube {-0.5099999905 -0.5 -0.5 0.5 0.3950000107 0.4839999974}
  translate {-1.876000047 0 0}
@@ -670,8 +557,8 @@ SyUV {
  xpos 4674
  ypos -859
 }
-set C5e84c00 [stack 0]
-push $N5e82000
+set C5e1f000 [stack 0]
+push $N5e1ba00
 Sphere {
  rows 32
  columns 32
@@ -680,12 +567,12 @@ Sphere {
  xpos 4474
  ypos -905
 }
-clone $C5e84c00 {
+clone $C5e1f000 {
  xpos 4474
  ypos -861
  selected false
 }
-push $N5e82000
+push $N5e1ba00
 Card2 {
  rows 32
  columns 32
@@ -705,7 +592,7 @@ Card2 {
  xpos 4867
  ypos -912
 }
-clone $C5e84c00 {
+clone $C5e1f000 {
  xpos 4867
  ypos -866
  selected false
@@ -724,22 +611,156 @@ ScanlineRender {
  xpos 4691
  ypos -636
 }
+push $N5a7fc00
+SyLens {
+ output "apply disto"
+ k {{curve x1 -0.01826 x114 -0.01826}}
+ filter Mitchell
+ trim true
+ name SyLens_Re1
+ tile_color 0xc10000ff
+ xpos 52
+ ypos -544
+}
+push $N5d9ba00
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference2
+ xpos -45
+ ypos -483
+}
+push $N5ab0c00
+SyLens {
+ k -0.038
+ name SyLens4
+ xpos 471
+ ypos -1353
+}
+push $N5dd8400
+Dot {
+ name Dot16
+ xpos -454
+ ypos -1172
+}
+BlackOutside {
+ name BlackOutside2
+ xpos -488
+ ypos -917
+}
+Dot {
+ name Dot14
+ xpos -454
+ ypos -663
+}
+Dot {
+ name Dot15
+ xpos -656
+ ypos -663
+}
+SyLens {
+ k {{curve i x12 -0.01826 x50 -0.01826 x114 -0.01826}}
+ filter Parzen
+ grow true
+ name SyLens_UN1
+ tile_color 0xc10000ff
+ xpos -690
+ ypos -583
+}
+StickyNote {
+ inputs 0
+ name StickyNote6
+ label "If you want to combine SyShader with Project3D, you will need to use\nthe fragment shader options (this is primarily useful\nfor baking out texture maps), and connect the SyShader node.\nUPSTREAM of the Project3D node.\nNote that \"Crop\" on Project3D is disabled!"
+ note_font_size 21
+ xpos 3631
+ ypos -644
+}
+StickyNote {
+ inputs 0
+ name StickyNote7
+ label "A shortcut solution if you are only\nworking with Cards is to undistort the\nCard itself. Just apply SyGeo to the card\nand then place it in 3D space to be at the\ndesired position. This also is perfectly\ncompatible with SyCamera."
+ note_font_size 21
+ xpos 5080
+ ypos -540
+}
+Camera2 {
+ inputs 0
+ translate {0 0 2.558000088}
+ focal 53
+ name Camera4
+ xpos 3972
+ ypos -780
+}
+Camera2 {
+ inputs 0
+ translate {0 0 1.713999987}
+ rotate {0 1.1 0}
+ name Camera3
+ xpos 3980
+ ypos -930
+}
+push $N5d5e000
+SyShader {
+ shader_type "fragment shader"
+ k -0.01826
+ name SyShader3
+ xpos 3789
+ ypos -933
+}
+Project3D {
+ inputs 2
+ crop false
+ name Project3D1
+ xpos 3789
+ ypos -909
+}
+Card2 {
+ image_aspect false
+ uniform_scale 2
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card4
+ xpos 3789
+ ypos -857
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender4
+ xpos 3789
+ ypos -759
+}
 SyCamera {
  inputs 0
- translate {0 0 1.605000019}
+ translate {-9.442873001 0 14.11524296}
+ rotate {0 -33.60035406 0}
+ focal 149
  k {{curve i x17 -0.01826}}
  aspect 1.316195373
  name SyCamera3
- xpos 5084
+ xpos 5099
  ypos -650
 }
-push $N5e82000
+push $N5e1ba00
 Dot {
  name Dot17
  xpos 5269
  ypos -1172
 }
 Card2 {
+ rows 32
+ columns 32
+ translate {-0.002000000095 0 0}
  control_points {3 3 3 6 
 
 1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
@@ -753,15 +774,21 @@ Card2 {
 1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
  name Card6
  xpos 5235
- ypos -915
+ ypos -921
 }
 SyGeo {
  k -0.01826
- vshift -0.01
  aspect 1.31619537
  name SyGeo1
  xpos 5235
- ypos -891
+ ypos -885
+}
+TransformGeo {
+ translate {1.095000029 0 0}
+ rotate {0 -37.62375553 0}
+ name TransformGeo1
+ xpos 5235
+ ypos -861
 }
 push 0
 ScanlineRender {
