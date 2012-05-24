@@ -40,8 +40,8 @@ extern "C" {
 using namespace DD::Image;
 
 static const char* const CLASS = "SyLens";
-static const char* const HELP =  "This plugin undistorts footage according "
-	"to the lens distortion model used by Syntheyes. "
+static const char* const HELP =  "This plugin undistorts footage according\n"
+	"to the lens distortion model used by Syntheyes.\n"
 	"Contact me@julik.nl if you need help with the plugin.";
 
 #include "VERSION.h"

@@ -1,7 +1,8 @@
 static const char* const CLASS = "SyGeo";
 static const char* const HELP = "This node will undistort the XY coordinates of the vertices.\n"
 	"if it's input object. It's best for working with Cards with \"image aspect\" enabled.\n"
-	"Note that the input Card should not have any transforms since the distortion happens in the world space.\n"
+	"Note that the input Card should not have any transforms since the distortion happens in world space.\n"
+	"First undistort your Card and then apply transforms to it using TransformGeo.\n"
 	"Contact me@julik.nl if you need help with the plugin.";
 
 #include "VERSION.h"
@@ -65,6 +66,7 @@ public:
 		ModifyGeo::get_geometry_hash();
 		// Knobs that change the SyLens algo:
 		geo_hash[Group_Points].append(distorter.compute_hash());
+		geo_hash[Group_Vertices].append(distorter.compute_hash());
 	}
 	
 	void _validate(bool for_real)
@@ -75,7 +77,7 @@ public:
 	
 	void modify_geometry(int obj, Scene& scene, GeometryList& out)
 	{
-		PointList* points = out.writable_vertices(obj);
+		PointList* points = out.writable_points(obj);
 		const unsigned n = points->size();
 		// Transform points:
 		for (unsigned i = 0; i < n; i++) {
