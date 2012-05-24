@@ -111,9 +111,13 @@ double SyDistorter::undistort_approximated(double rp)
 	double r, f, approx_rp, delta;
 	r = lut.back()->r;
 	const double inc = 0.01f;
-	while(r < 2000) { // Make sure the loop completes at some point
+	while(true) {
 		r += inc;
 		f = distort_radial(r);
+		if(f < 0) {
+			// FAIL! At this point the F becomes negative
+			return 1.0f;
+		}
 		approx_rp = r * f;
 		if(approx_rp > rp) {
 			// We found the upper bound, so we can now go back one step and interpolate
@@ -124,10 +128,6 @@ double SyDistorter::undistort_approximated(double rp)
 			return lerp(rp, left_rp, approx_rp, left_f, f);
 		}
 	}
-	
-	// FAIL! At this point the F becomes negative and the image
-	// wraps. Syntheyes' also does not have stellar handling for this.
-	return 1.0f;
 }
 
 double SyDistorter::undistort_sampled(double rd)
@@ -297,7 +297,8 @@ void SyDistorter::knobs_with_aspect( Knob_Callback f)
 void SyDistorter::recompute()
 {
 	double r = 0;
-	// Max radius will be the original radius at the top-right corner
+	// Max radius will be the original radius at the top-right corner,
+	// plus a cushion of 1
 	double max_r = sqrt((aspect_ * aspect_) + 1);
 	double increment = max_r / float(STEPS);
 	
