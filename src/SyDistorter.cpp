@@ -2,7 +2,15 @@
 #include <algorithm>
 #include "DDImage/Thread.h"
 #include "SyDistorter.h"
+
+#ifdef DEBUG
 #include <iostream>
+#endif
+
+// The number of discrete points we sample on the radius of the distortion.
+// The rest is going to be interpolated
+static const unsigned int STEPS = 64;
+
 
 SyDistorter::SyDistorter()
 {
@@ -78,6 +86,7 @@ void SyDistorter::remove_disto(Vector2& pt)
 	
 	double x = pt.x * aspect_;
 	double rd = sqrt((fabs(x) * fabs(x)) + (fabs(pt.y) * fabs(pt.y)));
+	std::cout << "rd: " << rd << "\n";
 	double inv_f = undistort(rd);
 	
 	pt.x = pt.x / inv_f;
@@ -89,6 +98,9 @@ void SyDistorter::remove_disto(Vector2& pt)
 
 double SyDistorter::undistort(double radius_distorted)
 {
+	// Important: EXACT midpoint should just have 1
+	if(radius_distorted == 0) return 1;
+	
 	if(radius_distorted < lut.back()->r_distorted) {
 		undistort_sampled(radius_distorted);
 	} else {
@@ -105,29 +117,33 @@ but only a handful, so this method will end up unused most of the time.
 */
 double SyDistorter::undistort_approximated(double rp)
 {
-	double r, f, approx_rp, delta;
-	r = 0.1f;
-	const double inc = 0.001f;
-	while(r < 1000) { // Make sure the loop completes at some point
-		r += inc;
-		f = distort_radial(r);
-		approx_rp = r / f;
-		if(approx_rp > rp) {
+	double r, right_f, right_rp, delta;
+	const double inc = 0.05f;
+	
+	// We know that we should be extrapolating where our lookup table left off
+	right_f = 1;
+	r = 0;
+	while(right_f > 0) { // Make sure the loop completes at some point
+		right_f = distort_radial(r);
+		right_rp = r * right_f;
+		if(right_rp > rp) {
 			// We found the upper bound, so we can now go back one step and interpolate
 			// between it and the upper bound F.
 			r -= inc;
 			double left_f = distort_radial(r);
-			double left_rp = r / left_f;
-			return lerp(rp, left_rp, approx_rp, left_f, f);
+			double left_rp = r * left_f;
+			return lerp(rp, left_rp, right_rp, left_f, right_f);
 		}
+		r += inc;
 	}
 	
-	// FAIL!
+	// Ok, here we fail because there is too much distortion
 	return 1.0f;
 }
 
 double SyDistorter::undistort_sampled(double rd)
 {
+	
 	std::vector<LutTuple*>::iterator tuple_it;
 	LutTuple* left = NULL;
 	LutTuple* right = NULL;
@@ -135,7 +151,7 @@ double SyDistorter::undistort_sampled(double rd)
 	for(tuple_it = lut.begin(); 
 		tuple_it != lut.end() && !(left && right);
 		tuple_it++) {
-			
+		
 		if((*tuple_it)->r_distorted < rd) {
 			left = *tuple_it;
 		}
@@ -191,14 +207,7 @@ void SyDistorter::apply_disto(Vector2& pt)
 
 double SyDistorter::distort_radial(double r)
 {
-	double r2 = r * r;
-	double f;
-	// Skipping the square root speeds things up if we don't need it
-	if (fabs(k_cube_) > 0.00001) {
-		f = 1 + r2*(k_ + k_cube_ * r);
-	} else {
-		f = 1 + r2*(k_);
-	}
+	double f = 1 + (r * r)*(k_ + k_cube_ * r);
 	return f;
 }
 
@@ -289,16 +298,12 @@ void SyDistorter::knobs_with_aspect( Knob_Callback f)
 	_aKnob->tooltip("Set to the aspect of your distorted plate (like 1.78 for 16:9)");
 }
 
-// The number of discrete points we sample on the radius of the distortion.
-// The rest is going to be interpolated
-static const unsigned int STEPS = 64;
-
 // Updates the internal lookup table
 void SyDistorter::recompute()
 {
 	double r = 0;
 	// Max radius will be the original radius at the top-right corner
-	double max_r = sqrt((aspect_ * aspect_) + 1);
+	double max_r = sqrt((aspect_ * aspect_) + 1) + 0.25f;
 	double increment = max_r / float(STEPS);
 	
 	// Clear out the LUT elements so that they don't leak. We could use std::auto_ptr

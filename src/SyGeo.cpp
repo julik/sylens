@@ -21,6 +21,10 @@ private:
 	
 	// The distortion engine
 	SyDistorter distorter;
+	const char* point_local_attrib_name;
+	
+	// Group type ptr
+	DD::Image::GroupType t_group_type;
 	
 public:
 
@@ -38,6 +42,7 @@ public:
 
 	SyGeo(Node* node) : ModifyGeo(node)
 	{
+		point_local_attrib_name = "pw";
 	}
 	
 	void append(Hash& hash) {
@@ -73,18 +78,78 @@ public:
 		return ModifyGeo::_validate(for_real);
 	}
 	
-	void modify_geometry(int obj, Scene& scene, GeometryList& out)
+	// This is needed to preserve UVs which are already there
+	void keep_point_locals(int index, GeoInfo& info, GeometryList& out)
 	{
-		PointList* points = out.writable_vertices(obj);
-		const unsigned n = points->size();
-		// Transform points:
-		for (unsigned i = 0; i < n; i++) {
-			Vector3& v = (*points)[i];
+		
+		// get the original point_local attribute used to restore untouched point_local coordinate
+		const AttribContext* context = info.get_attribcontext(point_local_attrib_name);
+		AttributePtr point_local_original = context ? context->attribute : AttributePtr();
+		
+		if(!point_local_original){
+			Op::error( "Missing \"%s\" channel from geometry", point_local_attrib_name );
+			return;
+		}
+
+		t_group_type = context->group; // texture coordinate group type
+
+		// we have two possibilities:
+		// the point_local coordinate are stored in Group_Points or in Group_Vertices way
+		// sanity check
+		assert(t_group_type == Group_Points || t_group_type == Group_Vertices);
+		
+		// create a buffer to write on it
+		Attribute* point_local = out.writable_attribute(index, t_group_type, point_local_attrib_name, VECTOR4_ATTRIB);
+		assert(point_local);
+
+		// copy all original texture coordinate if available
+		if (point_local_original){
+			// sanity check
+			assert(point_local->size() == point_local_original->size());
+
+			for (unsigned i = 0; i < point_local->size(); i++) {
+				point_local->vector4(i) = point_local_original->vector4(i);
+			}
+		}
+	}
+	
+	// Apply distortion to each element in the passed vertex or point attribute
+	void distort_each_element_in_attribute(Attribute* attr, unsigned const int num_of_elements)
+	{
+		if(!attr) return;
+		for (unsigned point_idx = 0; point_idx < num_of_elements; point_idx++) {
+			Vector3& v = attr->vector3(point_idx);
 			// The Card has it's vertices in the [-0.5, 0.5] space with aspect applied
 			Vector2 xy(v.x * 2, v.y * 2);
 			distorter.remove_disto(xy);
 			v.x = xy.x / 2.0f;
 			v.y = xy.y / 2.0f;
+		}
+	}
+	
+	void modify_geometry(int obj, Scene& scene, GeometryList& out)
+	{
+		// Call the engine on all the caches:
+		for (unsigned i = 0; i < out.objects(); i++) {
+			GeoInfo& info = out[i];
+			
+			// Copy over old UV attributes
+			keep_point_locals(i, info, out);
+			
+			// Reusable pointer for the attribute we are going to be writing to
+			Attribute* point_local;
+			
+			// Copy over pt attributes
+			point_local = out.writable_attribute(i, Group_Points, point_local_attrib_name, VECTOR3_ATTRIB);
+			distort_each_element_in_attribute(point_local, info.points());
+			
+			// If the previously detected group type is vertex attribute we need to distort it as well
+			// since vertex attribs take precedence and say a Sphere in Nuke has vertex attribs
+			// as opposed to point attribs :-( so justified double work here
+			if(t_group_type == Group_Vertices) {
+				point_local = out.writable_attribute(i, Group_Vertices, point_local_attrib_name, VECTOR3_ATTRIB);
+				distort_each_element_in_attribute(point_local, info.vertices()); // Copy over vertex attributes
+			}
 		}
 	}
 };
