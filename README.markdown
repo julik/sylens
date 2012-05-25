@@ -156,13 +156,13 @@ Nuke allows for arbitrary UV attributes to be added to the main geometry. If you
 
 ## The SyGeo node
 
-SyGeo undistorts the vertex coordinates in your geometry. It's primarily designed to undistort Card nodes that you place your footage on.
+SyGeo undistorts the vertex coordinates in your geometry. It's primarily designed to undistort Card nodes that you place your footage on (with **image aspect** enabled).
 
-### Workflow with UV distortion
+### Workflow with SyGeo
 
 Typically you would be using it like this:
 
-![SyUV DAG][18]
+![SyGeo DAG][18]
 
 Here we pump the footage into a Card node, which then gets straightened. This is analogous
 to the distortion parameters of the Card node itself.
@@ -179,7 +179,7 @@ Cubic distortion modifier. If you used this in Syntheyes you can apply it here a
 
 #### aspect
 
-The Syntheyes algorithm **requires** the aspect ratio of your distorted plate. This cannot be automatically deciphered from the UVs so you need to dial it in manually. Use your image's aspect ratio.
+The Syntheyes algorithm **requires** the aspect ratio of your distorted plate. This cannot be automatically deciphered from the input geometry so you need to dial it in manually. Use your image's aspect ratio.
 
 #### ushift
 
@@ -189,7 +189,18 @@ Sometimes you are dealing with off-center lens distortion. This can occur when a
 
 Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor (some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint up or down with regards to the center of your digital plate.
 
+#### apply in world space
 
+Normally for a Card node you would want remove distortion without honoring the transformations on the Card (so that you could
+first orient and position the card, then remove the distortion from it's vertices). If you then merge your geometries and
+apply SyGeo the distortion will be removed from each particular card separately, without the transforms on top.
+
+![Local distortion][19]
+
+However, if you got a whole "sandwich" of images that you want to remove distortion from, you can do it in world space
+(then your optical center is the origin of the scene)
+
+![Global distortion][20]
 
 ## The SyCamera node
 
@@ -320,3 +331,5 @@ For questions and comments shoot a mail to me \_at\_ julik.nl
  [16]: https://github.com/julik/sylens/raw/master/images/cam_many_subdivs.png
  [17]: https://github.com/julik/sylens/raw/master/images/sylens_controls.png
  [18]: https://github.com/julik/sylens/raw/master/images/sygeo.png
+ [19]: https://github.com/julik/sylens/raw/master/images/local_space.png
+ [20]: https://github.com/julik/sylens/raw/master/images/global_space.png

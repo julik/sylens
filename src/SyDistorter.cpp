@@ -162,6 +162,11 @@ double SyDistorter::undistort_sampled(double rd)
 			right = *tuple_it;
 		}
 	}
+	
+	if(!(left && right)) {
+		return undistort_approximated(rd);
+	}
+	
 	return lerp(rd, left->r_distorted, right->r_distorted, left->f, right->f);
 }
 /*
