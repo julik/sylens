@@ -29,7 +29,7 @@ class Package
 
     # Ideally this will make links relative
     def rewrite(link)
-      return link if link =~ /^http/
+      return link unless link =~ /^https\:\/\/github/
       @downloads.push(link)
       File.basename(link)
     end
@@ -44,7 +44,11 @@ class Package
   end
   
   def repo_url
-    "https://github.com/guerilla-di/%s" % @name
+    "https://github.com/julik/%s" % @name
+  end
+  
+  def doco_dir
+    File.join(File.dirname(__FILE__), "site", "scripts", @name)
   end
   
   def package!
@@ -57,21 +61,25 @@ class Package
     rewritten_readme_html = md.render(readme_handle.read)
     
     assets = render_engine.downloads.map do |e| 
-      url = File.join('https://github.com/julik/', e)
+      url = e
       url = url.gsub(/ /, '%20')
-      [File.basename(e), open(url)]
+      begin
+        [File.basename(e), open(url)]
+      rescue OpenURI::HTTPError => e
+        raise "Cannot download #{url.inspect}"
+      end
     end
     
-    FileUtils.mkdir_p(File.join(File.dirname(__FILE__), "site", "scripts", @name))
+    FileUtils.mkdir_p(doco_dir)
     
     # Write out the readme
-    File.open(File.join(File.dirname(__FILE__), "site", "scripts", @name, "index.erb"), "wb") do | index |
+    File.open(File.join(doco_dir, "README.html"), "wb") do | index |
       index.write(rewritten_readme_html)
     end
     
     assets.each do | a |
       # Write out the index.erb
-      File.open(File.join(File.dirname(__FILE__), "site", "scripts", @name, a[0]), "wb") do | index |
+      File.open(File.join(doco_dir, a[0]), "wb") do | index |
         index.write(a[1].read)
       end
     end
