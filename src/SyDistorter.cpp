@@ -14,6 +14,9 @@ SyDistorter::SyDistorter()
 	center_shift_v_ = 0;
 }
 
+/*
+The distorter has it's own hash that registers all of he distortion paramters plus the aspect
+*/
 U64 SyDistorter::compute_hash()
 {
 	Hash h;
@@ -25,6 +28,11 @@ U64 SyDistorter::compute_hash()
 	return h.value();
 }
 
+/*
+When the knobs change the values of the distorter it needs to update
+the internal lookup table. Therefore, it's handy to call this method
+in your _validate() routine
+*/
 void SyDistorter::recompute_if_needed()
 {
 	// We have a shared data structure (the lookup table vector),
@@ -43,17 +51,19 @@ void SyDistorter::recompute_if_needed()
 	delete lock;
 }
 
+/* Sets the aspect of the input image */
 void SyDistorter::set_aspect(double a)
 {
 	aspect_ = a;
+	recompute_if_needed();
 }
 
+/* Sets the distortion coefficients and the aspect */
 void SyDistorter::set_coefficients(double k, double k_cube, double aspect)
 {
 	k_ = k;
 	k_cube_ = k_cube;
 	aspect_ = aspect;
-	
 	recompute_if_needed();
 }
 
@@ -73,6 +83,11 @@ SyDistorter::~SyDistorter()
 	// Then the LUT gets deleted
 }
 
+/*
+Removes the distortion from the passed Vector2.
+The coordinates of the vector should be in the [{-1,1}-{-1,1}] space
+(Syntheyes UV coordinates)
+*/
 void SyDistorter::remove_disto(Vector2& pt)
 {
 	// Bracket in centerpoint adjustment
@@ -116,7 +131,7 @@ double SyDistorter::undistort_approximated(double rp)
 		f = distort_radial(r);
 		if(f < 0) {
 			// FAIL! At this point the F becomes negative
-			return 1.0f;
+			return lut.back()->f;
 		}
 		approx_rp = r * f;
 		if(approx_rp > rp) {
@@ -149,7 +164,11 @@ double SyDistorter::undistort_sampled(double rd)
 	}
 	return lerp(rd, left->r_distorted, right->r_distorted, left->f, right->f);
 }
-
+/*
+Applies the distortion to the passed Vector2.
+The coordinates of the vector should be in the [{-1,1}-{-1,1}] space
+(Syntheyes UV coordinates)
+*/
 void SyDistorter::apply_disto(Vector2& pt)
 {
 	// Bracket in centerpoint adjustment
@@ -193,6 +212,11 @@ void SyDistorter::apply_disto(Vector2& pt)
 	pt.y += center_shift_v_;
 }
 
+/*
+Applies the distortion according th the Syntheyes model to the
+passed radius from the optical center of the lens. We use the radius,
+not the radius squared.
+*/
 double SyDistorter::distort_radial(double r)
 {
 	double r2 = r * r;
@@ -206,6 +230,11 @@ double SyDistorter::distort_radial(double r)
 	return f;
 }
 
+/*
+Applies distortion to the UV coordinates. The UV coords are premultiplied with the W,
+so this method will first divide out the W value, distort the X and Y and then remultiply
+the values back. The UV's are assumed to be in the camera-projected space (-0.5 to 0.5 covering full frustum)
+ */
 void SyDistorter::distort_uv(Vector4& uv)
 {
 	/* 
@@ -256,7 +285,7 @@ double SyDistorter::lerp(const double x, const double left_x, const double right
 }
 
 // Creates knobs related to lens distortion, but without aspect control
-// The caller should then set the aspect by itself
+// The caller should then set the aspect by itself using set_aspect()
 void SyDistorter::knobs( Knob_Callback f)
 {
 	// For info on knob flags see Knob.h
