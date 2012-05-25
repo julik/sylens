@@ -1,8 +1,6 @@
 static const char* const CLASS = "SyGeo";
 static const char* const HELP = "This node will undistort the XY coordinates of the vertices.\n"
 	"if it's input object. It's best for working with Cards with \"image aspect\" enabled.\n"
-	"Note that the input Card should not have any transforms since the distortion happens in world space.\n"
-	"First undistort your Card and then apply transforms to it using TransformGeo.\n"
 	"Contact me@julik.nl if you need help with the plugin.";
 
 #include "VERSION.h"
@@ -17,6 +15,11 @@ static const char* const HELP = "This node will undistort the XY coordinates of 
 
 using namespace DD::Image;
 
+/* 
+Current issues: 
+- the op is not selectable in the viewport
+- changing the transform matrix of the input geo does not force an update
+*/
 class SyGeo : public GeoOp
 {
 private:
