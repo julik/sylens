@@ -218,7 +218,7 @@ void SyLens::knobs( Knob_Callback f) {
 
 // http://stackoverflow.com/questions/485525/round-for-float-in-c
 int SyLens::round(double x) {
-	return floor(x + 0.5);
+	return (int)floor(x + 0.5);
 }
 
 // The algo works in image aspec, not the pixel aspect. We also have to take the uncrop factor
