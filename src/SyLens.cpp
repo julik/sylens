@@ -337,8 +337,8 @@ void SyLens::_validate(bool for_real)
 		} else {
 			distort_px_into_source(*pointsOnBbox[i]);
 		}
-		xValues.push_back(pointsOnBbox[i]->x);
-		yValues.push_back(pointsOnBbox[i]->y);
+		xValues.push_back(round(pointsOnBbox[i]->x));
+		yValues.push_back(round(pointsOnBbox[i]->y));
 	}
 	
 	int minX, minY, maxX, maxY;
