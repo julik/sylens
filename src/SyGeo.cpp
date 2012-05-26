@@ -129,6 +129,12 @@ public:
 			undistort_points_of(i, out);
 		}
 	}
+	
+	// Needed to make the object selectable
+	void select_geometry(ViewerContext* ctx, GeometryList &scene_objects)
+	{
+		input0()->select_geometry(ctx, scene_objects);
+	}
 };
 
 static Op* build(Node* node)

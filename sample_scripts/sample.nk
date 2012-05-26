@@ -2,7 +2,7 @@
 version 6.3 v4
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="209" y="22" w="951" h="1018" screen="0">
+    <window x="208" y="22" w="951" h="1018" screen="0">
         <splitter orientation="1">
             <split size="600"/>
             <splitter orientation="1">
@@ -175,37 +175,37 @@ Read {
  xpos 157
  ypos -1377
 }
-set N5d79e00 [stack 0]
+set N5aad800 [stack 0]
 Dot {
  name Dot3
  xpos 191
  ypos -1172
 }
-set N5b0dc00 [stack 0]
+set N5dc7200 [stack 0]
 Dot {
  name Dot4
  xpos 531
  ypos -1172
 }
-set N5dc6e00 [stack 0]
+set N5aba400 [stack 0]
 Dot {
  name Dot5
  xpos 663
  ypos -1172
 }
-set N5a90800 [stack 0]
+set N5a6a600 [stack 0]
 Dot {
  name Dot10
  xpos 1936
  ypos -1172
 }
-set N5a90c00 [stack 0]
+set N5aa3200 [stack 0]
 Dot {
  name Dot6
  xpos 1936
  ypos -812
 }
-set N5cc0600 [stack 0]
+set N5dcb600 [stack 0]
 Dot {
  name Dot7
  xpos 1390
@@ -257,7 +257,7 @@ StickyNote {
  xpos 2438
  ypos -439
 }
-push $N5b0dc00
+push $N5dc7200
 Dot {
  name Dot2
  xpos 191
@@ -268,7 +268,7 @@ Dot {
  xpos -11
  ypos -657
 }
-set N5dc3c00 [stack 0]
+set N5d76200 [stack 0]
 SyLens {
  k {{curve i x50 -0.01826 x114 -0.01826}}
  filter Parzen
@@ -277,7 +277,7 @@ SyLens {
  xpos -172
  ypos -665
 }
-set N5dc4000 [stack 0]
+set N5d76600 [stack 0]
 Transform {
  scale {1 1.56}
  center {1024 617}
@@ -296,7 +296,7 @@ SyLens {
  xpos -172
  ypos -542
 }
-push $N5a90c00
+push $N5aa3200
 Dot {
  name Dot11
  xpos 2843
@@ -352,7 +352,7 @@ Camera2 {
  xpos 354
  ypos -665
 }
-push $N5dc6e00
+push $N5aba400
 Card2 {
  rows 32
  columns 32
@@ -399,7 +399,7 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-push $N5a90800
+push $N5a6a600
 Difference {
  inputs 2
  output rgba.red
@@ -413,7 +413,7 @@ Dot {
  xpos 2849
  ypos -802
 }
-set N5e02a00 [stack 0]
+set N5dfa600 [stack 0]
 Dot {
  name Dot9
  xpos 3341
@@ -432,7 +432,7 @@ Camera2 {
  xpos 2961
  ypos -614
 }
-push $N5e02a00
+push $N5dfa600
 SyShader {
  shader_type "fragment shader"
  k {{parent.SyLens1.k i}}
@@ -484,7 +484,7 @@ SyCamera {
  xpos 2049
  ypos -617
 }
-push $N5cc0600
+push $N5dcb600
 SyShader {
  k {{parent.SyLens2.k i}}
  kcube {{parent.SyLens2.kcube i}}
@@ -543,7 +543,7 @@ Dot {
  xpos 4647
  ypos -1172
 }
-set N5e18400 [stack 0]
+set N5e10000 [stack 0]
 Cube {
  cube {-0.5099999905 -0.5 -0.5 0.5 0.3950000107 0.4839999974}
  translate {-1.876000047 0 0}
@@ -557,8 +557,8 @@ SyUV {
  xpos 4674
  ypos -859
 }
-set C5e1ba00 [stack 0]
-push $N5e18400
+set C5e13600 [stack 0]
+push $N5e10000
 Sphere {
  rows 32
  columns 32
@@ -567,12 +567,12 @@ Sphere {
  xpos 4474
  ypos -905
 }
-clone $C5e1ba00 {
+clone $C5e13600 {
  xpos 4474
  ypos -861
  selected false
 }
-push $N5e18400
+push $N5e10000
 Card2 {
  rows 32
  columns 32
@@ -592,7 +592,7 @@ Card2 {
  xpos 4867
  ypos -912
 }
-clone $C5e1ba00 {
+clone $C5e13600 {
  xpos 4867
  ypos -866
  selected false
@@ -611,7 +611,7 @@ ScanlineRender {
  xpos 4691
  ypos -636
 }
-push $N5dc4000
+push $N5d76600
 SyLens {
  output "apply disto"
  k {{curve x1 -0.01826 x114 -0.01826}}
@@ -622,7 +622,7 @@ SyLens {
  xpos 52
  ypos -544
 }
-push $N5dc3c00
+push $N5d76200
 Difference {
  inputs 2
  output rgba.red
@@ -630,14 +630,14 @@ Difference {
  xpos -45
  ypos -483
 }
-push $N5d79e00
+push $N5aad800
 SyLens {
  k -0.038
  name SyLens4
  xpos 471
  ypos -1353
 }
-push $N5b0dc00
+push $N5dc7200
 Dot {
  name Dot16
  xpos -454
@@ -745,13 +745,13 @@ SyCamera {
  translate {-9.442873001 0 14.11524296}
  rotate {0 -33.60035406 0}
  focal 149
- k {{curve i x17 -0.01826}}
+ k {{curve x17 -0.01826}}
  aspect 1.316195373
  name SyCamera3
  xpos 5099
  ypos -650
 }
-push $N5e18400
+push $N5e10000
 Dot {
  name Dot17
  xpos 5269
@@ -793,7 +793,6 @@ ScanlineRender {
  ypos -629
 }
 Viewer {
- frame 17
  input_process false
  name Viewer3
  xpos 4349
