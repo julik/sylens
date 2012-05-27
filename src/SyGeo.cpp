@@ -64,10 +64,11 @@ public:
 		const int KNOB_ON_SEPARATE_LINE = 0x1000;
 		// Allow the use of object transforms when doing distortion
 		Knob* k_xform = Bool_knob( f, &global_xform, "global_xform");
-		k_xform->label("apply in world space");
+		k_xform->label("undistort in world space");
 		k_xform->tooltip("When enabled, the distortion will happen in global space.\n"
 			"This is useful if you want to first assemble a group of Cards \n"
-			"and then undistort it as one entity, ignoring the way they have been positioned");
+			"and then undistort it as one entity, ignoring the way they have been positioned.\n"
+			"The optical center of the lens will be at the origin of the scene.\n");
 		k_xform->set_flag(KNOB_ON_SEPARATE_LINE);
 		
 		Divider(f, 0);
