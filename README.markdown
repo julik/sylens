@@ -189,18 +189,6 @@ Sometimes you are dealing with off-center lens distortion. This can occur when a
 
 Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor (some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint up or down with regards to the center of your digital plate.
 
-#### apply in world space
-
-Normally for a Card node you would want remove distortion without honoring the transformations on the Card (so that you could
-first orient and position the card, then remove the distortion from it's vertices). If you then merge your geometries and
-apply SyGeo the distortion will be removed from each particular card separately, without the transforms on top.
-
-![Local distortion][19]
-
-However, if you got a whole "sandwich" of images that you want to remove distortion from, you can do it in world space
-(then your optical center is the origin of the scene)
-
-![Global distortion][20]
 
 ## The SyCamera node
 

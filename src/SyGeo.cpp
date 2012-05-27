@@ -15,18 +15,13 @@ static const char* const HELP = "This node will undistort the XY coordinates of 
 
 using namespace DD::Image;
 
-/* 
-Current issues: 
-- the op is not selectable in the viewport
-- changing the transform matrix of the input geo does not force an update
-*/
+
 class SyGeo : public GeoOp
 {
 private:
 	
 	// The distortion engine
 	SyDistorter distorter;
-	bool global_xform;
 	
 public:
 
@@ -44,32 +39,19 @@ public:
 
 	SyGeo(Node* node) : GeoOp(node)
 	{
-		global_xform = false;
 	}
 	
 	void append(Hash& hash) {
 		// Knobs that change the SyLens algo
 		hash.append(distorter.compute_hash());
 		hash.append(VERSION);
-		hash.append(global_xform);
 		GeoOp::append(hash); // the super called he wants his pointers back
 	}
 	
 	void knobs(Knob_Callback f)
 	{
 		GeoOp::knobs(f);
-		
 		distorter.knobs_with_aspect(f);
-		
-		const int KNOB_ON_SEPARATE_LINE = 0x1000;
-		// Allow the use of object transforms when doing distortion
-		Knob* k_xform = Bool_knob( f, &global_xform, "global_xform");
-		k_xform->label("undistort in world space");
-		k_xform->tooltip("When enabled, the distortion will happen in global space.\n"
-			"This is useful if you want to first assemble a group of Cards \n"
-			"and then undistort it as one entity, ignoring the way they have been positioned.\n"
-			"The optical center of the lens will be at the origin of the scene.\n");
-		k_xform->set_flag(KNOB_ON_SEPARATE_LINE);
 		
 		Divider(f, 0);
 		std::ostringstream ver;
@@ -82,7 +64,6 @@ public:
 		// Get all hashes up-to-date
 		GeoOp::get_geometry_hash();
 		geo_hash[Group_Points].append(distorter.compute_hash());
-		geo_hash[Group_Points].append(global_xform);
 	}
 	
 	void _validate(bool for_real)
@@ -124,9 +105,6 @@ public:
 		
 		unsigned num_objects = out.objects();
 		for(unsigned i = 0; i < num_objects; i++) {
-			if(global_xform) {
-				input0()->evaluate_transform(i, out, true);
-			}
 			undistort_points_of(i, out);
 		}
 	}
