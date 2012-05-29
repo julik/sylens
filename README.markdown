@@ -189,6 +189,12 @@ Sometimes you are dealing with off-center lens distortion. This can occur when a
 
 Sometimes you are dealing with off-center lens distortion. This can occur when a lens is fitted onto the camera but not properly centered onto the sensor (some lens adapters are especially susceptible to this, like the anamorphic Alexa fittings). Apply some margin here to shift your distortion midpoint up or down with regards to the center of your digital plate.
 
+#### scale
+
+This defines the relationship between the coordinates in the camera frustum and your geometry. When using SyGeo
+with Card nodes, for example, the factor is set to 2 since the outermost left and right points are offset by 0.5 from
+the origin of the Card. The Syntheyes algorithm, however, needs the coordinates to be in the -1..1 range so there is a
+scaling operation involved when doing distortions. For Card nodes you can leave this parameter at it's default setting.
 
 ## The SyCamera node
 

@@ -120,6 +120,8 @@ with our given one. This has a number of disadvantages. First of all, it's going
 more we go to the outside of the image frame since the same difference in radius will produce a bigger
 distortion. Second, it's kind of slow. However, not many points outside of the image will be estimated that way
 but only a handful, so this method will end up unused most of the time.
+At some point the f(r) function goes negative - this is where a wraparound occurs. At this point we will give
+up with undistortion because the image will likely wrap around and the alrogithm becomes kind of unpredictable.
 */
 double SyDistorter::undistort_approximated(double rp)
 {

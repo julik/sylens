@@ -22,6 +22,7 @@ private:
 	
 	// The distortion engine
 	SyDistorter distorter;
+	float scale_factor;
 	
 public:
 
@@ -39,11 +40,13 @@ public:
 
 	SyGeo(Node* node) : GeoOp(node)
 	{
+		scale_factor = 2.0f;
 	}
 	
 	void append(Hash& hash) {
 		// Knobs that change the SyLens algo
 		hash.append(distorter.compute_hash());
+		hash.append(scale_factor);
 		hash.append(VERSION);
 		GeoOp::append(hash); // the super called he wants his pointers back
 	}
@@ -52,6 +55,13 @@ public:
 	{
 		GeoOp::knobs(f);
 		distorter.knobs_with_aspect(f);
+		
+		Knob* factor_knob = Float_knob( f, &scale_factor, "scale" );
+		factor_knob->label("scale");
+		factor_knob->tooltip("Set this to the factor between the scale of your geometry and the camera frustum.\n"
+			"For Card nodes, for example, the factor is 2 (the rightmost point of the Card is at 0.5 on the X-axis.\n"
+			"This is also the default value.");
+		factor_knob->set_range(0.1f, 10.0f, true);
 		
 		Divider(f, 0);
 		std::ostringstream ver;
@@ -64,6 +74,7 @@ public:
 		// Get all hashes up-to-date
 		GeoOp::get_geometry_hash();
 		geo_hash[Group_Points].append(distorter.compute_hash());
+		geo_hash[Group_Points].append(scale_factor);
 	}
 	
 	void _validate(bool for_real)
@@ -89,13 +100,13 @@ public:
 			Vector3 v = (*src_pts)[i];
 			
 			// The Card has it's vertices in the [-0.5, 0.5] space with aspect applied
-			Vector2 xy(v.x * 2, v.y * 2);
+			Vector2 xy(v.x * scale_factor, v.y * scale_factor);
 			distorter.remove_disto(xy);
 			
 			Vector3& dest_v = (*dest_points)[i];
 			dest_v.z = v.z;
-			dest_v.x = xy.x / 2.0f;
-			dest_v.y = xy.y / 2.0f;
+			dest_v.x = xy.x / scale_factor;
+			dest_v.y = xy.y / scale_factor;
 		}
 	}
 	
