@@ -4,7 +4,7 @@
 #include "SyDistorter.h"
 
 // The number of discrete points we sample on the radius of the distortion.
-// The rest is going to be interpolated
+// The rest is going to be extrapolated
 static const unsigned int STEPS = 64;
 
 SyDistorter::SyDistorter()
