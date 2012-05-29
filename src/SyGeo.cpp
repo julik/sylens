@@ -20,7 +20,6 @@ class SyGeo : public GeoOp
 {
 private:
 	
-	// The distortion engine
 	SyDistorter distorter;
 	float scale_factor;
 	
@@ -81,7 +80,7 @@ public:
 	{
 		distorter.recompute_if_needed();
 		input0()->validate(for_real);
-		return GeoOp::_validate(for_real);
+		GeoOp::_validate(for_real);
 	}
 	
 	void undistort_points_of(int obj_idx, GeometryList& out)
@@ -92,21 +91,23 @@ public:
 		const PointList* src_pts = object.point_list();
 		
 		// Allocate the destination points, they will be blanked out
+		// with garbage values that we have to manually replace with
+		// copied values from the source points
 		PointList* dest_points = out.writable_points(obj_idx);
 		
 		// Copy points from source to destination, removing distortion
 		// in the process:
 		for (unsigned i = 0; i < dest_points->size(); i++) {
-			Vector3 v = (*src_pts)[i];
+			Vector3 pt_source = (*src_pts)[i];
+			Vector3& pt_dest = (*dest_points)[i];
 			
 			// The Card has it's vertices in the [-0.5, 0.5] space with aspect applied
-			Vector2 xy(v.x * scale_factor, v.y * scale_factor);
+			Vector2 xy(pt_source.x * scale_factor, pt_source.y * scale_factor);
 			distorter.remove_disto(xy);
 			
-			Vector3& dest_v = (*dest_points)[i];
-			dest_v.z = v.z;
-			dest_v.x = xy.x / scale_factor;
-			dest_v.y = xy.y / scale_factor;
+			pt_dest.z = pt_source.z;
+			pt_dest.x = xy.x / scale_factor;
+			pt_dest.y = xy.y / scale_factor;
 		}
 	}
 	
