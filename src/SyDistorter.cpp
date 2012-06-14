@@ -258,6 +258,7 @@ void SyDistorter::distort_uv(Vector4& uv)
 	
 	// UV's go 0..1. SY imageplane coordinates go -1..1
 	const double factor = 2;
+	
 	// Centerpoint is in the middle.
 	const double centerpoint_shift_in_uv_space = 0.5f;
 	
