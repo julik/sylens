@@ -179,7 +179,10 @@ int SyLens::knob_changed(Knob* k)
 void SyLens::append(Hash& hash) {
 	hash.append(VERSION);
 	hash.append(distorter.compute_hash());
-	Iop::append(hash); // the super called he wants his pointers back
+	hash.append(k_output);
+	hash.append(k_grow_format_);
+	hash.append(k_trim_bbox_to_format_);
+	Iop::append(hash);
 }
 	
 // knobs. There is really only one thing to pay attention to - be consistent and call your knobs
