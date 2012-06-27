@@ -86,4 +86,5 @@ private:
 	double distort_sampled(double);
 	double distort_radial(double);
 	void recompute();
+	void clear_lut();
 };

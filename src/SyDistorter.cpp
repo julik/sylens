@@ -75,12 +75,7 @@ void SyDistorter::set_center_shift(double u, double v)
 
 SyDistorter::~SyDistorter()
 {
-	// Clear out the LUT
-	std::vector<LutTuple*>::iterator tuple_it;
-	for(tuple_it = lut.begin(); tuple_it != lut.end(); tuple_it++) {
-		delete(*tuple_it);
-	}
-	// Then the LUT gets deleted
+	clear_lut();
 }
 
 /*
@@ -330,6 +325,18 @@ void SyDistorter::knobs_with_aspect( Knob_Callback f)
 	_aKnob->tooltip("Set to the aspect of your distorted plate (like 1.78 for 16:9)");
 }
 
+void SyDistorter::clear_lut()
+{
+	
+	// Clear out the LUT elements so that they don't leak. We could use std::auto_ptr
+	// as well...
+	std::vector<LutTuple*>::iterator tuple_it;
+	for(tuple_it = lut.begin(); tuple_it != lut.end(); tuple_it++) {
+		delete (*tuple_it);
+	}
+	lut.clear();
+}
+
 // Updates the internal lookup table
 void SyDistorter::recompute()
 {
@@ -339,13 +346,7 @@ void SyDistorter::recompute()
 	double max_r = sqrt((aspect_ * aspect_) + 1);
 	double increment = max_r / float(STEPS);
 	
-	// Clear out the LUT elements so that they don't leak. We could use std::auto_ptr
-	// as well...
-	std::vector<LutTuple*>::iterator tuple_it;
-	for(tuple_it = lut.begin(); tuple_it != lut.end(); tuple_it++) {
-		delete (*tuple_it);
-	}
-	lut.clear();
+	clear_lut();
 	
 	lut.push_back(new LutTuple(0,1));
 	for(unsigned i = 0; i < STEPS; i++) {
