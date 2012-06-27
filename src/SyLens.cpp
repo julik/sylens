@@ -182,6 +182,7 @@ void SyLens::append(Hash& hash) {
 	hash.append(k_output);
 	hash.append(k_grow_format_);
 	hash.append(k_trim_bbox_to_format_);
+	
 	Iop::append(hash);
 }
 	
@@ -280,7 +281,7 @@ void SyLens::_validate(bool for_real)
 	y_px_shift = 0;
 
 	// If we need to grow the plate, do it here.
-	if(k_grow_format_ && k_output == UNDIST) {
+	if(k_grow_format_ && (k_output == UNDIST)) {
 		
 		// Determine the offset of the left bottom corner
 		Vector2 corner(0.0f, 0.0f);
@@ -289,13 +290,14 @@ void SyLens::_validate(bool for_real)
 		if(corner.x < 0.0f || corner.y < 0.0f) {
 			int out_width = ow + (2 * round(fabs(corner.x)));
 			int out_height = oh + (2 * round(fabs(corner.y)));
-			
 			output_format = Format(out_width, out_height, output_format.pixel_aspect());
 			x_px_shift = out_width - ow;
 			y_px_shift = out_height - oh;
-			info_.format(output_format);
 		}
 	}
+	
+	// Set the format
+	info_.format(output_format);
 	
 	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
 	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
@@ -363,7 +365,7 @@ void SyLens::_validate(bool for_real)
 	
 	// If trim is enabled we intersect our obox with the format so that there is no bounding box
 	// outside the crop area. Thiis handy for redistorted material.
-	if(k_trim_bbox_to_format_ || k_grow_format_) obox.intersect(output_format);
+	if(k_trim_bbox_to_format_) obox.intersect(output_format);
 	
 	info_.set(obox);
 }
