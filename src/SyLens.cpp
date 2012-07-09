@@ -73,6 +73,9 @@ class SyLens : public Iop
 	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
 	int k_output;
 	
+	// Sampling offset
+	int xShift, yShift;
+	
 	// The distortion engine
 	SyDistorter distorter;
 	
@@ -82,6 +85,8 @@ public:
 		k_output = UNDIST;
 		_aspect = 1.33f;
 		k_grow_format_ = false;
+		xShift = 0;
+		yShift = 0;
 	}
 	
 	void _computeAspects();
@@ -179,7 +184,8 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	Vector2 sampleFromXY(0.0f, 0.0f);
 	for (; x < r; x++) {
 		
-		sampleFromXY = Vector2(x, y);
+		sampleFromXY = Vector2(x + xShift, y + yShift);
+		
 		if( k_output == UNDIST) {
 			distort_px_into_source(sampleFromXY);
 		} else {
