@@ -40,8 +40,8 @@ extern "C" {
 using namespace DD::Image;
 
 static const char* const CLASS = "SyLens";
-static const char* const HELP =  "This plugin undistorts footage according\n"
-	"to the lens distortion model used by Syntheyes.\n"
+static const char* const HELP =  "This plugin undistorts footage according "
+	"to the lens distortion model used by Syntheyes. "
 	"Contact me@julik.nl if you need help with the plugin.";
 
 #include "VERSION.h"
@@ -57,7 +57,6 @@ class SyLens : public Iop
 	static const Iop::Description description;
 	
 	Filter filter;
-	Format output_format;
 	
 	enum { UNDIST, REDIST };
 	
@@ -71,9 +70,8 @@ class SyLens : public Iop
 	double centerpoint_shift_u_, centerpoint_shift_v_;
 	
 	// Stuff driven by knobbz
-	bool k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
+	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
 	int k_output;
-	int x_px_shift, y_px_shift;
 	
 	// The distortion engine
 	SyDistorter distorter;
@@ -82,13 +80,7 @@ public:
 	SyLens( Node *node ) : Iop ( node )
 	{
 		k_output = UNDIST;
-		
-		k_grow_format_ = 0;
-		k_trim_bbox_to_format_ = 0;
-		
 		_aspect = 1.33f;
-		x_px_shift = 0;
-		y_px_shift = 0;
 	}
 	
 	void _computeAspects();
@@ -96,12 +88,17 @@ public:
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
-	int knob_changed(Knob*);
-	void append(Hash& hash);
+	
+	// Hashing for caches. We append our version to the cache hash, so that when you update
+	// the plugin all the caches will be flushed automatically
+	void append(Hash& hash) {
+		hash.append(VERSION);
+		hash.append(distorter.compute_hash());
+		Iop::append(hash); // the super called he wants his pointers back
+	}
 	
 	~SyLens () { 
 	}
-	
 private:
 	
 	int round(double x);
@@ -134,8 +131,7 @@ double SyLens::toUv(double absValue, int absSide)
 	return x * 2;
 }
 
-double SyLens::fromUv(double uvValue, int absSide)
-{
+double SyLens::fromUv(double uvValue, int absSide) {
 	double value_off_corner = (uvValue / 2) + 0.5f;
 	return absSide * value_off_corner;
 }
@@ -156,36 +152,59 @@ void SyLens::centered_uv_to_absolute_px(Vector2& xy, int w, int h)
 
 // Get a coordinate that we need to sample from the SOURCE distorted image to get at the absXY
 // values in the RESULT
-void SyLens::distort_px_into_source(Vector2& absXY)
-{
+void SyLens::distort_px_into_source(Vector2& absXY) {
 	absolute_px_to_centered_uv(absXY, plate_width_, plate_height_);
 	distorter.apply_disto(absXY);
 	centered_uv_to_absolute_px(absXY, plate_width_, plate_height_);
 }
 
 // This is still a little wrongish but less wrong than before
-void SyLens::undistort_px_into_destination(Vector2& absXY)
-{
+void SyLens::undistort_px_into_destination(Vector2& absXY) {
 	absolute_px_to_centered_uv(absXY, plate_width_, plate_height_);
 	distorter.remove_disto(absXY);
 	centered_uv_to_absolute_px(absXY, plate_width_, plate_height_);
 }
-int SyLens::knob_changed(Knob* k)
+ 
+// The image processor that works by scanline. Y is the scanline offset, x is the pix,
+// r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
+void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 {
-	return Iop::knob_changed(k);
+	
+	foreach(z, channels) out.writable(z);
+	
+	Pixel pixel(channels);
+	const float sampleOff = 0.5f;
+	
+	Vector2 sampleFromXY(0.0f, 0.0f);
+	for (; x < r; x++) {
+		
+		sampleFromXY = Vector2(x, y);
+		if( k_output == UNDIST) {
+			distort_px_into_source(sampleFromXY);
+		} else {
+			undistort_px_into_destination(sampleFromXY);
+		}
+		
+		// Sample from the input node at the coordinates
+		// half a pixel has to be added here because sample() takes the first two
+		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
+		// have to deal with a slight offset which is *not* desired.
+		input0().sample(
+			sampleFromXY.x + sampleOff , sampleFromXY.y + sampleOff, 
+			1.0f, 
+			1.0f,
+			&filter,
+			pixel
+		);
+		
+		// write the resulting pixel into the image
+		foreach (z, channels)
+		{
+			((float*)out[z])[x] = pixel[z];
+		}
+	}
 }
 
-	
-void SyLens::append(Hash& hash) {
-	hash.append(VERSION);
-	hash.append(distorter.compute_hash());
-	hash.append(k_output);
-	hash.append(k_grow_format_);
-	hash.append(k_trim_bbox_to_format_);
-	
-	Iop::append(hash);
-}
-	
 // knobs. There is really only one thing to pay attention to - be consistent and call your knobs
 // "in_snake_case_as_short_as_possible", labels are also lowercase normally
 void SyLens::knobs( Knob_Callback f) {
@@ -197,21 +216,23 @@ void SyLens::knobs( Knob_Callback f) {
 	_output_selector->label("output");
 	_output_selector->tooltip("Pick your poison");
 	
+	// Old mode configuration knob that we just hide
+	const char* old_mode_value = "nada";
+	Knob* hidden_mode = String_knob(f, &old_mode_value, "mode");
+	hidden_mode->set_flag(KNOB_HIDDEN);
+	
 	distorter.knobs(f);
 	filter.knobs(f);
 	
-	// Trim bbox
+	// Utility functions
 	Knob* kTrimKnob = Bool_knob( f, &k_trim_bbox_to_format_, "trim");
 	kTrimKnob->label("trim bbox");
 	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
 	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
-	// Grow plate
-	Knob* kGrowKnob = Bool_knob( f, &k_grow_format_, "grow");
-	kGrowKnob->label("grow format");
-	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox."
-		"\nThis is useful if you are going to do a matte painting of the output.");
-	kGrowKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+	Knob* k_enable_debug_Knob = Bool_knob( f, &k_enable_debug_, "debug");
+	k_enable_debug_Knob->label("debug info");
+	k_enable_debug_Knob->tooltip("When checked, SyLens will output various debug info to STDOUT");
 	
 	Divider(f, 0);
 	
@@ -222,7 +243,7 @@ void SyLens::knobs( Knob_Callback f) {
 
 // http://stackoverflow.com/questions/485525/round-for-float-in-c
 int SyLens::round(double x) {
-	return (int)floor(x + 0.5);
+	return floor(x + 0.5);
 }
 
 // The algo works in image aspec, not the pixel aspect. We also have to take the uncrop factor
@@ -235,6 +256,8 @@ void SyLens::_computeAspects() {
 	plate_height_ = round(f.height());
 
 	_aspect = float(plate_width_) / float(plate_height_) *  f.pixel_aspect();
+	
+	if(k_enable_debug_) printf("SyLens: true plate window with uncrop will be %dx%d\n", plate_width_, plate_height_);
 }
 
 	
@@ -242,7 +265,6 @@ void SyLens::_computeAspects() {
 // pay attention
 void SyLens::_validate(bool for_real)
 {
-
 	// Bookkeeping boilerplate
 	filter.initialize();
 	input0().validate(for_real);
@@ -257,6 +279,8 @@ void SyLens::_validate(bool for_real)
 	
 	distorter.set_aspect(_aspect);
 	distorter.recompute_if_needed();
+	
+	if(k_enable_debug_) printf("SyLens: _validate info box to  %dx%d\n", plate_width_, plate_height_);
 	
 	// Time to define how big our output will be in terms of format. Format will always be the whole plate.
 	// If we only use a bboxed piece of the image we will limit our request to that. But first of all we need to
@@ -275,29 +299,7 @@ void SyLens::_validate(bool for_real)
 	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 	// Grab the bbox from the input first
 	Info inf = input0().info();
-	output_format = input0().format();
-	
-	x_px_shift = 0;
-	y_px_shift = 0;
-
-	// If we need to grow the plate, do it here.
-	if(k_grow_format_ && (k_output == UNDIST)) {
-		
-		// Determine the offset of the left bottom corner
-		Vector2 corner(0.0f, 0.0f);
-		undistort_px_into_destination(corner);
-		// Only do it if we need to make the plate bigger
-		if(corner.x < 0.0f || corner.y < 0.0f) {
-			int out_width = ow + (2 * round(fabs(corner.x)));
-			int out_height = oh + (2 * round(fabs(corner.y)));
-			output_format = Format(out_width, out_height, output_format.pixel_aspect());
-			x_px_shift = out_width - ow;
-			y_px_shift = out_height - oh;
-		}
-	}
-	
-	// Set the format
-	info_.format(output_format);
+	Format f = input0().format();
 	
 	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
 	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
@@ -342,8 +344,8 @@ void SyLens::_validate(bool for_real)
 		} else {
 			distort_px_into_source(*pointsOnBbox[i]);
 		}
-		xValues.push_back(round(pointsOnBbox[i]->x));
-		yValues.push_back(round(pointsOnBbox[i]->y));
+		xValues.push_back(pointsOnBbox[i]->x);
+		yValues.push_back(pointsOnBbox[i]->y);
 	}
 	
 	int minX, minY, maxX, maxY;
@@ -354,18 +356,13 @@ void SyLens::_validate(bool for_real)
 	minY = *std::min_element(yValues.begin(), yValues.end());
 	maxY = *std::max_element(yValues.begin(), yValues.end());
 	
-	if(k_grow_format_) {
-		minX -= x_px_shift;
-		minY -= y_px_shift;
-		maxX += x_px_shift;
-		maxY += y_px_shift;
-	}
-	
 	Box obox(minX, minY, maxX, maxY);
 	
 	// If trim is enabled we intersect our obox with the format so that there is no bounding box
 	// outside the crop area. Thiis handy for redistorted material.
-	if(k_trim_bbox_to_format_) obox.intersect(output_format);
+	if(k_trim_bbox_to_format_) obox.intersect(input0().format());
+	
+	if(k_enable_debug_) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
 	
 	info_.set(obox);
 }
@@ -373,14 +370,10 @@ void SyLens::_validate(bool for_real)
 void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int count)
 {
 	
-	ChannelSet c1(channels);
-	in_channels(0,c1);
+	if(k_enable_debug_) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
+	ChannelSet c1(channels); in_channels(0,c1);
 	
-	// Honor the shift we need to apply if we change the output format
-	Vector2 bl(x-x_px_shift, y-y_px_shift), 
-		br(r-x_px_shift, y+y_px_shift),
-		tr(r+x_px_shift, t+y_px_shift),
-		tl(x-x_px_shift, t+y_px_shift);
+	Vector2 bl(x, y), br(r, y), tr(r, t), tl(x, t);
 	
 	if(k_output == UNDIST) {
 		distort_px_into_source(bl);
@@ -398,7 +391,7 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
 	// If we don't request it we will get black pixels in there, so we add a small margin on all sides
 	// to give us a little cushion
-	const unsigned int safetyPadding = 4;
+	const unsigned int safetyPadding = 16;
 	input0().request(
 		round(bl.x - safetyPadding),  
 		round(bl.y  - safetyPadding),
@@ -406,44 +399,4 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 		round(tr.y + safetyPadding),
 		channels, count
 	);
-}
-
-// The image processor that works by scanline. Y is the scanline offset, x is the pix,
-// r is the length of the row. We are now effectively in the undistorted coordinates, mind you!
-void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
-{
-	
-	foreach(z, channels) out.writable(z);
-	
-	Pixel pixel(channels);
-	
-	Vector2 sampleFromXY(0.0f, 0.0f);
-	for (; x < r; x++) {
-		
-		sampleFromXY = Vector2(x - (x_px_shift/2), y - (y_px_shift/2));
-		
-		if( k_output == UNDIST) {
-			distort_px_into_source(sampleFromXY);
-		} else {
-			undistort_px_into_destination(sampleFromXY);
-		}
-		
-		// Sample from the input node at the coordinates
-		// half a pixel has to be added here because sample() takes the first two
-		// arguments as the center of the rectangle to sample. By not adding 0.5 we'd
-		// have to deal with a slight offset which is *not* desired.
-		input0().sample(
-			sampleFromXY.x + 0.5f, sampleFromXY.y + 0.5f, 
-			1.0f, 
-			1.0f,
-			&filter,
-			pixel
-		);
-		
-		// write the resulting pixel into the image
-		foreach (z, channels)
-		{
-			((float*)out[z])[x] = pixel[z];
-		}
-	}
 }
