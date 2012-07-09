@@ -70,7 +70,7 @@ class SyLens : public Iop
 	double centerpoint_shift_u_, centerpoint_shift_v_;
 	
 	// Stuff driven by knobbz
-	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_;
+	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
 	int k_output;
 	
 	// The distortion engine
@@ -81,6 +81,7 @@ public:
 	{
 		k_output = UNDIST;
 		_aspect = 1.33f;
+		k_grow_format_ = false;
 	}
 	
 	void _computeAspects();
@@ -230,9 +231,18 @@ void SyLens::knobs( Knob_Callback f) {
 	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
 	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
+	// Grow plate
+	// Grow plate
+	Knob* kGrowKnob = Bool_knob( f, &k_grow_format_, "grow");
+	kGrowKnob->label("grow format");
+	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox."
+		"\nThis is useful if you are going to do a matte painting of the output.");
+	kGrowKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+	
 	Knob* k_enable_debug_Knob = Bool_knob( f, &k_enable_debug_, "debug");
 	k_enable_debug_Knob->label("debug info");
 	k_enable_debug_Knob->tooltip("When checked, SyLens will output various debug info to STDOUT");
+	k_enable_debug_Knob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
 	Divider(f, 0);
 	
