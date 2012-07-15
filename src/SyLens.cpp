@@ -380,6 +380,10 @@ void SyLens::_validate(bool for_real)
 	
 	if(k_enable_debug_) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
 	
+	if(k_grow_format_) {
+		
+	}
+	
 	info_.set(obox);
 }
 
