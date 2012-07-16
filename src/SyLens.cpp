@@ -92,7 +92,6 @@ public:
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
-	int knob_changed(Knob*);
 	
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will be flushed automatically
@@ -138,14 +137,6 @@ double SyLens::toUv(double absValue, int absSide)
 {
 	double x = (absValue / (double)absSide) - 0.5f;
 	return x * 2;
-}
-
-int SyLens::knob_changed(Knob* k)
-{
-	if(k->name() == "grow") {
-		validate(true);
-	}
-	return Iop::knob_changed(k);
 }
 
 double SyLens::fromUv(double uvValue, int absSide) {
@@ -303,7 +294,8 @@ void SyLens::_validate(bool for_real)
 	distorter.set_aspect(_aspect);
 	distorter.recompute_if_needed();
 	
-	// Reset pixel shifts
+	// Reset pixel shifts to 0 for the case
+	// that the grow plate has been disabled
 	xShift = 0;
 	yShift = 0;
 	
@@ -418,7 +410,6 @@ void SyLens::_validate(bool for_real)
 		}
 		
 		/* We should support redistorting from grown plates but we'll handle that in the future 
-		// Or we might just be redistorting from an oversize plate
 		if(corner.x > 0.0f && corner.y > 0.0f && k_output == REDIST) {
 			xShift = (int)(-corner.x);
 			yShift = (int)(-corner.y);
