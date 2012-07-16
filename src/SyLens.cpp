@@ -19,11 +19,6 @@
 	did not
 */
 
-// for our friend printf
-extern "C" {
-#include <stdio.h>
-}
-
 // For max/min on containers
 #include <algorithm>
 
@@ -70,7 +65,7 @@ class SyLens : public Iop
 	double centerpoint_shift_u_, centerpoint_shift_v_;
 	
 	// Stuff driven by knobbz
-	bool k_enable_debug_, k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
+	bool k_trim_bbox_to_format_, k_only_format_output_, k_grow_format_;
 	int k_output;
 	
 	// Sampling offset
@@ -78,6 +73,9 @@ class SyLens : public Iop
 	
 	// The distortion engine
 	SyDistorter distorter;
+	
+	// The oversize format in case we use it
+	Format oversize;
 	
 public:
 	SyLens( Node *node ) : Iop ( node )
@@ -94,12 +92,17 @@ public:
 	void _request(int x, int y, int r, int t, ChannelMask channels, int count);
 	void engine( int y, int x, int r, ChannelMask channels, Row& out );
 	void knobs( Knob_Callback f);
+	int knob_changed(Knob*);
 	
 	// Hashing for caches. We append our version to the cache hash, so that when you update
 	// the plugin all the caches will be flushed automatically
 	void append(Hash& hash) {
 		hash.append(VERSION);
 		hash.append(distorter.compute_hash());
+		hash.append(k_grow_format_);
+		hash.append(k_trim_bbox_to_format_);
+		hash.append(xShift);
+		hash.append(yShift);
 		Iop::append(hash); // the super called he wants his pointers back
 	}
 	
@@ -135,6 +138,14 @@ double SyLens::toUv(double absValue, int absSide)
 {
 	double x = (absValue / (double)absSide) - 0.5f;
 	return x * 2;
+}
+
+int SyLens::knob_changed(Knob* k)
+{
+	if(k->name() == "grow") {
+		validate(true);
+	}
+	return Iop::knob_changed(k);
 }
 
 double SyLens::fromUv(double uvValue, int absSide) {
@@ -184,7 +195,7 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 	Vector2 sampleFromXY(0.0f, 0.0f);
 	for (; x < r; x++) {
 		
-		sampleFromXY = Vector2(x + xShift, y + yShift);
+		sampleFromXY = Vector2(x - xShift, y - yShift);
 		
 		if( k_output == UNDIST) {
 			distort_px_into_source(sampleFromXY);
@@ -245,11 +256,6 @@ void SyLens::knobs( Knob_Callback f) {
 		"\nThis is useful if you are going to do a matte painting of the output.");
 	kGrowKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
-	Knob* k_enable_debug_Knob = Bool_knob( f, &k_enable_debug_, "debug");
-	k_enable_debug_Knob->label("debug info");
-	k_enable_debug_Knob->tooltip("When checked, SyLens will output various debug info to STDOUT");
-	k_enable_debug_Knob->set_flag(KNOB_ON_SEPARATE_LINE);
-	
 	Divider(f, 0);
 	
 	std::ostringstream ver;
@@ -273,10 +279,11 @@ void SyLens::_computeAspects() {
 
 	_aspect = float(plate_width_) / float(plate_height_) *  f.pixel_aspect();
 	
-	if(k_enable_debug_) printf("SyLens: true plate window with uncrop will be %dx%d\n", plate_width_, plate_height_);
+	warning("true plate window with uncrop will be %dx%d", plate_width_, plate_height_);
 }
 
-	
+
+
 // Here we need to expand the image and the bounding box. This is the most important method in a plug like this so
 // pay attention
 void SyLens::_validate(bool for_real)
@@ -296,7 +303,11 @@ void SyLens::_validate(bool for_real)
 	distorter.set_aspect(_aspect);
 	distorter.recompute_if_needed();
 	
-	if(k_enable_debug_) printf("SyLens: _validate info box to  %dx%d\n", plate_width_, plate_height_);
+	// Reset pixel shifts
+	xShift = 0;
+	yShift = 0;
+	
+	warning("_validate plate size  %dx%d", plate_width_, plate_height_);
 	
 	// Time to define how big our output will be in terms of format. Format will always be the whole plate.
 	// If we only use a bboxed piece of the image we will limit our request to that. But first of all we need to
@@ -378,10 +389,48 @@ void SyLens::_validate(bool for_real)
 	// outside the crop area. Thiis handy for redistorted material.
 	if(k_trim_bbox_to_format_) obox.intersect(input0().format());
 	
-	if(k_enable_debug_) printf("SyLens: output bbox is %dx%d to %dx%d\n", obox.x(), obox.y(), obox.r(), obox.t());
+	warning("output bbox is %dx%d to %dx%d", obox.x(), obox.y(), obox.r(), obox.t());
 	
 	if(k_grow_format_) {
+		// Determine whether the bottom-left corner will end up outside the format
+		Vector2 corner(0,0);
+		if(k_output == UNDIST) {
+			undistort_px_into_destination(corner);
+		} else {
+			distort_px_into_source(corner);
+		}
 		
+		// If we undistort and the corner will end up outside - we have overflow
+		if(corner.x < 0.0f || corner.y < 0.0f) {
+			warning("Barrel distortion and plate needs to grow. Off-corner is %0.5fx%0.5f", corner.x, corner.y);
+			
+			xShift = (int)fabs(corner.x);
+			yShift = (int)fabs(corner.y);
+			oversize = Format(f.width() + (xShift * 2), f.height() + (yShift * 2), f.pixel_aspect());
+			
+			// Move the bounding box
+			obox.move(xShift, yShift);
+			
+			warning("Oversize format will be %dx%d", oversize.width(), oversize.height());
+			
+			// Set the oversize format to be our output
+			info_.format(oversize);
+		}
+		
+		/* We should support redistorting from grown plates but we'll handle that in the future 
+		// Or we might just be redistorting from an oversize plate
+		if(corner.x > 0.0f && corner.y > 0.0f && k_output == REDIST) {
+			xShift = (int)(-corner.x);
+			yShift = (int)(-corner.y);
+			oversize = Format(f.width() + (xShift * 2), f.height() + (yShift * 2), f.pixel_aspect());
+			
+			// Move the bounding box
+			obox.move(xShift, yShift);
+			
+			// Set the oversize format to be our output
+			info_.format(oversize);
+		}
+		*/
 	}
 	
 	info_.set(obox);
@@ -390,10 +439,15 @@ void SyLens::_validate(bool for_real)
 void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int count)
 {
 	
-	if(k_enable_debug_) printf("SyLens: Received request %d %d %d %d\n", x, y, r, t);
+	warning("Received request %d %d %d %d", x, y, r, t);
 	ChannelSet c1(channels); in_channels(0,c1);
 	
-	Vector2 bl(x, y), br(r, y), tr(r, t), tl(x, t);
+	// Allocate corners of the request box
+	Vector2 
+		bl(x - xShift, y - yShift), 
+		br(r - xShift, y - yShift),
+		tr(r - xShift, t - yShift),
+		tl(x - xShift, t - yShift);
 	
 	if(k_output == UNDIST) {
 		distort_px_into_source(bl);
@@ -409,14 +463,16 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	
 	// Request the same part of the input distorted. However if rounding errors have taken place 
 	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
-	// If we don't request it we will get black pixels in there, so we add a small margin on all sides
+	// If we don't request it we will get stretched pixlines there, so we add a small margin on all sides
 	// to give us a little cushion
-	const unsigned int safetyPadding = 16;
+	const unsigned int safetyPadding = 72;
+	warning("Will request upstream: %d,%d x %d,%d plus padding of %d", (int)bl.x, (int)bl.y, (int)tr.x, (int)tr.y, safetyPadding);
+	
 	input0().request(
-		round(bl.x - safetyPadding),  
-		round(bl.y  - safetyPadding),
-		round(tr.x + safetyPadding),
-		round(tr.y + safetyPadding),
+		(int)bl.x - safetyPadding,  
+		(int)bl.y - safetyPadding,
+		(int)tr.x + safetyPadding,
+		(int)tr.y + safetyPadding,
 		channels, count
 	);
 }
