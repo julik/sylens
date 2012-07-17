@@ -439,9 +439,9 @@ void SyLens::_validate(bool for_real)
 
 void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int count)
 {
-	
-	warning("Received request %d %d %d %d", x, y, r, t);
 	ChannelSet c1(channels); in_channels(0,c1);
+	
+	warning("Received request from downstream [%d,%d]x [%d,%d]", x, y, r, t);
 	
 	// TODO: refactor this out and blend with the _validate() routine
 	std::vector<Vector2*> bbox_points;
@@ -485,24 +485,18 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	// Determine the min and max points on all boundaries
 	signed minX, minY, maxX, maxY;
 	
-	// Formally speaking, we have to allocate an std::iterator first. But we wont.
-	minX = *std::min_element(xValues.begin(), xValues.end());
-	maxX = *std::max_element(xValues.begin(), xValues.end());
-	minY = *std::min_element(yValues.begin(), yValues.end());
-	maxY = *std::max_element(yValues.begin(), yValues.end());
-	
 	// Request the same part of the input distorted. However if rounding errors have taken place 
 	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
 	// If we don't request it we will get stretched pixlines there, so we add a small margin on all sides
 	// to give us a little cushion
 	const signed safetyPadding = 4;
-	warning("Will request upstream: %d,%d x %d,%d plus padding of %d", minX, minY, maxX, maxY, safetyPadding);
+	// The basic unit of what we request will be the smallest and biggest coordinates respectively
+	minX = *std::min_element(xValues.begin(), xValues.end()) - safetyPadding;
+	maxX = *std::max_element(xValues.begin(), xValues.end()) + safetyPadding;
+	minY = *std::min_element(yValues.begin(), yValues.end()) - safetyPadding;
+	maxY = *std::max_element(yValues.begin(), yValues.end()) + safetyPadding;
 	
-	input0().request(
-		minX - safetyPadding,  
-		minY - safetyPadding,
-		maxX + safetyPadding,
-		maxY + safetyPadding,
-		channels, count
-	);
+	warning("Will request upstream (accounting for (re)distortion): [%d,%d] by [%d,%d]", minX, minY, maxX, maxY);
+	
+	input0().request(minX, minY, maxX, maxY, channels, count);
 }
