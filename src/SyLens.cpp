@@ -243,7 +243,6 @@ void SyLens::knobs( Knob_Callback f) {
 	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
 	
 	// Grow plate
-	// Grow plate
 	Knob* kGrowKnob = Bool_knob( f, &k_grow_format_, "grow");
 	kGrowKnob->label("grow format");
 	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox."
@@ -390,14 +389,10 @@ void SyLens::_validate(bool for_real)
 	
 	warning("output bbox is %dx%d to %dx%d", obox.x(), obox.y(), obox.r(), obox.t());
 	
-	if(k_grow_format_) {
+	if(k_grow_format_ && k_output == UNDIST) {
 		// Determine whether the bottom-left corner will end up outside the format
 		Vector2 corner(0,0);
-		if(k_output == UNDIST) {
-			undistort_px_into_destination(corner);
-		} else {
-			distort_px_into_source(corner);
-		}
+		undistort_px_into_destination(corner);
 		
 		// If we undistort and the corner will end up outside - we have overflow
 		if(corner.x < 0.0f || corner.y < 0.0f) {
@@ -418,20 +413,6 @@ void SyLens::_validate(bool for_real)
 			// Set the oversize format to be our output
 			info_.format(oversize);
 		}
-		
-		/* We should support redistorting from grown plates but we'll handle that in the future 
-		if(corner.x > 0.0f && corner.y > 0.0f && k_output == REDIST) {
-			xShift = (int)(-corner.x);
-			yShift = (int)(-corner.y);
-			oversize = Format(f.width() + (xShift * 2), f.height() + (yShift * 2), f.pixel_aspect());
-			
-			// Move the bounding box
-			obox.move(xShift, yShift);
-			
-			// Set the oversize format to be our output
-			info_.format(oversize);
-		}
-		*/
 	}
 	
 	info_.set(obox);
