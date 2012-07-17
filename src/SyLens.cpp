@@ -77,8 +77,8 @@ class SyLens : public Iop
 	// The distortion engine
 	SyDistorter distorter;
 	
-	// The oversize format in case we use it
-	Format oversize;
+	// The output format for the node
+	Format output_format;
 	
 public:
 	SyLens( Node *node ) : Iop ( node )
@@ -320,11 +320,9 @@ void SyLens::_validate(bool for_real)
 	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 	// Grab the bbox from the input first
 	Info inf = input0().info();
-	Format f = input0().format();
 	
-	out_width_ = f.width();
-	out_height_ = f.height();
-	
+	// Start with the input format
+	output_format = input0().format();
 	
 	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
 	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
@@ -383,14 +381,15 @@ void SyLens::_validate(bool for_real)
 	
 	Box obox(minX, minY, maxX, maxY);
 	
-	// If trim is enabled we intersect our obox with the format so that there is no bounding box
-	// outside the crop area. Thiis handy for redistorted material.
-	if(k_trim_bbox_to_format_) obox.intersect(input0().format());
-	
-	warning("output bbox is %dx%d to %dx%d", obox.x(), obox.y(), obox.r(), obox.t());
-	
 	if(k_grow_format_ && k_output == UNDIST) {
-		// Determine whether the bottom-left corner will end up outside the format
+		
+		// We spare some extra steps and only do this step if the bounding box
+		// will actually grow. To determine that, we take the corner at 0,0 (lower left)
+		// and we undistort it. If the coordinates end up being negative it means that the
+		// undistorted plate will be bigger than the original and we need to compute a
+		// new oversize format. We need to store this format as a member to prevent Nuke from
+		// crashing (otherwise the Format object goes out of scope and the _validate() of the
+		// downstream node cannot get at it) 
 		Vector2 corner(0,0);
 		undistort_px_into_destination(corner);
 		
@@ -398,23 +397,28 @@ void SyLens::_validate(bool for_real)
 		if(corner.x < 0.0f || corner.y < 0.0f) {
 			warning("Barrel distortion and plate needs to grow. Off-corner is %0.5fx%0.5f", corner.x, corner.y);
 			
-			xShift = (int)fabs(corner.x);
-			yShift = (int)fabs(corner.y);
-			oversize = Format(f.width() + (xShift * 2), f.height() + (yShift * 2), f.pixel_aspect());
+			xShift = (signed)fabs(corner.x);
+			yShift = (signed)fabs(corner.y);
 			
-			out_width_ = oversize.width();
-			out_height_ = oversize.height();
+			// Reassign the output format to something bigger than the original
+			output_format = Format(output_format.width() + (xShift * 2), output_format.height() + (yShift * 2), output_format.pixel_aspect());
 			
 			// Move the bounding box
 			obox.move(xShift, yShift);
 			
-			warning("Oversize format will be %dx%d", oversize.width(), oversize.height());
+			warning("Oversize format will be %dx%d", output_format.width(), output_format.height());
 			
-			// Set the oversize format to be our output
-			info_.format(oversize);
 		}
 	}
 	
+	// If trim is enabled we intersect our obox with the format so that there is no bounding box
+	// outside the crop area. Thiis handy for redistorted material.
+	if(k_trim_bbox_to_format_) obox.intersect(input0().format());
+	
+	warning("Output bbox is %dx%d to %dx%d", obox.x(), obox.y(), obox.r(), obox.t());
+	
+	// Set the oversize format and the bounding box
+	info_.format(output_format);
 	info_.set(obox);
 }
 
