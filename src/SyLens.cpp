@@ -57,7 +57,10 @@ class SyLens : public Iop
 	
 	// The original size of the plate that we distort
 	unsigned int plate_width_, plate_height_;
-
+	
+	// The size of the output
+	unsigned int out_width_, out_height_;
+	
 	// Image aspect and NOT the pixel aspect Nuke furnishes us
 	double _aspect;
 	
@@ -320,6 +323,10 @@ void SyLens::_validate(bool for_real)
 	Info inf = input0().info();
 	Format f = input0().format();
 	
+	out_width_ = f.width();
+	out_height_ = f.height();
+	
+	
 	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
 	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
 	// we just take the corners we might be chopping some image away. So to get a reliable bbox we need to check
@@ -400,6 +407,9 @@ void SyLens::_validate(bool for_real)
 			yShift = (int)fabs(corner.y);
 			oversize = Format(f.width() + (xShift * 2), f.height() + (yShift * 2), f.pixel_aspect());
 			
+			out_width_ = oversize.width();
+			out_height_ = oversize.height();
+			
 			// Move the bounding box
 			obox.move(xShift, yShift);
 			
@@ -433,37 +443,66 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	warning("Received request %d %d %d %d", x, y, r, t);
 	ChannelSet c1(channels); in_channels(0,c1);
 	
-	// Allocate corners of the request box
-	Vector2 
-		bl(x - xShift, y - yShift), 
-		br(r - xShift, y - yShift),
-		tr(r - xShift, t - yShift),
-		tl(x - xShift, t - yShift);
+	// TODO: refactor this out and blend with the _validate() routine
+	std::vector<Vector2*> bbox_points;
 	
-	if(k_output == UNDIST) {
-		distort_px_into_source(bl);
-		distort_px_into_source(br);
-		distort_px_into_source(tl);
-		distort_px_into_source(tr);
-	} else {
-		undistort_px_into_destination(bl);
-		undistort_px_into_destination(br);
-		undistort_px_into_destination(tl);
-		undistort_px_into_destination(tr);
+	// Add the four corners first
+	bbox_points.push_back(new Vector2(x - xShift, y - yShift)); 
+	bbox_points.push_back(new Vector2(r - xShift, y - yShift));
+	bbox_points.push_back(new Vector2(r - xShift, t - yShift));
+	bbox_points.push_back(new Vector2(x - xShift, t - yShift));
+	
+	// If we intersect the centerlines of the OUTPUT
+	// we need to add the points in the middle
+	// as well, otherwise we will clip off the request area near the centerlines
+	unsigned midX = out_width_ / 2;
+	unsigned midY = out_height_ / 2;
+	
+	// Check intersection of the requested box with the vertical centerline
+	if((x - xShift) < midX && (r - xShift) > midX) {
+		bbox_points.push_back(new Vector2(midX, y - yShift)); 
+		bbox_points.push_back(new Vector2(midX, t - yShift));
 	}
+
+	// Check intersection of the requested box with the horizontal centerline
+	if((y - yShift) < midY && (t - yShift) > midY) {
+		bbox_points.push_back(new Vector2(x - xShift, midY)); 
+		bbox_points.push_back(new Vector2(r - xShift, midY));
+	}
+	
+	std::vector<signed> xValues;
+	std::vector<signed> yValues;
+	for(unsigned int i = 0; i < bbox_points.size(); i++) {
+		if(k_output == UNDIST) {
+			distort_px_into_source(*bbox_points[i]);
+		} else {
+			undistort_px_into_destination(*bbox_points[i]);
+		}
+		xValues.push_back((signed)bbox_points[i]->x);
+		yValues.push_back((signed)bbox_points[i]->y);
+	}
+	
+	// Determine the min and max points on all boundaries
+	signed minX, minY, maxX, maxY;
+	
+	// Formally speaking, we have to allocate an std::iterator first. But we wont.
+	minX = *std::min_element(xValues.begin(), xValues.end());
+	maxX = *std::max_element(xValues.begin(), xValues.end());
+	minY = *std::min_element(yValues.begin(), yValues.end());
+	maxY = *std::max_element(yValues.begin(), yValues.end());
 	
 	// Request the same part of the input distorted. However if rounding errors have taken place 
 	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
 	// If we don't request it we will get stretched pixlines there, so we add a small margin on all sides
 	// to give us a little cushion
-	const unsigned int safetyPadding = 72;
-	warning("Will request upstream: %d,%d x %d,%d plus padding of %d", (int)bl.x, (int)bl.y, (int)tr.x, (int)tr.y, safetyPadding);
+	const signed safetyPadding = 4;
+	warning("Will request upstream: %d,%d x %d,%d plus padding of %d", minX, minY, maxX, maxY, safetyPadding);
 	
 	input0().request(
-		(int)bl.x - safetyPadding,  
-		(int)bl.y - safetyPadding,
-		(int)tr.x + safetyPadding,
-		(int)tr.y + safetyPadding,
+		minX - safetyPadding,  
+		minY - safetyPadding,
+		maxX + safetyPadding,
+		maxY + safetyPadding,
 		channels, count
 	);
 }
