@@ -31,6 +31,7 @@ class SyCamera : public CameraOp
 private:
 	double max_corner_u_, max_corner_v_;
 	bool distortion_enabled;
+	double _obsolete_aspect;
 	
 public:
 	static const Description description;
@@ -61,9 +62,18 @@ public:
 	
 	void _validate(bool for_real)
 	{
+		CameraOp::_validate(for_real);
+		
+		// Avoid recomputing things when not necessary
+		if(0 == distortion_enabled) return;
+		
+		// Set the distortion aspect based on haperture/vaperture correlation.
+		// For this to work haperture/vaperture must be set correctly
+		double asp = film_width() / film_height();
+		warning("Disto autoaspect (haperture/vaperture) %0.5f", asp);
+		distorter.set_aspect(asp);
 		distorter.recompute_if_needed();
 		update_distortion_limits();
-		CameraOp::_validate(for_real);
 	}
 	
 	/* This is a virtual method on every CameraOp made exactly for this purpose, it's called from within
@@ -71,7 +81,7 @@ public:
 	void lens_knobs(Knob_Callback f)
 	{
 		Tab_knob(f, "SyLens");
-		distorter.knobs_with_aspect(f);
+		distorter.knobs(f);
 		
 		// Allow bypass
 		Knob* k_bypass = Bool_knob( f, &distortion_enabled, "disto_enabled");
@@ -79,10 +89,21 @@ public:
 		k_bypass->tooltip("You can deactivate this to suppress redistortion (if you want to use SyCamera without any distortion but do not want to change the parameters)");
 		
 		Divider(f, 0);
+		Text_knob(f, "Make sure that your haperture/vaperture are set to the correct aspect!");
+		
+		Divider(f, 0);
 		
 		std::ostringstream ver;
 		ver << "SyCamera v." << VERSION;
 		Text_knob(f, ver.str().c_str());
+		
+		// TODO: to be removed in SyLens 4.
+		// For compatibility with older scripts, add an "aspect" knob
+		Knob* k_obsolete_aspect = Float_knob(f, &_obsolete_aspect, "aspect");
+		// ...do not show it
+		k_obsolete_aspect->set_flag(Knob::INVISIBLE);
+		// ...and make it disappear when copy-pasted or saved out.
+		k_obsolete_aspect->set_flag(Knob::DO_NOT_WRITE);
 	}
 
 	/*

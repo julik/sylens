@@ -220,6 +220,11 @@ Note that in order to achieve good redistortion you need to have enough vertices
 
 ![Cam Many Subdivs][16]
 
+Note that the Syntheyes algorithm **requires** the aspect ratio of your distorted plate. Therefore it is **imperative** that your 
+`haperture` and `vaperture` parameters are set correctly. The Syntheyes script that exports Nuke files takes care of this by default,
+but if you create a SyCamera from scratch you will need to take care of them yourself.
+
+
 ### Explanation of the UI controls
 
 #### k
@@ -229,10 +234,6 @@ Quartic distortion coefficient. This is calculated by Syntheyes and needs to be 
 #### kcube
 
 Cubic distortion modifier. If you used this in Syntheyes you can apply it here as well.
-
-#### aspect
-
-The Syntheyes algorithm **requires** the aspect ratio of your distorted plate. This cannot be automatically deciphered from the Camera node so you need to dial it in manually. Use your image's aspect ratio.
 
 #### ushift
 

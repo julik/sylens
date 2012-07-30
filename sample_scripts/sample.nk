@@ -2,35 +2,35 @@
 version 6.3 v4
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="205" y="22" w="1920" h="1174" screen="0">
+    <window x="92" y="56" w="1680" h="1024" screen="0">
         <splitter orientation="1">
-            <split size="1214"/>
+            <split size="1148"/>
             <splitter orientation="1">
-                <split size="40"/>
+                <split size="43"/>
                 <dock id="" hideTitles="1" activePageId="Toolbar.1">
                     <page id="Toolbar.1"/>
                 </dock>
-                <split size="1170"/>
+                <split size="1101"/>
                 <splitter orientation="2">
-                    <split size="640"/>
+                    <split size="556"/>
                     <dock id="" activePageId="Viewer.1">
                         <page id="Viewer.1"/>
                     </dock>
-                    <split size="508"/>
+                    <split size="442"/>
                     <dock id="" activePageId="DAG.1">
                         <page id="DAG.1"/>
                         <page id="Curve Editor.1"/>
                     </dock>
                 </splitter>
             </splitter>
-            <split size="702"/>
+            <split size="528"/>
             <splitter orientation="2">
-                <split size="999"/>
+                <split size="868"/>
                 <dock id="" activePageId="Properties.1">
                     <page id="Properties.1"/>
                     <page id="Script Editor.1"/>
                 </dock>
-                <split size="149"/>
+                <split size="130"/>
                 <dock id="" activePageId="Progress.1">
                     <page id="Progress.1"/>
                 </dock>
@@ -42,12 +42,15 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
  inputs 0
  name /Users/julik/Code/sylens/sample_scripts/sample.nk
- frame 21
+ frame 7
  last_frame 50
  lock_range true
  format "2048 1234 0 0 2048 1234 1 "
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ addUserKnob {20 User}
+ addUserKnob {1 cachedversion +INVISIBLE}
+ cachedversion _UNVERSIONED
 }
 BackdropNode {
  inputs 0
@@ -159,13 +162,6 @@ BackdropNode {
  bdwidth 310
  bdheight 323
 }
-StickyNote {
- inputs 0
- name StickyNote1
- label "Distortion -0.01826"
- xpos -279
- ypos -595
-}
 Read {
  inputs 0
  file "\[file dirname \[value root.name]]/Source.jpg"
@@ -180,31 +176,31 @@ Dot {
  xpos 191
  ypos -1172
 }
-set N12845420 [stack 0]
+set N71bea50 [stack 0]
 Dot {
  name Dot4
  xpos 531
  ypos -1172
 }
-set N12847f60 [stack 0]
+set N71c1590 [stack 0]
 Dot {
  name Dot5
  xpos 663
  ypos -1172
 }
-set N51d8fa0 [stack 0]
+set N71c4270 [stack 0]
 Dot {
  name Dot10
  xpos 1936
  ypos -1172
 }
-set N1288a5c0 [stack 0]
+set N71c6f50 [stack 0]
 Dot {
  name Dot6
  xpos 1936
  ypos -812
 }
-set N12893940 [stack 0]
+set N71c9c30 [stack 0]
 Dot {
  name Dot7
  xpos 1390
@@ -256,19 +252,19 @@ StickyNote {
  xpos 2438
  ypos -439
 }
-push $N1288a5c0
+push $N71c6f50
 Dot {
  name Dot11
  xpos 2843
  ypos -1172
 }
-set N128db8a0 [stack 0]
+set N71e7d90 [stack 0]
 Dot {
  name Dot13
  xpos 3823
  ypos -1176
 }
-set N128de570 [stack 0]
+set N71eaa30 [stack 0]
 Card2 {
  lens_in_distortion -0.01826
  control_points {3 3 3 6 
@@ -286,94 +282,13 @@ Card2 {
  xpos 3672
  ypos -953
 }
-SyCamera {
- inputs 0
- translate {0 0 1.184999943}
- k -0.01826
- aspect 1.65964344
- name SyCamera1
- xpos 348
- ypos -522
-}
-Cylinder {
- inputs 0
- radius 0.05
- height 0.7
- translate {-0.125 0 0.2039999962}
- name Cylinder1
- xpos 362
- ypos -567
-}
-Camera2 {
- inputs 0
- translate {0 0 1.184999943}
- vaperture 14.872
- name Camera1
- xpos 354
- ypos -665
-}
-push $N12847f60
-Card2 {
- rows 32
- columns 32
- rotate {0 26.69209412 0}
- control_points {3 3 3 6 
-
-1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
-1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
-1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
-1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
-1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
-1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
-1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
-1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
-1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
- name Card1
- xpos 497
- ypos -668
-}
-UVProject {
- inputs 2
- name UVProject1
- xpos 497
- ypos -644
-}
-SyUV {
- k -0.01826
- aspect 1.659643436
- name SyUV1
- xpos 497
- ypos -620
-}
-Scene {
- inputs 2
- name Scene1
- xpos 507
- ypos -588
-}
-push 0
-ScanlineRender {
- inputs 3
- output_motion_vectors_type accurate
- name ScanlineRender1
- xpos 497
- ypos -501
-}
-push $N51d8fa0
-Difference {
- inputs 2
- output rgba.red
- name Difference1
- xpos 629
- ypos -506
-}
-push $N128db8a0
+push $N71e7d90
 Dot {
  name Dot8
  xpos 2849
  ypos -802
 }
-set N1306dce0 [stack 0]
+set N149135e0 [stack 0]
 Dot {
  name Dot9
  xpos 3341
@@ -392,7 +307,7 @@ Camera2 {
  xpos 2961
  ypos -614
 }
-push $N1306dce0
+push $N149135e0
 SyShader {
  shader_type "fragment shader"
  k {{parent.SyLens1.k i}}
@@ -449,208 +364,6 @@ StickyNote {
  xpos 5049
  ypos -544
 }
-push $N12845420
-Dot {
- name Dot2
- xpos 191
- ypos -657
-}
-Dot {
- name Dot1
- xpos -11
- ypos -657
-}
-set N10ab38e0 [stack 0]
-SyLens {
- k {{curve x50 -0.01826 x114 -0.01826}}
- filter Parzen
- name SyLens_UN
- tile_color 0xc10000ff
- selected true
- xpos -172
- ypos -665
-}
-set N10ab65c0 [stack 0]
-Transform {
- scale {1 1.56}
- center {1024 617}
- name Transform1
- xpos -172
- ypos -599
-}
-SyLens {
- output "apply disto"
- k {{curve i x1 -0.01826 x114 -0.01826}}
- filter Mitchell
- trim true
- name SyLens_Re2
- tile_color 0xc10000ff
- label "\t"
- xpos -172
- ypos -542
-}
-push $N12845420
-Dot {
- name Dot16
- xpos -454
- ypos -1172
-}
-BlackOutside {
- name BlackOutside2
- xpos -488
- ypos -917
-}
-Dot {
- name Dot14
- xpos -454
- ypos -663
-}
-Dot {
- name Dot15
- xpos -656
- ypos -663
-}
-SyLens {
- k {{curve i x12 -0.01826 x50 -0.01826 x114 -0.01826}}
- filter Parzen
- grow true
- name SyLens_UN1
- tile_color 0xc10000ff
- xpos -690
- ypos -583
-}
-SyCamera {
- inputs 0
- translate {-9.442873001 0 14.11524296}
- rotate {0 -33.60035406 0}
- focal 149
- k {{curve x17 -0.01826}}
- aspect 1.316195373
- name SyCamera3
- xpos 5103
- ypos -650
-}
-push $N128de570
-BlackOutside {
- name BlackOutside1
- xpos 4509
- ypos -1179
-}
-Dot {
- name Dot12
- xpos 4647
- ypos -1172
-}
-set N10ae97e0 [stack 0]
-Dot {
- name Dot17
- xpos 5269
- ypos -1172
-}
-Card2 {
- rows 16
- columns 16
- control_points {3 3 3 6 
-
-1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
-1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
-1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
-1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
-1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
-1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
-1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
-1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
-1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
- name Card6
- xpos 5235
- ypos -749
-}
-SyGeo {
- k -0.03
- ushift 0.3
- aspect 1.31619537
- name SyGeo2
- xpos 5235
- ypos -725
-}
-push 0
-ScanlineRender {
- inputs 3
- output_motion_vectors_type accurate
- name ScanlineRender6
- xpos 5235
- ypos -629
-}
-SyLens {
- inputs 0
- output "apply disto"
- k {{curve x1 -0.01826 x114 -0.01826}}
- filter Mitchell
- trim true
- name SyLens_Re1
- tile_color 0xc10000ff
- xpos 50
- ypos -547
-}
-push $N10ab38e0
-Difference {
- inputs 2
- output rgba.red
- name Difference2
- xpos -45
- ypos -483
-}
-SyCamera {
- inputs 0
- k {{SyLens2.k i}}
- kcube {{SyLens2.kcube i x12 0}}
- ushift {{SyLens2.ushift i}}
- vshift {{SyLens2.vshift i}}
- aspect 1.316195373
- name SyCamera2
- xpos 2049
- ypos -617
-}
-push $N12893940
-SyShader {
- k {{parent.SyLens2.k i}}
- kcube {{parent.SyLens2.kcube i}}
- ushift {{parent.SyLens2.ushift i}}
- vshift {{parent.SyLens2.vshift i}}
- name SyShader2
- xpos 1902
- ypos -696
-}
-Card2 {
- z 10
- lens_in_focal {{parent.SyCamera2.focal i}}
- lens_in_haperture {{parent.SyCamera2.haperture i}}
- translate {{parent.SyCamera2.translate i} {parent.SyCamera2.translate i} {parent.SyCamera2.translate i}}
- rotate {{parent.SyCamera2.rotate i} {parent.SyCamera2.rotate i} {parent.SyCamera2.rotate i}}
- control_points {3 3 3 6 
-
-1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
-1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
-1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
-1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
-1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
-1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
-1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
-1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
-1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
- name Card2
- xpos 1902
- ypos -603
-}
-push 0
-ScanlineRender {
- inputs 3
- overscan 50
- output_motion_vectors_type accurate
- name ScanlineRender2
- xpos 1902
- ypos -504
-}
 Camera2 {
  inputs 0
  translate {0 0 2.558000088}
@@ -667,7 +380,7 @@ Camera2 {
  xpos 3980
  ypos -930
 }
-push $N128de570
+push $N71eaa30
 SyShader {
  shader_type "fragment shader"
  k -0.01826
@@ -713,10 +426,21 @@ Camera2 {
  translate {-3.062570572 -5.284231186 5.314462662}
  rotate {41.27163663 -25.41727858 -16.61894991}
  name Camera5
- xpos 4492
+ xpos 4490
  ypos -657
 }
-push $N10ae97e0
+push $N71eaa30
+BlackOutside {
+ name BlackOutside1
+ xpos 4509
+ ypos -1179
+}
+Dot {
+ name Dot12
+ xpos 4647
+ ypos -1172
+}
+set N14a4b820 [stack 0]
 Cube {
  cube {-0.5099999905 -0.5 -0.5 0.5 0.3950000107 0.4839999974}
  translate {-1.876000047 0 0}
@@ -730,8 +454,8 @@ SyUV {
  xpos 4674
  ypos -859
 }
-set C142d8900 [stack 0]
-push $N10ae97e0
+set C14a56940 [stack 0]
+push $N14a4b820
 Sphere {
  rows 32
  columns 32
@@ -740,12 +464,12 @@ Sphere {
  xpos 4474
  ypos -905
 }
-clone $C142d8900 {
+clone $C14a56940 {
  xpos 4474
  ypos -861
  selected false
 }
-push $N10ae97e0
+push $N14a4b820
 Card2 {
  rows 32
  columns 32
@@ -765,7 +489,7 @@ Card2 {
  xpos 4867
  ypos -912
 }
-clone $C142d8900 {
+clone $C14a56940 {
  xpos 4867
  ypos -866
  selected false
@@ -784,9 +508,371 @@ ScanlineRender {
  xpos 4691
  ypos -636
 }
-push $N10ab65c0
+push $N71bea50
+Dot {
+ name Dot16
+ xpos -454
+ ypos -1172
+}
+BlackOutside {
+ name BlackOutside2
+ xpos -488
+ ypos -917
+}
+Dot {
+ name Dot14
+ xpos -454
+ ypos -663
+}
+Dot {
+ name Dot15
+ xpos -656
+ ypos -663
+}
+SyLens {
+ k {{curve i x12 -0.01826 x50 -0.01826 x114 -0.01826}}
+ filter Parzen
+ grow true
+ name SyLens_UN1
+ tile_color 0xc10000ff
+ xpos -690
+ ypos -580
+}
+Crop {
+ box {0 284 1256 1234}
+ name Crop1
+ xpos -796
+ ypos -528
+}
+StickyNote {
+ inputs 0
+ name StickyNote8
+ label "We use a straight line to lift the horizon"
+ xpos -221
+ ypos -691
+}
+StickyNote {
+ inputs 0
+ name StickyNote1
+ label "Distortion -0.01826"
+ xpos 86
+ ypos -680
+}
+push $N71bea50
+Dot {
+ name Dot2
+ xpos 191
+ ypos -657
+}
+Dot {
+ name Dot1
+ xpos -11
+ ypos -657
+}
+set N14ac9080 [stack 0]
+push $N14ac9080
+SyLens {
+ k {{curve i x50 -0.01826 x114 -0.01826}}
+ filter Parzen
+ name SyLens_UN
+ tile_color 0xc10000ff
+ xpos -172
+ ypos -665
+}
+Roto {
+ output mask
+ cliptype "union bbox+format"
+ curves {AnimTree: "" {
+ Version: 1.2
+ Flag: 0
+ RootNode: 1
+ Node: {
+  NodeName: "Root" {
+   Flag: 512
+   NodeType: 1
+   Transform: 0 0 S 0 0 S 0 0 S 0 0 S 0 1 S 0 1 S 0 0 S 0 1024 S 0 617 
+   NumOfAttributes: 11
+   "vis" S 0 1 "opc" S 0 1 "mbo" S 0 1 "mb" S 0 1 "mbs" S 0 0.5 "fo" S 0 1 "fx" S 0 0 "fy" S 0 0 "ff" S 0 1 "ft" S 0 0 "pt" S 0 0 
+  }
+  NumOfChildren: 1
+  Node: {
+   NodeName: "Bezier1" {
+    Flag: 576
+    NodeType: 3
+    CurveGroup: "" {
+     Transform: 0 0 S 1 6 0 S 1 6 0 S 1 6 0 S 1 6 1 S 1 6 1 S 1 6 0 S 1 6 1027 S 1 6 135 
+     Flag: 0
+     NumOfCubicCurves: 2
+     CubicCurve: "" {
+      Type: 0 Flag: 8192 Dim: 2
+      NumOfPoints: 12
+      0 S 1 6 0 S 1 6 0 0 0 S 1 6 -108 S 1 6 360 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 2181 S 1 6 355 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 2176 S 1 6 -74 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 -146 S 1 6 -80 0 0 S 1 6 0 S 1 6 0 0 
+     }
+     CubicCurve: "" {
+      Type: 0 Flag: 8192 Dim: 2
+      NumOfPoints: 12
+      0 S 1 6 0 S 1 6 0 0 0 S 1 6 -3 S 1 6 13 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 10 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 0 S 1 6 0 S 1 6 0 0 
+     }
+     NumOfAttributes: 44
+     "vis" S 0 1 "r" S 0 1 "g" S 0 1 "b" S 0 1 "a" S 0 1 "ro" S 0 0 "go" S 0 0 "bo" S 0 0 "ao" S 0 0 "opc" S 0 1 "bm" S 0 0 "inv" S 0 0 "mbo" S 0 0 "mb" S 0 1 "mbs" S 0 0.5 "mbsot" S 0 0 "mbso" S 0 0 "fo" S 0 1 "fx" S 0 0 "fy" S 0 0 "ff" S 0 1 "ft" S 0 0 "src" S 0 0 "stx" S 0 0 "sty" S 0 0 "str" S 0 0 "sr" S 0 0 "ssx" S 0 1 "ssy" S 0 1 "ss" S 0 0 "spx" S 0 1024 "spy" S 0 617 "stot" S 0 0 "sto" S 0 0 "sv" S 0 0 "sf" S 0 1 "sb" S 0 1 "nv" S 0 1 "view1" S 0 1 "ltn" S 0 6 "ltm" S 0 6 "ltt" S 0 0 "tt" S 0 4 "pt" S 0 0 
+    }
+   }
+   NumOfChildren: 0
+  }
+ }
+}
+}
+ toolbox {selectAll {
+  { selectAll ssx 1 ssy 1 sf 1 }
+  { createBezier ssx 1 ssy 1 sf 1 sb 1 tt 4 }
+  { createBSpline ssx 1 ssy 1 sf 1 sb 1 }
+  { createEllipse ssx 1 ssy 1 sf 1 sb 1 }
+  { createRectangle ssx 1 ssy 1 sf 1 sb 1 }
+  { brush ssx 1 ssy 1 sf 1 sb 1 }
+  { eraser src 2 ssx 1 ssy 1 sf 1 sb 1 }
+  { clone src 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { reveal src 3 ssx 1 ssy 1 sf 1 sb 1 }
+  { dodge src 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { burn src 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { blur src 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { sharpen src 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { smear src 1 ssx 1 ssy 1 sf 1 sb 1 }
+} }
+ toolbar_brush_hardness 0.200000003
+ toolbar_lifetime_type all
+ toolbar_source_transform_scale {1 1}
+ toolbar_source_transform_center {320 240}
+ colorOverlay 0
+ lifetime_type "all frames"
+ lifetime_start 6
+ lifetime_end 6
+ motionblur_shutter_offset_type centred
+ source_black_outside true
+ createNewTrack {{-1} "-1\t(none)\t-1" "1000\tNew Track Layer\t1000"}
+ name Roto1
+ xpos -170
+ ypos -631
+}
+TransformMasked {
+ channels rgb
+ translate {0 18}
+ center {1024 617}
+ maskChannelInput mask.a
+ name Transform2
+ xpos -170
+ ypos -589
+}
+SyLens {
+ output "apply disto"
+ k {{curve i x1 -0.01826 x114 -0.01826}}
+ filter Mitchell
+ name SyLens_Re2
+ tile_color 0xc10000ff
+ label "\t"
+ xpos -170
+ ypos -488
+}
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference2
+ xpos -45
+ ypos -488
+}
+SyCamera {
+ inputs 0
+ translate {-9.442873001 0 14.11524296}
+ rotate {0 -33.60035406 0}
+ focal 149
+ k {{curve i x17 -0.01826}}
+ name SyCamera3
+ xpos 5103
+ ypos -650
+}
+push $N14a4b820
+Dot {
+ name Dot17
+ xpos 5269
+ ypos -1172
+}
+Card2 {
+ rows 16
+ columns 16
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card6
+ xpos 5235
+ ypos -749
+}
+SyGeo {
+ k -0.054
+ ushift -0.17
+ aspect 1.31619537
+ name SyGeo2
+ xpos 5235
+ ypos -725
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender6
+ xpos 5235
+ ypos -629
+}
+SyCamera {
+ inputs 0
+ k {{SyLens2.k i}}
+ kcube {{SyLens2.kcube i x12 0}}
+ ushift {{SyLens2.ushift i}}
+ vshift {{SyLens2.vshift i}}
+ name SyCamera2
+ xpos 2049
+ ypos -617
+}
+push $N71c9c30
+SyShader {
+ k {{parent.SyLens2.k i}}
+ kcube {{parent.SyLens2.kcube i}}
+ ushift {{parent.SyLens2.ushift i}}
+ vshift {{parent.SyLens2.vshift i}}
+ name SyShader2
+ xpos 1902
+ ypos -696
+}
+Card2 {
+ z 10
+ lens_in_focal {{parent.SyCamera2.focal i}}
+ lens_in_haperture {{parent.SyCamera2.haperture i}}
+ translate {{parent.SyCamera2.translate i} {parent.SyCamera2.translate i} {parent.SyCamera2.translate i}}
+ rotate {{parent.SyCamera2.rotate i} {parent.SyCamera2.rotate i} {parent.SyCamera2.rotate i}}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card2
+ xpos 1902
+ ypos -603
+}
+push 0
+ScanlineRender {
+ inputs 3
+ overscan 50
+ output_motion_vectors_type accurate
+ name ScanlineRender2
+ xpos 1902
+ ypos -502
+}
+Camera2 {
+ inputs 0
+ name Camera6
+ xpos 343
+ ypos -830
+}
+SyCamera {
+ inputs 0
+ translate {0 0 1.184999943}
+ haperture 33
+ vaperture 19.885
+ k -0.01826
+ name SyCamera1
+ selected true
+ xpos 346
+ ypos -522
+}
+Cylinder {
+ inputs 0
+ radius 0.05
+ height 0.7
+ translate {-0.125 0 0.2039999962}
+ name Cylinder1
+ xpos 362
+ ypos -567
+}
+SyCamera {
+ inputs 0
+ translate {0 0 1.184999943}
+ haperture 33
+ vaperture 19.884
+ k -0.01826
+ name SyCamera4
+ xpos 353
+ ypos -665
+}
+push $N71c1590
+Card2 {
+ rows 32
+ columns 32
+ rotate {0 26.69209412 0}
+ control_points {3 3 3 6 
+
+1 {-0.5 -0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0 0 0} 
+1 {0 -0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {0.5 0 0} 
+1 {0.5 -0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666865 0} 0 {0 0 0} 0 {1 0 0} 
+1 {-0.5 0 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0 0.5 0} 
+1 {0 0 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {0.5 0.5 0} 
+1 {0.5 0 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0.1666666716 0} 0 {0 -0.1666666716 0} 0 {1 0.5 0} 
+1 {-0.5 0.5 0} 0 {0.1666666865 0 0} 0 {0 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0 1 0} 
+1 {0 0.5 0} 0 {0.1666666716 0 0} 0 {-0.1666666716 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {0.5 1 0} 
+1 {0.5 0.5 0} 0 {0 0 0} 0 {-0.1666666865 0 0} 0 {0 0 0} 0 {0 -0.1666666865 0} 0 {1 1 0} }
+ name Card1
+ xpos 497
+ ypos -668
+}
+UVProject {
+ inputs 2
+ name UVProject1
+ xpos 497
+ ypos -644
+}
+SyUV {
+ k -0.01826
+ aspect 1.659643436
+ name SyUV1
+ xpos 497
+ ypos -620
+}
+Scene {
+ inputs 2
+ name Scene1
+ xpos 507
+ ypos -588
+}
+push 0
+ScanlineRender {
+ inputs 3
+ output_motion_vectors_type accurate
+ name ScanlineRender1
+ xpos 497
+ ypos -501
+}
+set N14d22190 [stack 0]
+push $N71c4270
+Difference {
+ inputs 2
+ output rgba.red
+ name Difference1
+ xpos 629
+ ypos -506
+}
+push $N14d22190
 Viewer {
- frame 21
  input_process false
  name Viewer3
  xpos 4349
