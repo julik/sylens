@@ -412,7 +412,7 @@ void SyLens::_validate(bool for_real)
 	
 	// If trim is enabled we intersect our obox with the format so that there is no bounding box
 	// outside the crop area. Thiis handy for redistorted material.
-	if(k_trim_bbox_to_format_) obox.intersect(input0().format());
+	if(k_trim_bbox_to_format_) obox.intersect(output_format);
 	
 	warning("Output bbox is %dx%d to %dx%d", obox.x(), obox.y(), obox.r(), obox.t());
 	
