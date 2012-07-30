@@ -222,7 +222,6 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 void SyLens::knobs( Knob_Callback f) {
 	// For info on knob flags see Knob.h
 	const int KNOB_ON_SEPARATE_LINE = 0x1000;
-	const int KNOB_HIDDEN = 0x0000000000040000;
 	
 	Knob* _output_selector = Enumeration_knob(f, &k_output, output_mode_names, "output");
 	_output_selector->label("output");
@@ -231,7 +230,7 @@ void SyLens::knobs( Knob_Callback f) {
 	// Old mode configuration knob that we just hide
 	const char* old_mode_value = "nada";
 	Knob* hidden_mode = String_knob(f, &old_mode_value, "mode");
-	hidden_mode->set_flag(KNOB_HIDDEN);
+	hidden_mode->set_flag(Knob::INVISIBLE);
 	
 	distorter.knobs(f);
 	filter.knobs(f);
@@ -240,14 +239,14 @@ void SyLens::knobs( Knob_Callback f) {
 	Knob* kTrimKnob = Bool_knob( f, &k_trim_bbox_to_format_, "trim");
 	kTrimKnob->label("trim bbox");
 	kTrimKnob->tooltip("When checked, SyLens will crop the output to the format dimensions and reduce the bbox to match format exactly");
-	kTrimKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+	kTrimKnob->set_flag(Knob::STARTLINE);
 	
 	// Grow plate
 	Knob* kGrowKnob = Bool_knob( f, &k_grow_format_, "grow");
 	kGrowKnob->label("grow format");
 	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox."
 		"\nThis is useful if you are going to do a matte painting of the output.");
-	kGrowKnob->set_flag(KNOB_ON_SEPARATE_LINE);
+	kGrowKnob->set_flag(Knob::STARTLINE);
 	
 	Divider(f, 0);
 	

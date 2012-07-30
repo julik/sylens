@@ -291,10 +291,6 @@ double SyDistorter::lerp(const double x, const double left_x, const double right
 // The caller should then set the aspect by itself using set_aspect()
 void SyDistorter::knobs( Knob_Callback f)
 {
-	// For info on knob flags see Knob.h
-	const int KNOB_ON_SEPARATE_LINE = 0x1000;
-	const int KNOB_HIDDEN = 0x0000000000040000;
-	
 	Knob* _kKnob = Float_knob( f, &k_, "k" );
 	_kKnob->label("k");
 	_kKnob->tooltip("Set to the same distortion as applied by Syntheyes");
