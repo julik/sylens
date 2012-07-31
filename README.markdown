@@ -212,7 +212,11 @@ The only difference with the standard Nuke camera is the addition of the SyLens 
 
 ![Cam Controls][14]
 
-Note that in order to achieve good redistortion you need to have enough vertices in your geometry. For example, a Cylinder having only one span vertically only distorts at the caps with straight lines being traced between vertices:
+Note that in order to achieve good redistortion **you need to have enough vertices in your geometry.** 
+That is, Nuke's lens distortion function is not a **fragment shader**, but a **vertex shader** - it transforms the actual vertices
+in the geometry as opposed to requested pixels.
+
+For example, a Cylinder having only one span vertically only distorts at the caps with straight lines being traced between vertices:
 
 ![Cam Few Subdivs][15]
 
