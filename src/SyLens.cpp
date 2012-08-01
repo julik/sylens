@@ -211,8 +211,8 @@ Box SyLens::compute_needed_bbox_with_distortion(Box& inf, unsigned ow, unsigned 
 		} else {
 			distort_px_into_source(*pointsOnBbox[i]);
 		}
-		xValues.push_back(pointsOnBbox[i]->x);
-		yValues.push_back(pointsOnBbox[i]->y);
+		xValues.push_back((int)pointsOnBbox[i]->x);
+		yValues.push_back((int)pointsOnBbox[i]->y);
 	}
 	
 	// Find the maximum coverage area for the given points
@@ -321,7 +321,7 @@ void SyLens::knobs( Knob_Callback f) {
 
 // http://stackoverflow.com/questions/485525/round-for-float-in-c
 int SyLens::round(double x) {
-	return floor(x + 0.5);
+	return (int)floor(x + 0.5);
 }
 
 // The algo works in image aspec, not the pixel aspect. We also have to take the uncrop factor
