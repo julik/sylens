@@ -162,6 +162,13 @@ void SyLens::centered_uv_to_absolute_px(Vector2& xy, int w, int h)
 	xy.y = fromUv(xy.y, h);
 }
 
+/* 
+This takes the given Box and the width and height of the Format the box will be
+fit in. Then it applies or removes the disto from all the corner points of the bbox
+AND, most importantly, from the intersections of the Box with the centerlines of the
+Format. These will be only computed only if the Box actually intersects with the format
+centerlines. The flag argument accepts the same UNDIST/REDIST flags.
+*/
 Box SyLens::compute_needed_bbox_with_distortion(Box& inf, unsigned ow, unsigned oh, int flag)
 {
 	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
@@ -174,34 +181,31 @@ Box SyLens::compute_needed_bbox_with_distortion(Box& inf, unsigned ow, unsigned 
 	std::vector<Vector2*> pointsOnBbox;
 	
 	// Add the standard two points - LR and TR
-	pointsOnBbox.push_back(new Vector2(inf.x(), inf.y()));
-	pointsOnBbox.push_back(new Vector2(inf.r(), inf.t()));
+	pointsOnBbox.push_back(new Vector2((float)inf.x(), (float)inf.y()));
+	pointsOnBbox.push_back(new Vector2((float)inf.r(), (float)inf.t()));
 	
 	// Add the TL and LR as well
-	pointsOnBbox.push_back(new Vector2(inf.x(), inf.t()));
-	pointsOnBbox.push_back(new Vector2(inf.r(), inf.y()));
+	pointsOnBbox.push_back(new Vector2((float)inf.x(), (float)inf.t()));
+	pointsOnBbox.push_back(new Vector2((float)inf.r(), (float)inf.y()));
 	
 	// If our box intersects the midplane on X add the points where the bbox crosses centerline
 	if((inf.x() < xMid) && (inf.r() > xMid)) {
 		// Find the two intersections and add them
-		pointsOnBbox.push_back( new Vector2(xMid, inf.y()) );
-		pointsOnBbox.push_back( new Vector2(xMid, inf.t()) );
+		pointsOnBbox.push_back( new Vector2(xMid, (float)inf.y()) );
+		pointsOnBbox.push_back( new Vector2(xMid, (float)inf.t()) );
 	}
 	
 	// If our box intersects the midplane on Y add the points where the bbox crosses centerline
 	if((inf.y() < yMid) && (inf.t() > yMid)) {
-		pointsOnBbox.push_back( new Vector2(inf.x(), yMid) );
-		pointsOnBbox.push_back( new Vector2(inf.r(), yMid) );
+		pointsOnBbox.push_back( new Vector2((float)inf.x(), yMid) );
+		pointsOnBbox.push_back( new Vector2((float)inf.r(), yMid) );
 	}
 	
 	std::vector<int> xValues;
 	std::vector<int> yValues;
 	
-	// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
-	// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
-	// since this is where our bbox corners are going to be in the coordinate plane of the output
-	// format.
-	for(unsigned int i = 0; i < pointsOnBbox.size(); i++) {
+	// Apply the operation to each bounding point
+	for(unsigned i = 0; i < pointsOnBbox.size(); i++) {
 		if(flag == UNDIST) {
 			undistort_px_into_destination(*pointsOnBbox[i]);
 		} else {
@@ -211,9 +215,8 @@ Box SyLens::compute_needed_bbox_with_distortion(Box& inf, unsigned ow, unsigned 
 		yValues.push_back(pointsOnBbox[i]->y);
 	}
 	
+	// Find the maximum coverage area for the given points
 	int minX, minY, maxX, maxY;
-	
-	// Formally speaking, we have to allocate an std::iterator first. But we wont.
 	minX = *std::min_element(xValues.begin(), xValues.end());
 	maxX = *std::max_element(xValues.begin(), xValues.end());
 	minY = *std::min_element(yValues.begin(), yValues.end());
@@ -347,7 +350,7 @@ void SyLens::_validate(bool for_real)
 	set_out_channels(Mask_All);
 	
 	// Do not blank away everything
-	info_.black_outside(false);
+	info_.black_outside(true);
 	
 	// We need to know our aspects so prep them here
 	_computeAspects();
@@ -363,23 +366,15 @@ void SyLens::_validate(bool for_real)
 	warning("_validate plate size  %dx%d", plate_width_, plate_height_);
 	
 	// Time to define how big our output will be in terms of format. Format will always be the whole plate.
-	// If we only use a bboxed piece of the image we will limit our request to that. But first of all we need to
-	// compute the format of our output.
-	int ow, oh;
-	
-	ow = plate_width_;
-	oh = plate_height_;
-	
-	// Nudge outputs to power of 2, upwards
-	if(ow % 2 != 0) ow +=1;
-	if(oh % 2 != 0) oh +=1;
-	
+	// If we only use a bboxed piece of the image we will limit our request to that.
 	// For the case when we are working with a 8k by 4k plate with a SMALL CG pink elephant rrright in the left
 	// corner we want to actually translate the bbox of the elephant to our distorted pipe downstream. So we need to
 	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 	// Grab the bbox from the input first
 	Info inf = input0().info();
-	Box obox = compute_needed_bbox_with_distortion(inf, ow, oh, k_output);
+	warning("Input bbox is %dx%d to %dx%d", inf.x(), inf.y(), inf.r(), inf.t());
+	
+	Box obox = compute_needed_bbox_with_distortion(inf, plate_width_, plate_height_, k_output);
 
 	// Start with the input format
 	output_format = input0().format();
@@ -429,7 +424,6 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 {
 	ChannelSet c1(channels); in_channels(0,c1);
 	
-	
 	warning("Received request from downstream [%d,%d]x [%d,%d]", x, y, r, t);
 
 	const signed safetyPadding = 4;
@@ -437,11 +431,8 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	requested.move(-xShift, -yShift);
 	requested.pad(safetyPadding);
 	
-	// Request the same part of the input distorted. However if rounding errors have taken place 
-	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
-	// If we don't request it we will get stretched pixlines there, so we add a small margin on all sides
-	// to give us a little cushion
-	Box disto_requested = compute_needed_bbox_with_distortion(requested, out_width_, out_height_, REDIST);
+	// Request the same part of the input, but without distortions
+	Box disto_requested = compute_needed_bbox_with_distortion(requested, out_width_, out_height_, UNDIST);
 
 	warning("Will request upstream (accounting for (re)distortion): [%d,%d] by [%d,%d]", 
 		disto_requested.x(),
