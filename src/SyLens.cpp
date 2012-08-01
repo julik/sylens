@@ -119,7 +119,7 @@ private:
 	void centered_uv_to_absolute_px(Vector2&, int, int);
 	void distort_px_into_source(Vector2& vec);
 	void undistort_px_into_destination(Vector2& vec);
-	Box compute_bbox(Box& source, unsigned w, unsigned h, int flag);
+	Box compute_needed_bbox_with_distortion(Box& source, unsigned w, unsigned h, int flag);
 };
 
 // Since we do not need channel selectors or masks, we can use our raw Iop
@@ -162,7 +162,7 @@ void SyLens::centered_uv_to_absolute_px(Vector2& xy, int w, int h)
 	xy.y = fromUv(xy.y, h);
 }
 
-Box SyLens::compute_bbox(Box& inf, unsigned ow, unsigned oh, int flag)
+Box SyLens::compute_needed_bbox_with_distortion(Box& inf, unsigned ow, unsigned oh, int flag)
 {
 	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
 	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
@@ -379,7 +379,7 @@ void SyLens::_validate(bool for_real)
 	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 	// Grab the bbox from the input first
 	Info inf = input0().info();
-	Box obox = compute_bbox(inf, ow, oh, k_output);
+	Box obox = compute_needed_bbox_with_distortion(inf, ow, oh, k_output);
 
 	// Start with the input format
 	output_format = input0().format();
@@ -429,29 +429,31 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 {
 	ChannelSet c1(channels); in_channels(0,c1);
 	
-	const signed safetyPadding = 4;
 	
 	warning("Received request from downstream [%d,%d]x [%d,%d]", x, y, r, t);
-	
-	Box requested(x - xShift, y - yShift, r-xShift, t-yShift);
+
+	const signed safetyPadding = 4;
+	Box requested(x, y, r, t);
+	requested.move(-xShift, -yShift);
+	requested.pad(safetyPadding);
 	
 	// Request the same part of the input distorted. However if rounding errors have taken place 
 	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
 	// If we don't request it we will get stretched pixlines there, so we add a small margin on all sides
 	// to give us a little cushion
-	Box disto_requested = compute_bbox(requested, out_width_, out_height_, k_output);
+	Box disto_requested = compute_needed_bbox_with_distortion(requested, out_width_, out_height_, REDIST);
 
 	warning("Will request upstream (accounting for (re)distortion): [%d,%d] by [%d,%d]", 
-		disto_requested.x() - safetyPadding,
-		disto_requested.y() - safetyPadding,
-		disto_requested.r() + safetyPadding,
-		disto_requested.t() + safetyPadding
+		disto_requested.x(),
+		disto_requested.y(),
+		disto_requested.r(),
+		disto_requested.t()
 	);
 	
 	input0().request(
-		disto_requested.x() - safetyPadding,
-		disto_requested.y() - safetyPadding,
-		disto_requested.r() + safetyPadding,
-		disto_requested.t() + safetyPadding,		
+		disto_requested.x(),
+		disto_requested.y(),
+		disto_requested.r(),
+		disto_requested.t(),		
 		channels, count);
 }
