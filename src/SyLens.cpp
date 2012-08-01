@@ -119,6 +119,7 @@ private:
 	void centered_uv_to_absolute_px(Vector2&, int, int);
 	void distort_px_into_source(Vector2& vec);
 	void undistort_px_into_destination(Vector2& vec);
+	Box compute_bbox(Box& source, unsigned w, unsigned h, int flag);
 };
 
 // Since we do not need channel selectors or masks, we can use our raw Iop
@@ -159,6 +160,66 @@ void SyLens::centered_uv_to_absolute_px(Vector2& xy, int w, int h)
 	// Nuke coords are 0,0 on lower left
 	xy.x = fromUv(xy.x, w);
 	xy.y = fromUv(xy.y, h);
+}
+
+Box SyLens::compute_bbox(Box& inf, unsigned ow, unsigned oh, int flag)
+{
+	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
+	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
+	// we just take the corners we might be chopping some image away. So to get a reliable bbox we need to check
+	// our padding at 6 points - the 4 extremes and where the bbox crosses the middle of the coordinates
+	int xMid = ow/2;
+	int yMid = oh/2;
+
+	std::vector<Vector2*> pointsOnBbox;
+	
+	// Add the standard two points - LR and TR
+	pointsOnBbox.push_back(new Vector2(inf.x(), inf.y()));
+	pointsOnBbox.push_back(new Vector2(inf.r(), inf.t()));
+	
+	// Add the TL and LR as well
+	pointsOnBbox.push_back(new Vector2(inf.x(), inf.t()));
+	pointsOnBbox.push_back(new Vector2(inf.r(), inf.y()));
+	
+	// If our box intersects the midplane on X add the points where the bbox crosses centerline
+	if((inf.x() < xMid) && (inf.r() > xMid)) {
+		// Find the two intersections and add them
+		pointsOnBbox.push_back( new Vector2(xMid, inf.y()) );
+		pointsOnBbox.push_back( new Vector2(xMid, inf.t()) );
+	}
+	
+	// If our box intersects the midplane on Y add the points where the bbox crosses centerline
+	if((inf.y() < yMid) && (inf.t() > yMid)) {
+		pointsOnBbox.push_back( new Vector2(inf.x(), yMid) );
+		pointsOnBbox.push_back( new Vector2(inf.r(), yMid) );
+	}
+	
+	std::vector<int> xValues;
+	std::vector<int> yValues;
+	
+	// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
+	// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
+	// since this is where our bbox corners are going to be in the coordinate plane of the output
+	// format.
+	for(unsigned int i = 0; i < pointsOnBbox.size(); i++) {
+		if(flag == UNDIST) {
+			undistort_px_into_destination(*pointsOnBbox[i]);
+		} else {
+			distort_px_into_source(*pointsOnBbox[i]);
+		}
+		xValues.push_back(pointsOnBbox[i]->x);
+		yValues.push_back(pointsOnBbox[i]->y);
+	}
+	
+	int minX, minY, maxX, maxY;
+	
+	// Formally speaking, we have to allocate an std::iterator first. But we wont.
+	minX = *std::min_element(xValues.begin(), xValues.end());
+	maxX = *std::max_element(xValues.begin(), xValues.end());
+	minY = *std::min_element(yValues.begin(), yValues.end());
+	maxY = *std::max_element(yValues.begin(), yValues.end());
+	
+	return Box(minX, minY, maxX, maxY);
 }
 
 // Get a coordinate that we need to sample from the SOURCE distorted image to get at the absXY
@@ -275,7 +336,6 @@ void SyLens::_computeAspects() {
 }
 
 
-
 // Here we need to expand the image and the bounding box. This is the most important method in a plug like this so
 // pay attention
 void SyLens::_validate(bool for_real)
@@ -319,66 +379,10 @@ void SyLens::_validate(bool for_real)
 	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 	// Grab the bbox from the input first
 	Info inf = input0().info();
-	
+	Box obox = compute_bbox(inf, ow, oh, k_output);
+
 	// Start with the input format
 	output_format = input0().format();
-	
-	// Just distorting the four corners of the bbox is NOT enough. We also need to find out whether
-	// the bbox intersects the centerlines. Since the distortion is the most extreme at the centerlines if
-	// we just take the corners we might be chopping some image away. So to get a reliable bbox we need to check
-	// our padding at 6 points - the 4 extremes and where the bbox crosses the middle of the coordinates
-	int xMid = ow/2;
-	int yMid = oh/2;
-
-	std::vector<Vector2*> pointsOnBbox;
-	
-	// Add the standard two points - LR and TR
-	pointsOnBbox.push_back(new Vector2(inf.x(), inf.y()));
-	pointsOnBbox.push_back(new Vector2(inf.r(), inf.t()));
-	
-	// Add the TL and LR as well
-	pointsOnBbox.push_back(new Vector2(inf.x(), inf.t()));
-	pointsOnBbox.push_back(new Vector2(inf.r(), inf.y()));
-	
-	// If our box intersects the midplane on X add the points where the bbox crosses centerline
-	if((inf.x() < xMid) && (inf.r() > xMid)) {
-		// Find the two intersections and add them
-		pointsOnBbox.push_back( new Vector2(xMid, inf.y()) );
-		pointsOnBbox.push_back( new Vector2(xMid, inf.t()) );
-	}
-	
-	// If our box intersects the midplane on Y add the points where the bbox crosses centerline
-	if((inf.y() < yMid) && (inf.t() > yMid)) {
-		pointsOnBbox.push_back( new Vector2(inf.x(), yMid) );
-		pointsOnBbox.push_back( new Vector2(inf.r(), yMid) );
-	}
-	
-	std::vector<int> xValues;
-	std::vector<int> yValues;
-	
-	// Here the distortion is INVERTED with relation to the pixel operation. With pixels, we need
-	// to obtain the coordinate to sample FROM. However, here we need a coordinate to sample TO
-	// since this is where our bbox corners are going to be in the coordinate plane of the output
-	// format.
-	for(unsigned int i = 0; i < pointsOnBbox.size(); i++) {
-		if(k_output == UNDIST) {
-			undistort_px_into_destination(*pointsOnBbox[i]);
-		} else {
-			distort_px_into_source(*pointsOnBbox[i]);
-		}
-		xValues.push_back(pointsOnBbox[i]->x);
-		yValues.push_back(pointsOnBbox[i]->y);
-	}
-	
-	int minX, minY, maxX, maxY;
-	
-	// Formally speaking, we have to allocate an std::iterator first. But we wont.
-	minX = *std::min_element(xValues.begin(), xValues.end());
-	maxX = *std::max_element(xValues.begin(), xValues.end());
-	minY = *std::min_element(yValues.begin(), yValues.end());
-	maxY = *std::max_element(yValues.begin(), yValues.end());
-	
-	Box obox(minX, minY, maxX, maxY);
 	
 	if(k_grow_format_ && k_output == UNDIST) {
 		
@@ -425,62 +429,29 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 {
 	ChannelSet c1(channels); in_channels(0,c1);
 	
+	const signed safetyPadding = 4;
+	
 	warning("Received request from downstream [%d,%d]x [%d,%d]", x, y, r, t);
 	
-	// TODO: refactor this out and blend with the _validate() routine
-	std::vector<Vector2*> bbox_points;
-	
-	// Add the four corners first
-	bbox_points.push_back(new Vector2(x - xShift, y - yShift)); 
-	bbox_points.push_back(new Vector2(r - xShift, y - yShift));
-	bbox_points.push_back(new Vector2(r - xShift, t - yShift));
-	bbox_points.push_back(new Vector2(x - xShift, t - yShift));
-	
-	// If we intersect the centerlines of the OUTPUT
-	// we need to add the points in the middle
-	// as well, otherwise we will clip off the request area near the centerlines
-	unsigned midX = out_width_ / 2;
-	unsigned midY = out_height_ / 2;
-	
-	// Check intersection of the requested box with the vertical centerline
-	if((x - xShift) < midX && (r - xShift) > midX) {
-		bbox_points.push_back(new Vector2(midX, y - yShift)); 
-		bbox_points.push_back(new Vector2(midX, t - yShift));
-	}
-
-	// Check intersection of the requested box with the horizontal centerline
-	if((y - yShift) < midY && (t - yShift) > midY) {
-		bbox_points.push_back(new Vector2(x - xShift, midY)); 
-		bbox_points.push_back(new Vector2(r - xShift, midY));
-	}
-	
-	std::vector<signed> xValues;
-	std::vector<signed> yValues;
-	for(unsigned int i = 0; i < bbox_points.size(); i++) {
-		if(k_output == UNDIST) {
-			distort_px_into_source(*bbox_points[i]);
-		} else {
-			undistort_px_into_destination(*bbox_points[i]);
-		}
-		xValues.push_back((signed)bbox_points[i]->x);
-		yValues.push_back((signed)bbox_points[i]->y);
-	}
-	
-	// Determine the min and max points on all boundaries
-	signed minX, minY, maxX, maxY;
+	Box requested(x - xShift, y - yShift, r-xShift, t-yShift);
 	
 	// Request the same part of the input distorted. However if rounding errors have taken place 
 	// it is possible that in engine() we will need to sample from the pixels slightly outside of this area.
 	// If we don't request it we will get stretched pixlines there, so we add a small margin on all sides
 	// to give us a little cushion
-	const signed safetyPadding = 4;
-	// The basic unit of what we request will be the smallest and biggest coordinates respectively
-	minX = *std::min_element(xValues.begin(), xValues.end()) - safetyPadding;
-	maxX = *std::max_element(xValues.begin(), xValues.end()) + safetyPadding;
-	minY = *std::min_element(yValues.begin(), yValues.end()) - safetyPadding;
-	maxY = *std::max_element(yValues.begin(), yValues.end()) + safetyPadding;
+	Box disto_requested = compute_bbox(requested, out_width_, out_height_, k_output);
+
+	warning("Will request upstream (accounting for (re)distortion): [%d,%d] by [%d,%d]", 
+		disto_requested.x() - safetyPadding,
+		disto_requested.y() - safetyPadding,
+		disto_requested.r() + safetyPadding,
+		disto_requested.t() + safetyPadding
+	);
 	
-	warning("Will request upstream (accounting for (re)distortion): [%d,%d] by [%d,%d]", minX, minY, maxX, maxY);
-	
-	input0().request(minX, minY, maxX, maxY, channels, count);
+	input0().request(
+		disto_requested.x() - safetyPadding,
+		disto_requested.y() - safetyPadding,
+		disto_requested.r() + safetyPadding,
+		disto_requested.t() + safetyPadding,		
+		channels, count);
 }
