@@ -103,9 +103,9 @@ void SyDistorter::remove_disto(Vector2& pt)
 double SyDistorter::undistort(double radius_distorted)
 {
 	if(radius_distorted < lut.back()->r_distorted) {
-		undistort_sampled(radius_distorted);
+		return undistort_sampled(radius_distorted);
 	} else {
-		undistort_approximated(radius_distorted);
+		return undistort_approximated(radius_distorted);
 	}
 }
 
