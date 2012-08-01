@@ -350,7 +350,7 @@ void SyLens::_validate(bool for_real)
 	set_out_channels(Mask_All);
 	
 	// Do not blank away everything
-	info_.black_outside(true);
+	info_.black_outside(false);
 	
 	// We need to know our aspects so prep them here
 	_computeAspects();
