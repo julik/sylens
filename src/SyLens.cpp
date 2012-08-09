@@ -284,17 +284,15 @@ void SyLens::engine ( int y, int x, int r, ChannelMask channels, Row& out )
 // knobs. There is really only one thing to pay attention to - be consistent and call your knobs
 // "in_snake_case_as_short_as_possible", labels are also lowercase normally
 void SyLens::knobs( Knob_Callback f) {
-	// For info on knob flags see Knob.h
-	const int KNOB_ON_SEPARATE_LINE = 0x1000;
-	
 	Knob* _output_selector = Enumeration_knob(f, &k_output, output_mode_names, "output");
 	_output_selector->label("output");
 	_output_selector->tooltip("Pick your poison");
 	
-	// Old mode configuration knob that we just hide
+	// TODO: Remove in SyLens 4. Old mode configuration knob that we just hide
 	const char* old_mode_value = "nada";
 	Knob* hidden_mode = String_knob(f, &old_mode_value, "mode");
 	hidden_mode->set_flag(Knob::INVISIBLE);
+	hidden_mode->set_flag(Knob::DO_NOT_WRITE);
 	
 	distorter.knobs(f);
 	filter.knobs(f);
@@ -309,7 +307,7 @@ void SyLens::knobs( Knob_Callback f) {
 	Knob* kGrowKnob = Bool_knob( f, &k_grow_format_, "grow");
 	kGrowKnob->label("grow format");
 	kGrowKnob->tooltip("When checked, SyLens will expand the actual format of the image along with the bbox."
-		"\nThis is useful if you are going to do a matte painting of the output.");
+		"\nThis is useful if you are going to do a matte painting on the output.");
 	kGrowKnob->set_flag(Knob::STARTLINE);
 	
 	Divider(f, 0);
