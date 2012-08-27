@@ -70,7 +70,7 @@ public:
 		// Set the distortion aspect based on haperture/vaperture correlation.
 		// For this to work haperture/vaperture must be set correctly
 		double asp = film_width() / film_height();
-		warning("Disto autoaspect (haperture/vaperture) %0.5f", asp);
+		debug("Disto autoaspect (haperture/vaperture) %0.5f", asp);
 		distorter.set_aspect(asp);
 		distorter.recompute_if_needed();
 		update_distortion_limits();

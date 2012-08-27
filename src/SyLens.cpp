@@ -333,7 +333,7 @@ void SyLens::_computeAspects() {
 
 	_aspect = float(plate_width_) / float(plate_height_) *  f.pixel_aspect();
 	
-	warning("true plate window with uncrop will be %dx%d", plate_width_, plate_height_);
+	debug("true plate window with uncrop will be %dx%d", plate_width_, plate_height_);
 }
 
 
@@ -361,7 +361,7 @@ void SyLens::_validate(bool for_real)
 	xShift = 0;
 	yShift = 0;
 	
-	warning("_validate plate size  %dx%d", plate_width_, plate_height_);
+	debug("_validate plate size  %dx%d", plate_width_, plate_height_);
 	
 	// Time to define how big our output will be in terms of format. Format will always be the whole plate.
 	// If we only use a bboxed piece of the image we will limit our request to that.
@@ -370,7 +370,7 @@ void SyLens::_validate(bool for_real)
 	// apply our SuperAlgorizm to the bbox as well and move the bbox downstream too.
 	// Grab the bbox from the input first
 	Info inf = input0().info();
-	warning("Input bbox is %dx%d to %dx%d", inf.x(), inf.y(), inf.r(), inf.t());
+	debug("Input bbox is %dx%d to %dx%d", inf.x(), inf.y(), inf.r(), inf.t());
 	
 	Box obox = compute_needed_bbox_with_distortion(inf, plate_width_, plate_height_, k_output);
 
@@ -391,7 +391,7 @@ void SyLens::_validate(bool for_real)
 		
 		// If we undistort and the corner will end up outside - we have overflow
 		if(corner.x < 0.0f || corner.y < 0.0f) {
-			warning("Barrel distortion and plate needs to grow. Off-corner is %0.5fx%0.5f", corner.x, corner.y);
+			debug("Barrel distortion and plate needs to grow. Off-corner is %0.5fx%0.5f", corner.x, corner.y);
 			
 			xShift = (signed)fabs(corner.x);
 			yShift = (signed)fabs(corner.y);
@@ -402,7 +402,7 @@ void SyLens::_validate(bool for_real)
 			// Move the bounding box
 			obox.move(xShift, yShift);
 			
-			warning("Oversize format will be %dx%d", output_format.width(), output_format.height());
+			debug("Oversize format will be %dx%d", output_format.width(), output_format.height());
 			
 		}
 	}
@@ -411,7 +411,7 @@ void SyLens::_validate(bool for_real)
 	// outside the crop area. Thiis handy for redistorted material.
 	if(k_trim_bbox_to_format_) obox.intersect(output_format);
 	
-	warning("Output bbox is %dx%d to %dx%d", obox.x(), obox.y(), obox.r(), obox.t());
+	debug("Output bbox is %dx%d to %dx%d", obox.x(), obox.y(), obox.r(), obox.t());
 	
 	// Set the oversize format and the bounding box
 	info_.format(output_format);
@@ -422,7 +422,7 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 {
 	ChannelSet c1(channels); in_channels(0,c1);
 	
-	warning("Received request from downstream [%d,%d]x [%d,%d]", x, y, r, t);
+	debug("Received request from downstream [%d,%d]x [%d,%d]", x, y, r, t);
 
 	const signed safetyPadding = 4;
 	Box requested(x, y, r, t);
@@ -432,7 +432,7 @@ void SyLens::_request(int x, int y, int r, int t, ChannelMask channels, int coun
 	// Request the same part of the input, but without distortions
 	Box disto_requested = compute_needed_bbox_with_distortion(requested, out_width_, out_height_, UNDIST);
 
-	warning("Will request upstream (accounting for (re)distortion): [%d,%d] by [%d,%d]", 
+	debug("Will request upstream (accounting for (re)distortion): [%d,%d] by [%d,%d]", 
 		disto_requested.x(),
 		disto_requested.y(),
 		disto_requested.r(),
