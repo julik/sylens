@@ -139,13 +139,12 @@ const Iop::Description SyLens::description(CLASS, "Transform/SyLens", SyLensCrea
 // exactly what we want
 double SyLens::toUv(double absValue, int absSide)
 {
-	double x = (absValue / (double)absSide) - 0.5f;
-	return x * 2;
+  return (((absValue - 0.5f) / (absSide - 1.0f)) - 0.5f) * 2.0f;
 }
 
-double SyLens::fromUv(double uvValue, int absSide) {
-	double value_off_corner = (uvValue / 2) + 0.5f;
-	return absSide * value_off_corner;
+double SyLens::fromUv(double uvValue, int absSide)
+{
+  return (((uvValue / 2.0f) + 0.5f) * (absSide - 1.0f)) + 0.5f;
 }
 
 void SyLens::absolute_px_to_centered_uv(Vector2& xy, int w, int h)
