@@ -1,0 +1,4 @@
+#!/bin/sh
+# Cleanup all the object files, recompile and launch Nuke with the test script opened.
+#export PATH=/Developer/gcc40/bin/:$PATH
+make -f Makefile.Nuke7.mac clean && make -f Makefile.Nuke7.mac
