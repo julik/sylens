@@ -12,6 +12,12 @@ The currently provided plugins are:
 
 To get started right away, have a look at the sample.nk test file included with the plugin.
 
+## Installation
+
+The official download location of the plugins will always be:
+
+[http://julik.nl/sylens_latest.zip](http://julik.nl/sylens_latest.zip)
+
 ## The SyLens node
 
 SyLens node works with image inputs.
