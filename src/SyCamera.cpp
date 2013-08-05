@@ -163,11 +163,13 @@ public:
 		for (int i=0; i < n; ++i) {
 			// We need to apply distortion in clip space, so do that. We will perform it on
 			// point local values, not on P because we want our Z and W to be computed out
-			// correctly for the motion vectors
+			// correctly for the motion vectors.
+			// We do it in clip space (vertices in a distorted camera frustum centered on the middle of the frustum)
 			Vector4 ps = transforms->matrix(LOCAL_TO_CLIP).transform(v[i].PL(), 1);
 			// Perform the disto magic
 			sy_cam->distort_p(ps);
-			// and transform to screen space, assign to position
+			// and transform to screen space, assign to position. Note that in screen space
+			// objects are in pixel coordinates already, relative to the bottom-left corner
 			Vector4 ps_screen = transforms->matrix(CLIP_TO_SCREEN).transform(ps);
 			v[i].P() = ps_screen;
 		}
