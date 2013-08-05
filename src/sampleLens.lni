@@ -1,0 +1,62 @@
+<Lens title="UP-16 @ Infinity" mm="1">
+  <Info>
+    <creator>c:\Viken\bin\scripts\Lens\zeiss2.szl</creator>
+    <date>Fri, Apr 03, 2009 11:11:35 PM</date>
+    <c2>-8.48</c2>
+    <c4>10.41</c4>
+    <c6>-4.63</c6>
+    <c8>2.12</c8>
+    <c10>-0.53</c10>
+    <Hmax>15</Hmax>
+  </Info>
+  <DATA>
+    <sample rin="0" rout="0"/>
+    <sample rin="0.319149" rout="0.319137"/>
+    <sample rin="0.638298" rout="0.6382"/>
+    <sample rin="0.957447" rout="0.957118"/>
+    <sample rin="1.2766" rout="1.27582"/>
+    <sample rin="1.59574" rout="1.59423"/>
+    <sample rin="1.91489" rout="1.9123"/>
+    <sample rin="2.23404" rout="2.22995"/>
+    <sample rin="2.55319" rout="2.54714"/>
+    <sample rin="2.87234" rout="2.8638"/>
+    <sample rin="3.19149" rout="3.17991"/>
+    <sample rin="3.51064" rout="3.4954"/>
+    <sample rin="3.82979" rout="3.81026"/>
+    <sample rin="4.14894" rout="4.12446"/>
+    <sample rin="4.46809" rout="4.43799"/>
+    <sample rin="4.78723" rout="4.75083"/>
+    <sample rin="5.10638" rout="5.06299"/>
+    <sample rin="5.42553" rout="5.37448"/>
+    <sample rin="5.74468" rout="5.68531"/>
+    <sample rin="6.06383" rout="5.99552"/>
+    <sample rin="6.38298" rout="6.30514"/>
+    <sample rin="6.70213" rout="6.61422"/>
+    <sample rin="7.02128" rout="6.92281"/>
+    <sample rin="7.34043" rout="7.231"/>
+    <sample rin="7.65957" rout="7.53884"/>
+    <sample rin="7.97872" rout="7.84642"/>
+    <sample rin="8.29787" rout="8.15385"/>
+    <sample rin="8.61702" rout="8.46122"/>
+    <sample rin="8.93617" rout="8.76864"/>
+    <sample rin="9.25532" rout="9.07625"/>
+    <sample rin="9.57447" rout="9.38416"/>
+    <sample rin="9.89362" rout="9.69253"/>
+    <sample rin="10.2128" rout="10.0015"/>
+    <sample rin="10.5319" rout="10.3112"/>
+    <sample rin="10.8511" rout="10.6219"/>
+    <sample rin="11.1702" rout="10.9336"/>
+    <sample rin="11.4894" rout="11.2466"/>
+    <sample rin="11.8085" rout="11.5611"/>
+    <sample rin="12.1277" rout="11.8773"/>
+    <sample rin="12.4468" rout="12.1953"/>
+    <sample rin="12.766" rout="12.5154"/>
+    <sample rin="13.0851" rout="12.8379"/>
+    <sample rin="13.4043" rout="13.1628"/>
+    <sample rin="13.7234" rout="13.4905"/>
+    <sample rin="14.0426" rout="13.8212"/>
+    <sample rin="14.3617" rout="14.1551"/>
+    <sample rin="14.6809" rout="14.4925"/>
+    <sample rin="15" rout="14.8335"/>
+  </DATA>
+</Lens>
