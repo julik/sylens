@@ -1,0 +1,21 @@
+# Compiler Info ('g++-4.1 --version')
+# g++-4.1 (GCC) 4.1.2
+# Copyright (C) 2006 Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.  There is NO
+# warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# End Compiler Info Output
+NDKDIR ?= /mnt/maitre-d/linux/thefoundry/Nuke7.0v2
+MYCXX ?= /mnt/maitre-d/linux/gcc412/bin/g++412
+LINK ?= /mnt/maitre-d/linux/gcc412/bin/g++412
+CXXFLAGS ?= -g -c -DUSE_GLEW -I$(NDKDIR)/include -fPIC -msse
+LINKFLAGS ?= -L$(NDKDIR) 
+LIBS ?= -lDDImage
+LINKFLAGS += -shared
+all: SyLens.so SyUV.so SyCamera.so SyShader.so SyGeo.so
+.PRECIOUS : %.os
+%.os: %.cpp
+	$(MYCXX) $(CXXFLAGS) -o $(@) $<
+%.so: %.os
+	$(LINK) $(LINKFLAGS) $(LIBS) -o $(@) $<
+
+
