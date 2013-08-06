@@ -14,9 +14,10 @@ To get started right away, have a look at the sample.nk test file included with 
 
 ## Installation
 
-The official download location of the plugins will always be:
+Checkout or download the Git repo. Then, add it's directory to your Nuke plugin initialization 
+script (`init.py`):
 
-[http://julik.nl/sylens_latest.zip](http://julik.nl/sylens_latest.zip)
+    nuke.addPluginPath('/path/to/sylens')
 
 ## The SyLens node
 
