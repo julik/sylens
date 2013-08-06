@@ -2,7 +2,7 @@
 version 6.3 v4
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="92" y="56" w="1680" h="1024" screen="0">
+    <window x="330" y="22" w="1680" h="1024" screen="0">
         <splitter orientation="1">
             <split size="1148"/>
             <splitter orientation="1">
@@ -49,6 +49,8 @@ Root {
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
  addUserKnob {20 User}
+ addUserKnob {1 cachedscriptname +INVISIBLE}
+ cachedscriptname sample.nk
  addUserKnob {1 cachedversion +INVISIBLE}
  cachedversion _UNVERSIONED
 }
@@ -176,31 +178,31 @@ Dot {
  xpos 191
  ypos -1172
 }
-set N13406600 [stack 0]
+set N11a9e230 [stack 0]
 Dot {
  name Dot4
  xpos 531
  ypos -1172
 }
-set N13409140 [stack 0]
+set N11aa0d70 [stack 0]
 Dot {
  name Dot5
  xpos 663
  ypos -1172
 }
-set N1340be20 [stack 0]
+set N11aa3a50 [stack 0]
 Dot {
  name Dot10
  xpos 1936
  ypos -1172
 }
-set N1340eb00 [stack 0]
+set N11aa6730 [stack 0]
 Dot {
  name Dot6
  xpos 1936
  ypos -812
 }
-set N134117e0 [stack 0]
+set N11aa9410 [stack 0]
 Dot {
  name Dot7
  xpos 1390
@@ -252,19 +254,19 @@ StickyNote {
  xpos 2438
  ypos -439
 }
-push $N1340eb00
+push $N11aa6730
 Dot {
  name Dot11
  xpos 2843
  ypos -1172
 }
-set N1342f940 [stack 0]
+set N11ac7570 [stack 0]
 Dot {
  name Dot13
  xpos 3823
  ypos -1176
 }
-set N134325e0 [stack 0]
+set N11aca210 [stack 0]
 Card2 {
  lens_in_distortion -0.01826
  control_points {3 3 3 6 
@@ -282,13 +284,13 @@ Card2 {
  xpos 3672
  ypos -953
 }
-push $N1342f940
+push $N11ac7570
 Dot {
  name Dot8
  xpos 2849
  ypos -802
 }
-set N13457210 [stack 0]
+set N11aeee40 [stack 0]
 Dot {
  name Dot9
  xpos 3341
@@ -307,7 +309,7 @@ Camera2 {
  xpos 2961
  ypos -614
 }
-push $N13457210
+push $N11aeee40
 SyShader {
  shader_type "fragment shader"
  k {{parent.SyLens1.k i}}
@@ -380,7 +382,7 @@ Camera2 {
  xpos 3980
  ypos -930
 }
-push $N134325e0
+push $N11aca210
 SyShader {
  shader_type "fragment shader"
  k -0.01826
@@ -429,7 +431,7 @@ Camera2 {
  xpos 4490
  ypos -657
 }
-push $N134325e0
+push $N11aca210
 BlackOutside {
  name BlackOutside1
  xpos 4509
@@ -440,7 +442,7 @@ Dot {
  xpos 4647
  ypos -1172
 }
-set N1339e1b0 [stack 0]
+set N146bc5a0 [stack 0]
 Cube {
  cube {-0.5099999905 -0.5 -0.5 0.5 0.3950000107 0.4839999974}
  translate {-1.876000047 0 0}
@@ -454,8 +456,8 @@ SyUV {
  xpos 4674
  ypos -859
 }
-set C133a92d0 [stack 0]
-push $N1339e1b0
+set C12a73340 [stack 0]
+push $N146bc5a0
 Sphere {
  rows 32
  columns 32
@@ -464,12 +466,12 @@ Sphere {
  xpos 4474
  ypos -905
 }
-clone $C133a92d0 {
+clone $C12a73340 {
  xpos 4474
  ypos -861
  selected false
 }
-push $N1339e1b0
+push $N146bc5a0
 Card2 {
  rows 32
  columns 32
@@ -489,7 +491,7 @@ Card2 {
  xpos 4867
  ypos -912
 }
-clone $C133a92d0 {
+clone $C12a73340 {
  xpos 4867
  ypos -866
  selected false
@@ -532,7 +534,7 @@ SyCamera {
  xpos 5103
  ypos -650
 }
-push $N1339e1b0
+push $N146bc5a0
 Dot {
  name Dot17
  xpos 5269
@@ -582,7 +584,7 @@ SyCamera {
  xpos 2049
  ypos -617
 }
-push $N134117e0
+push $N11aa9410
 SyShader {
  k {{parent.SyLens2.k i}}
  kcube {{parent.SyLens2.kcube i}}
@@ -628,7 +630,7 @@ Camera2 {
  xpos 343
  ypos -830
 }
-push $N13406600
+push $N11a9e230
 Dot {
  name Dot16
  xpos -398
@@ -650,7 +652,7 @@ Dot {
  ypos -644
 }
 SyLens {
- k {{curve i x12 -0.01826 x50 -0.01826 x114 -0.01826}}
+ k {{curve x12 -0.01826 x50 -0.01826 x114 -0.01826}}
  filter Parzen
  grow true
  name SyLens_UN1
@@ -664,7 +666,7 @@ Crop {
  xpos -786
  ypos -513
 }
-push $N13406600
+push $N11a9e230
 Dot {
  name Dot2
  xpos 191
@@ -675,16 +677,17 @@ Dot {
  xpos -11
  ypos -657
 }
-set N13ef9530 [stack 0]
-push $N13ef9530
+set N1477d5f0 [stack 0]
+push $N1477d5f0
 SyLens {
- k {{curve i x50 -0.01826 x114 -0.01826}}
+ k {{curve x50 -0.01826 x114 -0.01826}}
  filter Parzen
  name SyLens_UN
  tile_color 0xc10000ff
  xpos -170
  ypos -665
 }
+set N14780300 [stack 0]
 Roto {
  output mask
  cliptype "union bbox+format"
@@ -785,7 +788,6 @@ Difference {
  xpos -45
  ypos -488
 }
-push $N13ef9530
 SyCamera {
  inputs 0
  translate {0 0 1.184999943}
@@ -815,7 +817,7 @@ SyCamera {
  xpos 353
  ypos -665
 }
-push $N13409140
+push $N11aa0d70
 Card2 {
  rows 32
  columns 32
@@ -862,7 +864,7 @@ ScanlineRender {
  xpos 497
  ypos -501
 }
-push $N1340be20
+push $N11aa3a50
 Difference {
  inputs 2
  output rgba.red
@@ -870,6 +872,26 @@ Difference {
  xpos 629
  ypos -506
 }
+Camera2 {
+ inputs 0
+ read_from_file true
+ name Camera1
+ xpos 16
+ ypos -841
+}
+push $N1477d5f0
+SyLens {
+ k {{curve x50 0 x114 -0.01826}}
+ ushift 0.09
+ vshift -0.37
+ filter Parzen
+ name SyLens_UN2
+ tile_color 0xc10000ff
+ xpos -125
+ ypos -764
+}
+push $N1477d5f0
+push $N14780300
 Viewer {
  inputs 2
  input_process false
