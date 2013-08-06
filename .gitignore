@@ -1,8 +1,8 @@
 g*.o
 *.os
-*.dylib
-*.so
-*.dll
+src/*.dylib
+src/*.so
+src/*.dll
 .DS_Store
 *.nk~
 *.nk.autosave
