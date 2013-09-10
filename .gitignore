@@ -10,3 +10,4 @@ src/*.dll
 *_pkg.zip
 *.nk~
 Graphs.gcx
+*.pyc
