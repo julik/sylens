@@ -1,7 +1,6 @@
 import os, sys, nuke
 
 mydir = os.path.dirname(__file__)
-nuke.pluginAppendPath(os.path.join(mydir, "gizmos"))
 
 # Add platform-dependent plugins
 platform = []
