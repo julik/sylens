@@ -86,6 +86,7 @@ public:
 		k_output = UNDIST;
 		_aspect = 1.33f;
 		k_grow_format_ = false;
+		k_trim_bbox_to_format_ = false;
 		xShift = 0;
 		yShift = 0;
 	}
