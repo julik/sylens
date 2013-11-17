@@ -1,5 +1,6 @@
 g*.o
 *.os
+*.a
 src/*.dylib
 src/*.so
 src/*.dll
