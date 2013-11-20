@@ -1,4 +1,0 @@
-#!/bin/sh
-# Cleanup all the object files, recompile and launch Nuke with the test script opened.
-export PATH=/Developer/usr/bin:$PATH
-make -f Makefile.mac clean && make -f Makefile.mac && cp *.dylib ~/.nuke/ && /Applications/Nuke6.3v4/Nuke6.3v4.app/Contents/MacOS/Nuke6.3v4 -V ../sample_scripts/sample.nk
