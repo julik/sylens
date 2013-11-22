@@ -14,11 +14,11 @@ To get started right away, have a look at the sample.nk test file included with 
 
 ## Installation
 
-Checkout or download the Git repo. Then, drop the directory into your `$HOME/.nuke` and
+Download a packaged release from the [releases page.](https://github.com/julik/sylens/releases) Then, drop the directory into your `$HOME/.nuke` and
 add it to your `init.py` which is in `$HOME/.nuke` like so:
 
-    nuke.pluginAddPath('sylens-master') # For the unzipped Github repository
-
+    nuke.pluginAddPath('sylens-311') # For the unzipped release
+    
 When you start Nuke the next time there is going to be an extra icon in your node toolbar.
 
 ## The SyLens node
