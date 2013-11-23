@@ -14,11 +14,11 @@ To get started right away, have a look at the sample.nk test file included with 
 
 ## Installation
 
-Checkout or download the Git repo. Then, drop the directory into your `$HOME/.nuke` and
+Download a packaged release from the [releases page.](https://github.com/julik/sylens/releases) Then, drop the directory into your `$HOME/.nuke` and
 add it to your `init.py` which is in `$HOME/.nuke` like so:
 
-    nuke.pluginAddPath('sylens-master') # For the unzipped Github repository
-
+    nuke.pluginAddPath('sylens-311') # For the unzipped release
+    
 When you start Nuke the next time there is going to be an extra icon in your node toolbar.
 
 ## The SyLens node
@@ -282,7 +282,7 @@ See the scripts in the sample_scripts directory.
 
 The plugins are based on the 3DE distortion plugin by Matti Grüner.
 
-Contributors, sponsors and beta-testers of SyLens are:
+Contributors, build maintainers, sponsors and beta-testers of SyLens are:
 
 * Julik Tarkhanov and HecticElectric, Amsterdam
 * Ivan Busquets
@@ -290,6 +290,7 @@ Contributors, sponsors and beta-testers of SyLens are:
 * Dmitri Korshunov
 * Jonathan Egstad
 * Miklos Kozary and Elefant Studios, Zürich
+* Sebastian Elsner
 
 The beautiful landscape shot used in the test script has been provided by Tim Parshikov,
 Mikhail Mestezky and the "Drug Druga" production company.
@@ -300,7 +301,7 @@ For questions and comments shoot a mail to me \_at\_ julik.nl
 
 ## License
 
-    Copyright (c) 2010 Julik Tarkhanov
+    Copyright (c) 2010-2014 Julik Tarkhanov
     
     	Permission is hereby granted, free of charge, to any person obtaining
     	a copy of this software and associated documentation files (the
