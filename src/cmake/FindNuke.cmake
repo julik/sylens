@@ -1,17 +1,20 @@
 #TODO:
 # - Linux/Mac Support
-# - Find newest version
-# - Let user specify version to use
-# - Find path in environment variable NDK_PATH, NUKE_PATH
 
-file(GLOB NUKE_DIR "C:/Program Files/Nuke*")
+file(GLOB NUKE_INSTALL_DIRS "C:/Program Files/Nuke*")
 
-find_path(NUKE_INCLUDE_DIR DDImage/Op.h HINTS ${NUKE_DIR}/include)
+message(STATUS "NDK_PATH = " $ENV{NDK_PATH})
+list(GET NUKE_INSTALL_DIRS -1 NEWEST_NUKE_INSTALL_DIR)
+message(STATUS "NEWEST_NUKE_INSTALL_DIR = " ${NEWEST_NUKE_INSTALL_DIR})
 
-find_library(NUKE_LIBRARY DDImage HINTS ${NUKE_DIR})
+find_path(NUKE_INCLUDE_DIR
+		  DDImage/Op.h 
+		  PATHS $ENV{NDK_PATH} ${NEWEST_NUKE_INSTALL_DIR}
+		  PATH_SUFFIXES include)
+
+find_library(NUKE_LIBRARY
+			 DDImage
+			 PATHS $ENV{NDK_PATH} ${NEWEST_NUKE_INSTALL_DIR})
   
-set(NUKE_LIBRARIES ${NUKE_LIBRARY} )
-set(NUKE_INCLUDE_DIRS ${NUKE_INCLUDE_DIR})
-
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Nuke DEFAULT_MSG NUKE_LIBRARY NUKE_INCLUDE_DIR)
