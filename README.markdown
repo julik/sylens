@@ -267,7 +267,7 @@ it to undistort the plates and say do a texture extraction.
 
 ## Building the plugins
 
-Consult `BUILDING.md' in the `src` directory of the plugin for exact build instructions.
+Consult `BUILD_INSTRUCTIONS.md` in the `src` directory of the plugin for exact build instructions.
 
 ## Testing the plugins
 
