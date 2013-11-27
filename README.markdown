@@ -267,12 +267,7 @@ it to undistort the plates and say do a texture extraction.
 
 ## Building the plugins
 
-Go to the src directory, and there:
-
-	make -f Makefile.mac NDKDIR=/Applications/Nuke6.3v1/Nuke6.3v1.app/Contents/MacOS # for MacOS
-	make -f Makefile.lin NDKDIR=/mnt/server/thefoundry/Nuke6.3v1/Nuke6.3v1 # for Linux
- 
-The plugins only use some standard containers and the NDK API, so you won't need to compile Boost or other third-party libraries.
+Consult `BUILDING.md' in the `src` directory of the plugin for exact build instructions.
 
 ## Testing the plugins
 
