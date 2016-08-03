@@ -1,4 +1,4 @@
-NDKDIR ?= /Applications/Nuke10.0v3.app/Contents/MacOS
+NDKDIR ?= /Applications/Nuke10.0v3/Nuke10.0v3.app/Contents/MacOS
 # Note how Foundry does not force the gcc version to 4.0 - the default
 # will be 4.2, which is not what you want.
 MYCXX ?= g++-4.0
