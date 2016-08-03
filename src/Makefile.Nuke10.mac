@@ -1,0 +1,35 @@
+NDKDIR ?= /Applications/Nuke10.0v3/Nuke10.0v3.app/Contents/MacOS
+# Note how Foundry does not force the gcc version to 4.0 - the default
+# will be 4.2, which is not what you want.
+MYCXX ?= g++-4.0
+LINK ?= g++-4.0
+SDK=/Developer/SDKs/MacOSX10.6.sdk
+CXXFLAGS ?= -g -c -DUSE_GLEW -I$(NDKDIR)/include -isysroot $(SDK) -arch x86_64
+LINKFLAGS ?= -L$(NDKDIR) -Wl,-syslibroot,$(SDK) -arch x86_64
+LIBS ?= -lDDImage -lGLEW
+LINKFLAGS += -bundle
+FRAMEWORKS ?= -framework QuartzCore -framework IOKit -framework CoreFoundation -framework Carbon -framework ApplicationServices -framework OpenGL -framework AGL 
+
+all: SyCamera.dylib SyGeo.dylib SyLens.dylib SyShader.dylib SyUV.dylib
+
+.PRECIOUS : %.os
+
+%.os: %.cpp
+	$(MYCXX) $(CXXFLAGS) -o $(@) $<
+
+%.dylib: %.os
+	$(LINK) $(LINKFLAGS) $(LIBS) $(FRAMEWORKS) -o $(@) $<
+
+clean:
+	rm -rf *.os *.dylib
+	
+dist: %.dylib
+	mkdir dist
+	cp README.txt dist/
+	cp Manual.html dist/
+	cp -r doc dist/
+	cp sample.nk dist/
+	cp -r SampleImg dist/
+	cp *.so dist/
+	cp *.dll dist/
+	cp *.dylib dist/
